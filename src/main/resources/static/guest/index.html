@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthDesk | Home</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/guest/css/guest-style.css" />
+    <link rel="stylesheet" href="/guest/css/responsive.css" />
+
+    <style>
+        .floating-cs-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+}
+
+.floating-cs-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+}
+
+.cs-icon {
+    color: white;
+    font-size: 28px;
+}
+
+.cs-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(37, 99, 235, 0.4);
+    border-radius: 50%;
+    animation: pulseRing 1.5s infinite;
+}
+
+@keyframes pulseRing {
+    0% { transform: scale(1); opacity: 0.7; }
+    70% { transform: scale(1.3); opacity: 0; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+
+.cs-modal {
+    display: none;
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 380px;
+    height: 550px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.cs-modal.show {
+    display: flex;
+}
+
+.cs-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.cs-modal-header {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.cs-header-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.cs-header-text h3 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.cs-header-text p {
+    font-size: 12px;
+    margin: 4px 0 0;
+    opacity: 0.9;
+}
+
+.cs-close {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.cs-close:hover {
+    transform: scale(1.1);
+}
+
+.cs-modal-body {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+}
+
+.cs-agent-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.cs-agent-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+}
+
+.cs-agent-details h4 {
+    font-size: 16px;
+    margin: 0;
+    color: #0f172a;
+}
+
+.cs-agent-details p {
+    font-size: 11px;
+    color: #64748b;
+    margin: 2px 0;
+}
+
+.cs-online-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    margin-right: 5px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.cs-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 250px;
+}
+
+.cs-message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+}
+
+.cs-message-bot {
+    align-self: flex-start;
+}
+
+.cs-message-user {
+    align-self: flex-end;
+}
+
+.cs-message-bubble {
+    padding: 10px 14px;
+    border-radius: 15px;
+    font-size: 13px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.cs-message-bot .cs-message-bubble {
+    background: white;
+    color: #0f172a;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.cs-message-user .cs-message-bubble {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.cs-message-time {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-top: 4px;
+    margin-left: 10px;
+}
+
+.cs-message-user .cs-message-time {
+    text-align: right;
+    margin-right: 10px;
+}
+
+.cs-quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.cs-quick-reply {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #2563eb;
+}
+
+.cs-quick-reply:hover {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    transform: translateY(-2px);
+}
+
+.cs-input-area {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 25px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.cs-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 25px;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.cs-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px #dbeafe;
+}
+
+.cs-send-btn {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.cs-send-btn:hover {
+    transform: scale(1.05);
+}
+
+.cs-modal-footer {
+    padding: 12px 20px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.cs-modal-footer i {
+    margin-right: 5px;
+    color: #2563eb;
+}
+
+@media (max-width: 480px) {
+    .cs-modal {
+        width: 90%;
+        right: 5%;
+        left: 5%;
+        bottom: 80px;
+    }
+}
+    </style>
+  </head>
+  <body>
+    <header class="header" id="header">
+      <nav class="navbar container">
+        <div class="logo">
+            <img src="/guest/images/logo.png" alt="HealthDesk Logo" class="logo-img">
+            <span class="logo-text">Health<span>Desk</span></span>
+        </div>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="/guest/index.html" class="nav-link active">Home</a></li>
+          <li><a href="/guest/about.html" class="nav-link">About</a></li>
+          <li><a href="/guest/doctors.html" class="nav-link">Doctors</a></li>
+          <li><a href="/guest/services.html" class="nav-link">Services</a></li>
+          <li><a href="/guest/contact.html" class="nav-link">Contact</a></li>
+          <li><a href="/guest/hours.html" class="nav-link">Hours</a></li>
+        </ul>
+        <div class="hamburger" id="hamburger">
+          <span></span><span></span><span></span>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container">
+          <div class="hero-content">
+            <h1>Welcome to <span class="highlight">HealthDesk</span></h1>
+            <p>
+              Your trusted clinic management system. We provide quality
+              healthcare services with modern facilities and experienced
+              doctors.
+            </p>
+          </div>
+          <div class="hero-image">
+            <i class="fas fa-stethoscope"></i>
+          </div>
+        </div>
+      </section>
+
+      <section class="info-section">
+        <div class="container">
+          <div class="info-grid">
+            <div class="info-card">
+              <i class="fas fa-map-marker-alt"></i>
+              <h3>Clinic Address</h3>
+              <p id="clinicAddress">Loading...</p>
+            </div>
+            <div class="info-card">
+              <i class="fas fa-phone-alt"></i>
+              <h3>Contact Number</h3>
+              <p id="clinicPhone">Loading...</p>
+            </div>
+            <div class="info-card">
+              <i class="fas fa-envelope"></i>
+              <h3>Email Address</h3>
+              <p id="clinicEmail">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge">Why Choose Us</span>
+            <h2>Our Features</h2>
+          </div>
+          <div class="features-grid">
+            <div class="feature-card">
+              <i class="fas fa-database"></i>
+              <h3>Digital Records</h3>
+              <p>Secure digital storage of patient medical history</p>
+            </div>
+            <div class="feature-card">
+              <i class="fas fa-calendar-check"></i>
+              <h3>Easy Scheduling</h3>
+              <p>Simple appointment booking system</p>
+            </div>
+            <div class="feature-card">
+              <i class="fas fa-shield-alt"></i>
+              <h3>Secure & Safe</h3>
+              <p>Multi-factor authentication for data protection</p>
+            </div>
+            <div class="feature-card">
+              <i class="fas fa-search"></i>
+              <h3>Quick Search</h3>
+              <p>Instant patient record lookup</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="floating-cs-button" id="floatingCsButton">
+    <div class="cs-icon">
+        <i class="fas fa-headset"></i>
+    </div>
+    <div class="cs-pulse"></div>
+</div>
+
+<div class="cs-modal" id="csModal">
+    <div class="cs-modal-content">
+        <div class="cs-modal-header">
+            <div class="cs-header-icon">
+                <i class="fas fa-headset"></i>
+            </div>
+            <div class="cs-header-text">
+                <h3>Customer Support</h3>
+                <p>We're here to help!</p>
+            </div>
+            <button class="cs-close" id="csClose">&times;</button>
+        </div>
+        
+        <div class="cs-modal-body">
+            <div class="cs-agent-info">
+                <div class="cs-agent-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="cs-agent-details">
+                    <h4>Support Team</h4>
+                    <p>Typically replies in under 5 minutes</p>
+                    <span class="cs-online-dot"></span> Online
+                </div>
+            </div>
+            
+            <div class="cs-chat-messages" id="csChatMessages">
+                <div class="cs-message cs-message-bot">
+                    <div class="cs-message-bubble">
+                        Hello! Welcome to HealthDesk! How can we help you today?
+                    </div>
+                    <span class="cs-message-time">Just now</span>
+                </div>
+            </div>
+            
+            <div class="cs-quick-replies">
+                <button class="cs-quick-reply" data-message="I want to schedule an appointment">Schedule Appointment</button>
+                <button class="cs-quick-reply" data-message="I have a question about my medical records">Medical Records</button>
+                <button class="cs-quick-reply" data-message="What are your clinic hours?">Clinic Hours</button>
+                <button class="cs-quick-reply" data-message="How do I contact the doctor?">Contact Doctor</button>
+            </div>
+            
+            <div class="cs-input-area">
+                <input type="text" id="csMessageInput" placeholder="Type your message here..." class="cs-input">
+                <button id="csSendBtn" class="cs-send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="cs-modal-footer">
+            <p><i class="fas fa-clock"></i> Available 24/7</p>
+            <p><i class="fas fa-phone-alt"></i> Emergency: (02) 8123 4567</p>
+        </div>
+    </div>
+</div>
+
+      </section>
+
+      <section class="about-preview">
+        <div class="container">
+          <div class="about-content">
+            <div class="about-text">
+              <h2>About Our Clinic</h2>
+              <p>
+                HealthDesk is a modern clinic management system designed to
+                provide efficient healthcare services. We offer comprehensive
+                medical care with state-of-the-art facilities and experienced
+                doctors.
+              </p>
+              <div class="clinic-hours">
+                <h4><i class="fas fa-clock"></i> Clinic Hours</h4>
+                <p>
+                  <strong>Monday - Friday:</strong>
+                  <span id="hoursWeekday">Loading...</span>
+                </p>
+                <p>
+                  <strong>Saturday:</strong>
+                  <span id="hoursSaturday">Loading...</span>
+                </p>
+                <p>
+                  <strong>Sunday:</strong>
+                  <span id="hoursSunday">Loading...</span>
+                </p>
+              </div>
+            </div>
+            <div class="about-image">
+              <i class="fas fa-hospital-user"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-section">
+        <div class="container">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-number">500+</span>
+              <p>Clinics Using</p>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number">50K+</span>
+              <p>Patients Managed</p>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number">99.9%</span>
+              <p>Satisfaction Rate</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-brand">
+    <img src="/guest/images/logo.png" alt="HealthDesk Logo" class="footer-logo-img">
+    <h2>Health<span>Desk</span></h2>
+    <p>Clinic Patient Record & Appointment System</p>
+</div>
+          <div class="footer-links">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="/guest/index.html">Home</a></li>
+              <li><a href="/guest/about.html">About</a></li>
+              <li><a href="/guest/doctors.html">Doctors</a></li>
+              <li><a href="/guest/services.html">Services</a></li>
+              <li><a href="/guest/contact.html">Contact</a></li>
+              <li><a href="/guest/hours.html">Hours</a></li>
+            </ul>
+          </div>
+          <div class="footer-info">
+            <h4>Contact Info</h4>
+            <p><i class="fas fa-map-marker-alt"></i> Cawayan, Catarman</p>
+            <p><i class="fas fa-phone"></i> (02) 8123 4567</p>
+            <p><i class="fas fa-envelope"></i> clinic@healthdesk.com</p>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2026 HealthDesk. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+
+const csButton = document.getElementById('floatingCsButton');
+const csModal = document.getElementById('csModal');
+const csClose = document.getElementById('csClose');
+const csSendBtn = document.getElementById('csSendBtn');
+const csMessageInput = document.getElementById('csMessageInput');
+const csChatMessages = document.getElementById('csChatMessages');
+
+csButton.addEventListener('click', () => {
+    csModal.classList.add('show');
+});
+
+csClose.addEventListener('click', () => {
+    csModal.classList.remove('show');
+});
+
+function addMessage(message, isUser = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `cs-message ${isUser ? 'cs-message-user' : 'cs-message-bot'}`;
+    messageDiv.innerHTML = `
+        <div class="cs-message-bubble">${message}</div>
+        <span class="cs-message-time">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+    `;
+    csChatMessages.appendChild(messageDiv);
+    csChatMessages.scrollTop = csChatMessages.scrollHeight;
+}
+
+async function saveCustomerMessage(message) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/public/customer-inquiries`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: message,
+                timestamp: new Date().toISOString(),
+                source: 'floating_chat'
+            })
+        });
+        if (response.ok) {
+            console.log('Message saved to backend');
+        }
+    } catch (error) {
+        console.log('Saving to localStorage instead');
+        const inquiries = JSON.parse(localStorage.getItem('customerInquiries') || '[]');
+        inquiries.push({
+            id: Date.now(),
+            message: message,
+            timestamp: new Date().toLocaleString(),
+            source: 'floating_chat'
+        });
+        localStorage.setItem('customerInquiries', JSON.stringify(inquiries));
+    }
+}
+
+async function sendMessage() {
+    const message = csMessageInput.value.trim();
+    if (!message) return;
+    
+    addMessage(message, true);
+    saveCustomerMessage(message);
+    csMessageInput.value = '';
+    
+    setTimeout(() => {
+        let reply = '';
+        if (message.toLowerCase().includes('appointment')) {
+            reply = 'To schedule an appointment, please call our clinic at (02) 8123 4567 or visit us during clinic hours. Our staff will be happy to assist you!';
+        } else if (message.toLowerCase().includes('record') || message.toLowerCase().includes('medical')) {
+            reply = 'Medical records are confidential and can only be accessed by authorized personnel. Please login to your account or contact our clinic directly.';
+        } else if (message.toLowerCase().includes('hour')) {
+            reply = 'Our clinic hours are Monday-Friday 8:00 AM - 5:00 PM, and Saturday 9:00 AM - 12:00 PM. We are closed on Sundays.';
+        } else if (message.toLowerCase().includes('doctor')) {
+            reply = 'You can call our clinic at (02) 8123 4567 to speak with our doctors or schedule a consultation.';
+        } else {
+            reply = 'Thank you for your message! Our support team will get back to you as soon as possible. For urgent matters, please call us at (02) 8123 4567.';
+        }
+        addMessage(reply, false);
+    }, 1000);
+}
+
+csSendBtn.addEventListener('click', sendMessage);
+csMessageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+document.querySelectorAll('.cs-quick-reply').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const message = btn.getAttribute('data-message');
+        csMessageInput.value = message;
+        sendMessage();
+    });
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target === csModal) {
+        csModal.classList.remove('show');
+    }
+});
+    </script>
+    <script src="/guest/js/api.js"></script>
+    <script src="/guest/js/guest.js"></script>
+    <script src="/guest/js/components.js"></script>
+  </body>
+</html>

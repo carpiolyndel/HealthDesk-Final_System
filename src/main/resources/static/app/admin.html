@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthDesk | Admin Portal</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/app/css/style.css" />
+    <link rel="stylesheet" href="/app/css/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --primary: #0d9488;
+        --primary-dark: #0f766e;
+        --primary-light: #ccfbf1;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --dark: #0f172a;
+        --gray-700: #334155;
+        --gray-500: #64748b;
+        --gray-300: #cbd5e1;
+        --gray-100: #f1f5f9;
+        --white: #ffffff;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #f8f9fc;
+        overflow-x: hidden;
+      }
+
+      .dashboard {
+        display: flex;
+        min-height: 100vh;
+      }
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(
+          180deg,
+          var(--primary) 0%,
+          var(--dark) 100%
+        );
+        color: white;
+        position: fixed;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.3s ease;
+        z-index: 100;
+        overflow-y: auto;
+      }
+      .sidebar-header {
+        padding: 24px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .sidebar-header img {
+        width: 50px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+      }
+      .sidebar-header h3 {
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .sidebar-header p {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 4px;
+      }
+      .sidebar-search {
+        padding: 16px;
+        margin: 8px 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sidebar-search i {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 13px;
+      }
+      .sidebar-search input {
+        background: none;
+        border: none;
+        color: white;
+        outline: none;
+        width: 100%;
+        font-size: 13px;
+      }
+      .sidebar-search input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .nav-section-title {
+        padding: 12px 24px 8px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 600;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 24px;
+        color: rgba(255, 255, 255, 0.7);
+        transition: all 0.3s;
+        cursor: pointer;
+        margin: 2px 12px;
+        border-radius: 10px;
+      }
+      .nav-item:hover,
+      .nav-item.active {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+      .nav-item i {
+        width: 22px;
+        font-size: 16px;
+      }
+      .sidebar-footer {
+        padding: 20px 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .logout-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #fca5a5;
+        cursor: pointer;
+        padding: 10px 16px;
+        border-radius: 10px;
+        transition: all 0.3s;
+      }
+      .logout-item:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fecaca;
+      }
+
+      .main-content {
+        flex: 1;
+        margin-left: 260px;
+        padding: 20px;
+      }
+      .topbar {
+        background: white;
+        border-radius: 12px;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+      }
+      .page-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--dark);
+      }
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .user-details {
+        text-align: right;
+      }
+      .user-name {
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .user-role {
+        font-size: 11px;
+        color: #a0aec0;
+      }
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .user-avatar i {
+        font-size: 20px;
+        color: var(--primary);
+      }
+
+      .content {
+        padding: 0;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+      .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+      .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+      .stat-info h3 {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--dark);
+      }
+      .stat-info p {
+        font-size: 13px;
+        color: #a0aec0;
+        margin-top: 4px;
+      }
+      .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: #e6f7f5;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .stat-icon i {
+        font-size: 24px;
+        color: var(--primary);
+      }
+
+      .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+        overflow: hidden;
+      }
+      .card-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 600;
+        font-size: 16px;
+      }
+      .card-body {
+        padding: 20px;
+      }
+      canvas {
+        max-height: 300px;
+        width: 100%;
+      }
+
+      .section-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+      .btn-edit {
+        background: var(--warning);
+        color: white;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        margin: 0 4px;
+      }
+      .btn-archive {
+        background: #64748b;
+        color: white;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        margin: 0 4px;
+      }
+      .btn-cancel {
+        background: var(--danger);
+        color: white;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        margin: 0 4px;
+      }
+      .reset-password-btn {
+        background: var(--warning);
+        color: white;
+        padding: 4px 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 11px;
+        margin-left: 8px;
+      }
+
+      .search-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .search-bar input {
+        flex: 1;
+        padding: 10px 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+      .search-bar input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+      .search-bar button {
+        background: var(--primary);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .data-table th,
+      .data-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .data-table th {
+        background: #f8f9fc;
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--gray-700);
+      }
+
+      .table-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      .entries-select select,
+      .table-search input {
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+      }
+      .pagination {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 20px;
+      }
+      .pagination button {
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .pagination button:hover {
+        background: #e2e8f0;
+      }
+      .pagination button.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      .role-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+      }
+      .role-admin {
+        background: #e8eaf6;
+        color: #5e35b1;
+      }
+      .role-doctor {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .role-nurse {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .role-staff {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .status-active {
+        color: var(--success);
+        font-weight: 500;
+      }
+      .status-inactive {
+        color: var(--danger);
+        font-weight: 500;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: white;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .modal-header h3 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .modal-header .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #a0aec0;
+      }
+      .modal-body {
+        padding: 24px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 14px;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+      .form-group textarea {
+        resize: vertical;
+      }
+      .modal-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .modal-buttons button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      .btn-save {
+        background: var(--success);
+        color: white;
+      }
+      .btn-cancel-modal {
+        background: #e2e8f0;
+        color: var(--gray-700);
+      }
+
+      .toast-container {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1100;
+      }
+      .toast {
+        background: var(--dark);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 40px;
+        font-size: 13px;
+        margin-top: 10px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-lg);
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .toast.success {
+        background: var(--success);
+      }
+      .toast.error {
+        background: var(--danger);
+      }
+
+      .page-content {
+        display: none;
+      }
+      .page-content.active {
+        display: block;
+      }
+
+      .mobile-menu-btn {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .inquiry-card {
+        background: var(--gray-100);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border-left: 4px solid var(--primary);
+      }
+      .inquiry-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .inquiry-name {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .inquiry-date {
+        font-size: 12px;
+        color: var(--gray-500);
+      }
+      .inquiry-subject {
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 8px;
+      }
+      .inquiry-message {
+        color: var(--gray-700);
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 12px;
+      }
+      .inquiry-contact {
+        display: flex;
+        gap: 16px;
+        font-size: 12px;
+        color: var(--gray-500);
+        flex-wrap: wrap;
+      }
+      .inquiry-status {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+      .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .status-replied {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .inquiry-reply {
+        margin-top: 12px;
+        padding: 12px;
+        background: #dcfce7;
+        border-radius: 8px;
+        border-left: 3px solid var(--success);
+      }
+      .filter-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .filter-btn {
+        padding: 6px 16px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 13px;
+        background: var(--gray-300);
+      }
+      .filter-btn.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      @media (max-width: 1024px) {
+        .stats-grid,
+        .charts-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.active {
+          transform: translateX(0);
+        }
+        .main-content {
+          margin-left: 0;
+        }
+        .mobile-menu-btn {
+          display: block;
+        }
+        .stats-grid,
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+        .table-controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard">
+      <div class="sidebar" id="sidebar">
+        <div>
+          <div class="sidebar-header">
+            <img src="/app/images/logo.png" alt="HealthDesk" />
+            <h3>HealthDesk</h3>
+            <p>Admin Portal</p>
+          </div>
+          <div class="sidebar-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search for..." id="sidebarSearch" />
+          </div>
+          <div class="nav-section-title">CORE</div>
+          <div class="nav-item active" data-page="dashboard">
+            <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+          </div>
+          <div class="nav-section-title">MANAGE</div>
+          <div class="nav-item" data-page="users">
+            <i class="fas fa-users"></i><span>User Management</span>
+          </div>
+          <div class="nav-item" data-page="archive">
+            <i class="fas fa-archive"></i><span>Archive</span>
+          </div>
+          <div class="nav-section-title">REPORTS</div>
+          <div class="nav-item" data-page="reports">
+            <i class="fas fa-chart-line"></i><span>Reports</span>
+          </div>
+          <div class="nav-item" data-page="contact">
+            <i class="fas fa-address-card"></i><span>Contact Inquiries</span>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <div class="logout-item" id="logoutBtn">
+            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="topbar">
+          <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h2 class="page-title" id="pageTitle">Dashboard</h2>
+          <div class="user-info">
+            <div class="user-details">
+              <div class="user-name" id="userName">Admin User</div>
+              <div class="user-role">Administrator</div>
+            </div>
+            <div class="user-avatar"><i class="fas fa-user-cog"></i></div>
+          </div>
+        </div>
+
+        <div class="content">
+          <div id="dashboardPage" class="page-content active">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-info">
+                  <h3 id="totalUsers">0</h3>
+                  <p>Total Users</p>
+                </div>
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-info">
+                  <h3 id="totalDoctors">0</h3>
+                  <p>Doctors</p>
+                </div>
+                <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-info">
+                  <h3 id="totalNurses">0</h3>
+                  <p>Nurses</p>
+                </div>
+                <div class="stat-icon"><i class="fas fa-user-nurse"></i></div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-info">
+                  <h3 id="totalStaff">0</h3>
+                  <p>Staff</p>
+                </div>
+                <div class="stat-icon"><i class="fas fa-user"></i></div>
+              </div>
+            </div>
+            <div class="charts-grid">
+              <div class="card">
+                <div class="card-header">User Registration Trends</div>
+                <div class="card-body"><canvas id="areaChart"></canvas></div>
+              </div>
+              <div class="card">
+                <div class="card-header">Users by Role</div>
+                <div class="card-body"><canvas id="barChart"></canvas></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Recent Users</div>
+              <div class="card-body">
+                <div class="table-controls">
+                  <div class="entries-select">
+                    Show
+                    <select id="entriesSelect">
+                      <option value="5">5</option>
+                      <option value="10" selected>10</option>
+                      <option value="25">25</option>
+                    </select>
+                    entries
+                  </div>
+                  <div class="table-search">
+                    <label>Search:</label
+                    ><input
+                      type="text"
+                      id="tableSearch"
+                      placeholder="Type to search..."
+                    />
+                  </div>
+                </div>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Full Name</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBody"></tbody>
+                </table>
+                <div class="pagination" id="pagination"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="usersPage" class="page-content">
+            <div class="section-card">
+              <div class="section-header">
+                <h3><i class="fas fa-user-shield"></i> System Users</h3>
+                <button class="btn-primary" id="addUserBtn">
+                  <i class="fas fa-plus"></i> Add User
+                </button>
+              </div>
+              <div class="search-bar">
+                <input
+                  type="text"
+                  id="searchUsersInput"
+                  placeholder="Search by username or name..."
+                /><button id="searchUsersBtn">
+                  <i class="fas fa-search"></i> Search
+                </button>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Password</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersList"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="archivePage" class="page-content">
+            <div class="section-card">
+              <h3><i class="fas fa-archive"></i> Archived Users</h3>
+              <div class="search-bar">
+                <input
+                  type="text"
+                  id="searchArchiveInput"
+                  placeholder="Search archive..."
+                /><button id="searchArchiveBtn">
+                  <i class="fas fa-search"></i> Search
+                </button>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Archived Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="archiveList"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="reportsPage" class="page-content">
+            <div class="section-card">
+              <h3><i class="fas fa-chart-line"></i> System Reports</h3>
+              <div class="report-buttons">
+                <button class="btn-primary" id="userReportBtn">
+                  <i class="fas fa-users"></i> User Report
+                </button>
+                <button class="btn-primary" id="activityReportBtn">
+                  <i class="fas fa-chart-line"></i> Activity Report
+                </button>
+                <button class="btn-primary" onclick="printSection('reportResult')">
+                  <i class="fas fa-print"></i> Print Report
+                </button>
+              </div>
+              <div id="reportResult"></div>
+            </div>
+          </div>
+
+          <div id="contactPage" class="page-content">
+            <div class="section-card">
+              <div class="section-header">
+                <h3><i class="fas fa-envelope"></i> Guest Contact Inquiries</h3>
+                <div class="filter-buttons">
+                  <button class="filter-btn active" data-filter="all">
+                    All
+                  </button>
+                  <button class="filter-btn" data-filter="pending">
+                    Pending
+                  </button>
+                  <button class="filter-btn" data-filter="replied">
+                    Replied
+                  </button>
+                </div>
+              </div>
+              <div id="inquiriesList" class="inquiries-container"></div>
+              <div
+                id="noInquiries"
+                style="
+                  display: none;
+                  text-align: center;
+                  padding: 40px;
+                  color: var(--gray-500);
+                "
+              >
+                <i
+                  class="fas fa-inbox"
+                  style="font-size: 48px; margin-bottom: 16px; display: block"
+                ></i>
+                No inquiries yet from guests
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Add New User</h3>
+          <button class="close-btn" id="closeUserModalBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="userForm">
+            <input type="hidden" id="userId" />
+            <div class="form-group">
+              <label>Username *</label
+              ><input type="text" id="username" required />
+            </div>
+            <div class="form-group">
+              <label>Full Name *</label
+              ><input type="text" id="fullname" required />
+            </div>
+            <div class="form-group">
+              <label>Email *</label
+              ><input type="email" id="userEmail" required />
+            </div>
+            <div class="form-group">
+              <label>Password <span id="passwordHint"></span></label
+              ><input
+                type="password"
+                id="password"
+                placeholder="Enter password"
+              />
+            </div>
+            <div class="form-group">
+              <label>Role</label
+              ><select id="role">
+                <option value="staff">Staff</option>
+                <option value="nurse">Nurse</option>
+                <option value="doctor">Doctor</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Status</label
+              ><select id="status">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="modal-buttons">
+              <button type="button" class="btn-cancel-modal" id="cancelUserBtn">
+                Cancel</button
+              ><button type="submit" class="btn-save">Save User</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-key"></i> Reset Password</h3>
+          <button class="close-btn" id="closeResetModalBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="resetPasswordForm">
+            <input type="hidden" id="resetUserId" />
+            <div class="form-group">
+              <label>Username</label
+              ><input
+                type="text"
+                id="resetUserName"
+                readonly
+                style="background: var(--gray-100)"
+              />
+            </div>
+            <div class="form-group">
+              <label>New Password</label
+              ><input
+                type="password"
+                id="newPassword"
+                placeholder="Enter new password"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>Confirm Password</label
+              ><input
+                type="password"
+                id="confirmPassword"
+                placeholder="Confirm new password"
+                required
+              />
+            </div>
+            <div
+              id="passwordMatchError"
+              style="color: var(--danger); font-size: 12px; margin-bottom: 16px"
+            ></div>
+            <div class="modal-buttons">
+              <button
+                type="button"
+                class="btn-cancel-modal"
+                id="cancelResetBtn"
+              >
+                Cancel</button
+              ><button type="submit" class="btn-save">Reset Password</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reply Modal -->
+    <div id="replyModal" class="modal">
+      <div class="modal-content" style="max-width: 600px">
+        <div class="modal-header">
+          <h3><i class="fas fa-reply"></i> Reply to Inquiry</h3>
+          <button class="close-btn" id="closeReplyModalBtn" onclick="closeReplyModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="replyForm">
+            <input type="hidden" id="replyInquiryId" />
+            <div class="form-group">
+              <label>To:</label>
+              <input
+                type="text"
+                id="replyToName"
+                readonly
+                style="background: var(--gray-100)"
+              />
+            </div>
+            <div class="form-group">
+              <label>Email:</label>
+              <input
+                type="email"
+                id="replyToEmail"
+                readonly
+                style="background: var(--gray-100)"
+              />
+            </div>
+            <div class="form-group">
+              <label>Original Message:</label>
+              <textarea
+                id="replyOriginalMessage"
+                rows="3"
+                readonly
+                style="background: var(--gray-100)"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label>Your Reply:</label>
+              <textarea
+                id="replyMessage"
+                rows="5"
+                placeholder="Type your reply here..."
+                required
+                style="
+                  border: 1px solid var(--gray-300);
+                  border-radius: 8px;
+                  padding: 12px;
+                  width: 100%;
+                "
+              ></textarea>
+            </div>
+            <div class="modal-buttons">
+              <button
+                type="button"
+                class="btn-cancel-modal"
+                id="cancelReplyBtn"
+                onclick="closeReplyModal()"
+              >
+                Cancel
+              </button>
+              <button type="button" class="btn-save" id="sendReplyBtn" onclick="sendReply()">
+                <i class="fas fa-paper-plane"></i> Send Reply
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-container"></div>
+
+    <script src="/app/js/config.js"></script>
+    <script src="/app/js/api.js"></script>
+    <script src="/app/js/utils.js"></script>
+    <script src="/app/js/auth.js"></script>
+    <script src="/app/js/admin.js"></script>
+    <script src="/app/js/share-data.js"></script>
+  </body>
+</html>
