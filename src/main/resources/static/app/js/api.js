@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = '/api';
 
 class ApiService {
     constructor() {
@@ -36,9 +36,10 @@ class ApiService {
             window.location.href = '/app/login.html';
             throw new Error('Session expired. Please login again.');
         }
-        const data = await response.json();
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : null;
         if (!response.ok) {
-            throw new Error(data.message || 'Request failed');
+            throw new Error(data?.message || data?.error || 'Request failed');
         }
         return data;
     }
@@ -89,7 +90,11 @@ class ApiService {
             localStorage.setItem('currentUser', JSON.stringify({
                 id: data.userId,
                 username: data.username,
-                role: data.role
+                role: data.role,
+                name: data.fullName || data.username,
+                fullname: data.fullName || data.username,
+                fullName: data.fullName || data.username,
+                email: data.email || ''
             }));
         }
         return data;
@@ -107,7 +112,11 @@ class ApiService {
             localStorage.setItem('currentUser', JSON.stringify({
                 id: data.userId,
                 username: data.username,
-                role: data.role
+                role: data.role,
+                name: data.fullName || data.username,
+                fullname: data.fullName || data.username,
+                fullName: data.fullName || data.username,
+                email: data.email || ''
             }));
         }
         return data;
@@ -190,7 +199,7 @@ class ApiService {
     }
 
     async cancelAppointment(id, reason) {
-        return this.put(`/appointments/${id}/cancel`, { reason });
+        return this.put(`/appointments/${id}/cancel`, { cancellationReason: reason });
     }
 
     async rescheduleAppointment(id, newDate, newTime, reason) {

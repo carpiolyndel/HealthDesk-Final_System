@@ -195,10 +195,10 @@
                 <div class="contact-grid">
                     <div class="contact-info">
                         <h2>Clinic Information</h2>
-                        <p><i class="fas fa-map-marker-alt"></i> Cawayan, Catarman, Northern Samar, Philippines</p>
-                        <p><i class="fas fa-phone-alt"></i> Landline: (02) 8123 4567</p>
-                        <p><i class="fas fa-mobile-alt"></i> Emergency: +63 917 123 4567</p>
-                        <p><i class="fas fa-envelope"></i> clinic@healthdesk.com</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Cawayan, Catarman, Northern Samar</p>
+                        <p><i class="fas fa-phone-alt"></i> Phone: 09486729942</p>
+                        <p><i class="fas fa-mobile-alt"></i> Emergency: 09486729942</p>
+                        <p><i class="fas fa-envelope"></i> healthdesk.info1@gmail.com</p>
                         <div class="map-placeholder">
                             <i class="fas fa-map"></i>
                         </div>
@@ -289,9 +289,9 @@
                 </div>
                 <div class="footer-info">
                     <h4>Contact Info</h4>
-                    <p><i class="fas fa-map-marker-alt"></i> Cawayan, Catarman</p>
-                    <p><i class="fas fa-phone"></i> (02) 8123 4567</p>
-                    <p><i class="fas fa-envelope"></i> clinic@healthdesk.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Cawayan, Catarman, Northern Samar</p>
+                    <p><i class="fas fa-phone"></i> 09486729942</p>
+                    <p><i class="fas fa-envelope"></i> healthdesk.info1@gmail.com</p>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -301,72 +301,8 @@
         </div>
     </footer>
 
+    <script src="/guest/js/api.js"></script>
+    <script src="/guest/js/guest.js"></script>
     <script src="/guest/js/components.js"></script>
-    <script>
-        function setupMobileMenu() {
-            const hamburger = document.getElementById('hamburger');
-            const navMenu = document.getElementById('navMenu');
-            if (hamburger && navMenu) {
-                hamburger.addEventListener('click', () => {
-                    hamburger.classList.toggle('active');
-                    navMenu.classList.toggle('active');
-                });
-                document.querySelectorAll('.nav-link').forEach((link) => {
-                    link.addEventListener('click', () => {
-                        hamburger.classList.remove('active');
-                        navMenu.classList.remove('active');
-                    });
-                });
-            }
-        }
-        function setupScrollEffects() {
-            const header = document.getElementById('header');
-            if (header) {
-                window.addEventListener('scroll', () => {
-                    if (window.scrollY > 50) {
-                        header.classList.add('scrolled');
-                    } else {
-                        header.classList.remove('scrolled');
-                    }
-                });
-            }
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-            setupMobileMenu();
-            setupScrollEffects();
-        });
-
-        const inquiryForm = document.getElementById('inquiryForm');
-        if (inquiryForm) {
-            inquiryForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const name = document.getElementById('inqName').value.trim();
-                const email = document.getElementById('inqEmail').value.trim();
-                const message = document.getElementById('inqMessage').value.trim();
-
-                if (!name || !email || !message) {
-                    showNotification('Please fill in all required fields.', 'error');
-                    return;
-                }
-
-                const inquiry = {
-                    id: Date.now(),
-                    name: name,
-                    email: email,
-                    phone: document.getElementById('inqPhone').value.trim() || '',
-                    subject: document.getElementById('inqSubject').value || 'General Inquiry',
-                    message: message,
-                    date: new Date().toLocaleString(),
-                };
-
-                let inquiries = JSON.parse(localStorage.getItem('guestInquiries') || '[]');
-                inquiries.unshift(inquiry);
-                localStorage.setItem('guestInquiries', JSON.stringify(inquiries));
-
-                showNotification('Message sent successfully! We will respond within 1-2 business days.', 'success');
-                this.reset();
-            });
-        }
-    </script>
 </body>
 </html>

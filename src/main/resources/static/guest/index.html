@@ -489,7 +489,7 @@
         
         <div class="cs-modal-footer">
             <p><i class="fas fa-clock"></i> Available 24/7</p>
-            <p><i class="fas fa-phone-alt"></i> Emergency: (02) 8123 4567</p>
+            <p><i class="fas fa-phone-alt"></i> Emergency: 09486729942</p>
         </div>
     </div>
 </div>
@@ -571,9 +571,9 @@
           </div>
           <div class="footer-info">
             <h4>Contact Info</h4>
-            <p><i class="fas fa-map-marker-alt"></i> Cawayan, Catarman</p>
-            <p><i class="fas fa-phone"></i> (02) 8123 4567</p>
-            <p><i class="fas fa-envelope"></i> clinic@healthdesk.com</p>
+            <p><i class="fas fa-map-marker-alt"></i> Cawayan, Catarman, Northern Samar</p>
+            <p><i class="fas fa-phone"></i> 09486729942</p>
+            <p><i class="fas fa-envelope"></i> healthdesk.info1@gmail.com</p>
           </div>
         </div>
         <div class="footer-bottom">
@@ -582,106 +582,6 @@
       </div>
     </footer>
 
-    <script>
-        const API_BASE_URL = 'http://localhost:8080/api';
-
-const csButton = document.getElementById('floatingCsButton');
-const csModal = document.getElementById('csModal');
-const csClose = document.getElementById('csClose');
-const csSendBtn = document.getElementById('csSendBtn');
-const csMessageInput = document.getElementById('csMessageInput');
-const csChatMessages = document.getElementById('csChatMessages');
-
-csButton.addEventListener('click', () => {
-    csModal.classList.add('show');
-});
-
-csClose.addEventListener('click', () => {
-    csModal.classList.remove('show');
-});
-
-function addMessage(message, isUser = false) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `cs-message ${isUser ? 'cs-message-user' : 'cs-message-bot'}`;
-    messageDiv.innerHTML = `
-        <div class="cs-message-bubble">${message}</div>
-        <span class="cs-message-time">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-    `;
-    csChatMessages.appendChild(messageDiv);
-    csChatMessages.scrollTop = csChatMessages.scrollHeight;
-}
-
-async function saveCustomerMessage(message) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/public/customer-inquiries`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: message,
-                timestamp: new Date().toISOString(),
-                source: 'floating_chat'
-            })
-        });
-        if (response.ok) {
-            console.log('Message saved to backend');
-        }
-    } catch (error) {
-        console.log('Saving to localStorage instead');
-        const inquiries = JSON.parse(localStorage.getItem('customerInquiries') || '[]');
-        inquiries.push({
-            id: Date.now(),
-            message: message,
-            timestamp: new Date().toLocaleString(),
-            source: 'floating_chat'
-        });
-        localStorage.setItem('customerInquiries', JSON.stringify(inquiries));
-    }
-}
-
-async function sendMessage() {
-    const message = csMessageInput.value.trim();
-    if (!message) return;
-    
-    addMessage(message, true);
-    saveCustomerMessage(message);
-    csMessageInput.value = '';
-    
-    setTimeout(() => {
-        let reply = '';
-        if (message.toLowerCase().includes('appointment')) {
-            reply = 'To schedule an appointment, please call our clinic at (02) 8123 4567 or visit us during clinic hours. Our staff will be happy to assist you!';
-        } else if (message.toLowerCase().includes('record') || message.toLowerCase().includes('medical')) {
-            reply = 'Medical records are confidential and can only be accessed by authorized personnel. Please login to your account or contact our clinic directly.';
-        } else if (message.toLowerCase().includes('hour')) {
-            reply = 'Our clinic hours are Monday-Friday 8:00 AM - 5:00 PM, and Saturday 9:00 AM - 12:00 PM. We are closed on Sundays.';
-        } else if (message.toLowerCase().includes('doctor')) {
-            reply = 'You can call our clinic at (02) 8123 4567 to speak with our doctors or schedule a consultation.';
-        } else {
-            reply = 'Thank you for your message! Our support team will get back to you as soon as possible. For urgent matters, please call us at (02) 8123 4567.';
-        }
-        addMessage(reply, false);
-    }, 1000);
-}
-
-csSendBtn.addEventListener('click', sendMessage);
-csMessageInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
-});
-
-document.querySelectorAll('.cs-quick-reply').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const message = btn.getAttribute('data-message');
-        csMessageInput.value = message;
-        sendMessage();
-    });
-});
-
-window.addEventListener('click', (e) => {
-    if (e.target === csModal) {
-        csModal.classList.remove('show');
-    }
-});
-    </script>
     <script src="/guest/js/api.js"></script>
     <script src="/guest/js/guest.js"></script>
     <script src="/guest/js/components.js"></script>

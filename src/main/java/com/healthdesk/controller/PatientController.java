@@ -27,13 +27,13 @@ public class PatientController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('DOCTOR','NURSE')")
+    @PreAuthorize("hasAnyRole('DOCTOR','NURSE','STAFF')")
     public ResponseEntity<List<PatientDTO>> getPatients(@RequestParam(required = false, defaultValue = "") String search) {
         return ResponseEntity.ok(patientService.searchPatients(search, currentUserService.getCurrentUser()));
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('DOCTOR','NURSE')")
+    @PreAuthorize("hasAnyRole('DOCTOR','NURSE','STAFF')")
     public ResponseEntity<List<PatientDTO>> searchPatients(@RequestParam(required = false) String term,
                                                            @RequestParam(required = false) String q) {
         String query = (q != null && !q.isBlank()) ? q : (term != null ? term : "");

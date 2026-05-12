@@ -19,6 +19,8 @@ public class AppointmentDTO {
     private String reason;
     private String notes;
     private String status;
+    private String patientName;
+    private String doctorName;
 
     // Getters
     public String getId() { return id; }
@@ -28,6 +30,8 @@ public class AppointmentDTO {
     public String getReason() { return reason; }
     public String getNotes() { return notes; }
     public String getStatus() { return status; }
+    public String getPatientName() { return patientName; }
+    public String getDoctorName() { return doctorName; }
 
     // Setters
     public void setId(String id) { this.id = id; }
@@ -37,4 +41,6 @@ public class AppointmentDTO {
     public void setReason(String reason) { this.reason = reason; }
     public void setNotes(String notes) { this.notes = notes; }
     public void setStatus(String status) { this.status = status; }
+    public void setPatientName(String patientName) { this.patientName = patientName; }
+    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
 }

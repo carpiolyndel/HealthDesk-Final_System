@@ -69,6 +69,13 @@ public class AppointmentService {
         if (doctor.getRole() != Role.DOCTOR) {
             throw new IllegalArgumentException("Appointments must be assigned to a doctor.");
         }
+        if (patient.getAssignedDoctor() == null) {
+            patient.setAssignedDoctor(doctor);
+        }
+        if (patient.getAssignedNurse() == null) {
+            userRepository.findByRole(Role.NURSE).stream().findFirst().ifPresent(patient::setAssignedNurse);
+        }
+        patientRepository.save(patient);
         User scheduledBy = actor;
 
         checkDoubleBooking(doctor.getId(), dto.getAppointmentDateTime(), null);
@@ -171,6 +178,8 @@ public class AppointmentService {
         dto.setReason(appointment.getReason());
         dto.setNotes(appointment.getNotes());
         dto.setStatus(appointment.getStatus().name());
+        dto.setPatientName(appointment.getPatient().getFirstName() + " " + appointment.getPatient().getLastName());
+        dto.setDoctorName(appointment.getDoctor().getFullName());
         return dto;
     }
 }

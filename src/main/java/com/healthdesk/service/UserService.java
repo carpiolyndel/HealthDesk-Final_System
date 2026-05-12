@@ -26,6 +26,7 @@ public class UserService {
 
     public List<UserDTO> getUsers(String search) {
         return userRepository.findAll().stream()
+                .filter(User::isActive)
                 .filter(user -> search == null || search.isBlank() || matchesSearch(user, search))
                 .map(this::toDTO)
                 .collect(Collectors.toList());

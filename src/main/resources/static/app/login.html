@@ -509,16 +509,16 @@
         };
 
         emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
-        console.log('✅ EmailJS initialized');
+        console.log('EmailJS initialized');
 
         const STORAGE_KEYS = {
             CURRENT_USER: 'currentUser'
         };
 
         let pendingUser = null;
-        let generatedOtp = null;
         let otpExpiry = null;
         let currentOtpTimer = null;
+        let pendingPassword = null;
 
         function showToast(message, type) {
             let container = document.querySelector('.toast-container');
@@ -579,8 +579,8 @@
         }
 
         async function sendOtpEmail(email, otp, name) {
-            console.log('📧 Sending OTP to:', email);
-            console.log('🔐 OTP:', otp);
+            console.log('Sending OTP to:', email);
+            console.log('OTP:', otp);
             
             if (!email || email === '') {
                 showToast('No email address for this user', 'error');
@@ -589,7 +589,7 @@
             
             if (email === 'admin@healthdesk.com' || email === 'doctor@healthdesk.com' || 
                 email === 'nurse@healthdesk.com' || email === 'staff@healthdesk.com') {
-                showToast(`🔐 Your OTP is: ${otp}`, 'info');
+                showToast(`Your OTP is: ${otp}`, 'info');
                 return true;
             }
             
@@ -608,78 +608,114 @@
                 );
                 
                 if (response.status === 200) {
-                    showToast(`✅ Code sent to ${email}`, 'success');
+                    showToast(`Code sent to ${email}`, 'success');
                     return true;
                 } else {
-                    showToast(`🔐 Your OTP: ${otp}`, 'info');
+                    showToast(`Your OTP: ${otp}`, 'info');
                     return false;
                 }
             } catch (error) {
                 console.error('Email error:', error);
-                showToast(`🔐 Your OTP: ${otp}`, 'info');
+                showToast(`Your OTP: ${otp}`, 'info');
                 return false;
             }
         }
 
         async function login(username, password) {
-            console.log('🔐 Login attempt:', username);
-            
-            const systemUsers = loadSystemUsers();
-            
-            const user = systemUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
-            
-            if (user && user.status === 'Active') {
-                pendingUser = user;
-                generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    return { success: false, message: data.message || 'Invalid username or password' };
+                }
+
+                pendingUser = {
+                    id: data.userId,
+                    username: data.username,
+                    role: data.role,
+                    email: data.email || data.username,
+                    fullname: data.fullName || data.username
+                };
+                pendingPassword = password;
+
+                if (data.accessToken) {
+                    const userData = {
+                        id: data.userId,
+                        username: data.username,
+                        role: data.role,
+                        name: data.fullName || data.username,
+                        fullname: data.fullName || data.username,
+                        fullName: data.fullName || data.username,
+                        email: data.email || ''
+                    };
+                    localStorage.setItem('token', data.accessToken);
+                    localStorage.setItem('refreshToken', data.refreshToken || '');
+                    localStorage.setItem('currentUser', JSON.stringify(userData));
+                    return { success: true, verified: true, user: userData, dashboard: getDashboardUrl(data.role) };
+                }
+
                 otpExpiry = Date.now() + 5 * 60 * 1000;
-                
-                await sendOtpEmail(user.email, generatedOtp, user.fullname);
-                
-                return { success: true, user: user };
+                return { success: true, user: pendingUser };
+            } catch (error) {
+                return { success: false, message: 'Cannot reach the server. Please start Spring Boot first.' };
             }
-            
-            showToast('Invalid username or password', 'error');
-            return { success: false, message: 'Invalid username or password' };
         }
 
-        function verifyOtp(enteredOtp) {
-            console.log('🔐 Verifying OTP - Entered:', enteredOtp, 'Expected:', generatedOtp);
-            
-            if (!generatedOtp) {
-                showToast('No OTP generated', 'error');
+        async function verifyOtp(enteredOtp) {
+            if (!pendingUser || !pendingPassword) {
+                showToast('No pending login session', 'error');
                 return { success: false, message: 'No OTP generated' };
             }
             if (Date.now() > otpExpiry) {
                 showToast('OTP expired', 'error');
                 return { success: false, message: 'OTP expired' };
             }
-            if (enteredOtp === generatedOtp) {
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: pendingUser.username,
+                        password: pendingPassword,
+                        otpCode: enteredOtp
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok || !data.accessToken) {
+                    return { success: false, message: data.message || 'Invalid verification code' };
+                }
+
                 const userData = {
-                    id: pendingUser.id,
-                    username: pendingUser.username,
-                    role: pendingUser.role,
-                    name: pendingUser.fullname,
-                    fullname: pendingUser.fullname,
-                    fullName: pendingUser.fullname,
-                    email: pendingUser.email
+                    id: data.userId,
+                    username: data.username,
+                    role: data.role,
+                    name: data.fullName || data.username,
+                    fullname: data.fullName || data.username,
+                    fullName: data.fullName || data.username,
+                    email: data.email || ''
                 };
+                localStorage.setItem('token', data.accessToken);
+                localStorage.setItem('refreshToken', data.refreshToken || '');
                 localStorage.setItem('currentUser', JSON.stringify(userData));
-                console.log('✅ User saved to localStorage:', userData);
-                
-                const dashboardUrl = getDashboardUrl(pendingUser.role);
-                console.log('🚀 Redirecting to:', dashboardUrl);
-                
-                return { success: true, user: userData, dashboard: dashboardUrl };
+
+                return { success: true, user: userData, dashboard: getDashboardUrl(data.role) };
+            } catch (error) {
+                return { success: false, message: 'Cannot verify OTP while the server is unavailable.' };
             }
-            return { success: false, message: 'Invalid verification code' };
         }
 
-        function resendOtp() {
-            if (pendingUser) {
-                generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-                otpExpiry = Date.now() + 5 * 60 * 1000;
-                sendOtpEmail(pendingUser.email, generatedOtp, pendingUser.fullname);
-                showToast('New verification code sent!', 'success');
+        async function resendOtp() {
+            if (!pendingUser || !pendingPassword) return false;
+            const result = await login(pendingUser.username, pendingPassword);
+            if (result.success) {
+                showToast('New verification code requested.', 'success');
                 return true;
             }
             return false;
@@ -755,7 +791,10 @@
             
             const result = await login(username, password);
             
-            if (result.success) {
+            if (result.success && result.verified) {
+                showToast(`Welcome back, ${result.user.name}!`, 'success');
+                window.location.href = result.dashboard;
+            } else if (result.success) {
                 openOtpModal(result.user.email);
                 document.getElementById('resendBtn').disabled = true;
             } else {
@@ -763,7 +802,7 @@
             }
         });
 
-        document.getElementById('verifyBtn').addEventListener('click', () => {
+        document.getElementById('verifyBtn').addEventListener('click', async () => {
             const enteredOtp = getOtpValue();
             console.log('Verify button clicked. OTP entered:', enteredOtp);
             
@@ -772,22 +811,20 @@
                 return;
             }
             
-            const result = verifyOtp(enteredOtp);
+            const result = await verifyOtp(enteredOtp);
             console.log('Verify result:', result);
             
             if (result.success) {
                 showToast(`Welcome back, ${result.user.name}!`, 'success');
                 closeOtpModal();
-                console.log('Redirecting to:', result.dashboard);
-                syncBackendSession(pendingUser.username, pendingUser.password)
-                    .finally(() => window.location.href = result.dashboard);
+                window.location.href = result.dashboard;
             } else {
                 showToast(result.message, 'error');
             }
         });
 
-        document.getElementById('resendBtn').addEventListener('click', () => {
-            resendOtp();
+        document.getElementById('resendBtn').addEventListener('click', async () => {
+            await resendOtp();
             startTimer();
             document.getElementById('resendBtn').disabled = true;
             showToast('New verification code sent!', 'success');
@@ -816,7 +853,7 @@
             }
         });
 
-        console.log('✅ Login page ready');
+        console.log('Login page ready');
         showToast('System Ready - Enter your Credential', 'info');
     </script>
 </body>

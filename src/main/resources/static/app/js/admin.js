@@ -48,7 +48,7 @@ function getCurrentUser() {
 
 function checkAuth() {
     const user = getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || user.role !== 'ADMIN' || (typeof api !== 'undefined' && !api.getToken())) {
         window.location.href = 'login.html';
         return null;
     }
@@ -92,7 +92,15 @@ async function loadData() {
     const storedArchived = localStorage.getItem('archivedUsers');
     const storedInquiries = localStorage.getItem('guestInquiries');
     
-    if (storedUsers) {
+    if (typeof api !== 'undefined' && api.getToken()) {
+        try {
+            systemUsers = (await api.getUsers(0, 500, '')).map(normalizeUser);
+            localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
+        } catch (error) {
+            showToast(error.message, 'error');
+            systemUsers = storedUsers ? JSON.parse(storedUsers).map(normalizeUser) : [];
+        }
+    } else if (storedUsers) {
         systemUsers = JSON.parse(storedUsers).map(normalizeUser);
     } else {
         systemUsers = [
@@ -457,14 +465,24 @@ function resetPassword() {
 
 // ============ ARCHIVE & DELETE ============
 
-function archiveUser(id) {
+async function archiveUser(id) {
     const u = systemUsers.find(u => u.id === id);
     if (u && confirm(`Archive user "${u.username}"?`)) {
-        systemUsers = systemUsers.filter(u => u.id !== id);
-        archivedUsers.push({ 
-            ...u, 
-            archivedDate: new Date().toISOString().split('T')[0] 
-        });
+        if (typeof api !== 'undefined' && api.getToken()) {
+            try {
+                await api.archiveUser(id);
+                await loadData();
+            } catch (error) {
+                showToast(error.message, 'error');
+                return;
+            }
+        } else {
+            systemUsers = systemUsers.filter(u => u.id !== id);
+            archivedUsers.push({
+                ...u,
+                archivedDate: new Date().toISOString().split('T')[0]
+            });
+        }
         saveToStorage();
         updateStats();
         renderUsers();
@@ -474,10 +492,20 @@ function archiveUser(id) {
     }
 }
 
-function deleteUser(id) {
+async function deleteUser(id) {
     const u = systemUsers.find(u => u.id === id);
     if (u && confirm(`Permanently delete "${u.username}"? This cannot be undone.`)) {
-        systemUsers = systemUsers.filter(u => u.id !== id);
+        if (typeof api !== 'undefined' && api.getToken()) {
+            try {
+                await api.deleteUser(id);
+                await loadData();
+            } catch (error) {
+                showToast(error.message, 'error');
+                return;
+            }
+        } else {
+            systemUsers = systemUsers.filter(u => u.id !== id);
+        }
         saveToStorage();
         updateStats();
         renderUsers();
@@ -683,8 +711,8 @@ Best regards,
 ${adminName}
 HealthDesk Clinic
 Cawayan, Catarman, Northern Samar
-Tel: (02) 8123 4567
-Email: clinic@healthdesk.com`);
+Phone: 09486729942
+Email: healthdesk.info1@gmail.com`);
     console.log('========================================');
     
     const index = guestInquiries.findIndex(i => i.id === inquiryId);

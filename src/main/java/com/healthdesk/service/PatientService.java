@@ -70,13 +70,13 @@ public class PatientService {
         Patient saved = patientRepository.save(patient);
         auditLogService.logAction(actor.getId(), "CREATE_PATIENT", "Created patient: " + saved.getId());
 
-        return convertToDTO(saved);
+        return convertToDTO(saved, actor);
     }
 
     public List<PatientDTO> searchPatients(String searchTerm, User actor) {
         return patientRepository.searchByNameOrId(searchTerm).stream()
                 .filter(patient -> canViewPatient(patient, actor))
-                .map(this::convertToDTO)
+                .map(patient -> convertToDTO(patient, actor))
                 .collect(Collectors.toList());
     }
 
@@ -85,7 +85,7 @@ public class PatientService {
         if (patient != null && !canViewPatient(patient, actor)) {
             throw new IllegalStateException("You can only access assigned patient records.");
         }
-        return patient != null ? convertToDTO(patient) : null;
+        return patient != null ? convertToDTO(patient, actor) : null;
     }
 
     public PatientDTO updatePatient(String id, PatientDTO patientDTO, User actor) {
@@ -113,7 +113,7 @@ public class PatientService {
 
         Patient updated = patientRepository.save(patient);
         auditLogService.logAction(actor.getId(), "UPDATE_PATIENT", "Updated patient: " + updated.getId());
-        return convertToDTO(updated);
+        return convertToDTO(updated, actor);
     }
 
     public void archivePatient(String id, User actor) {
@@ -137,14 +137,29 @@ public class PatientService {
             return patient.getAssignedNurse() != null
                     && Objects.equals(patient.getAssignedNurse().getId(), actor.getId());
         }
+        if (actor.getRole() == Role.STAFF) {
+            return true;
+        }
         return false;
     }
 
     private boolean canUpdatePatient(Patient patient, User actor) {
-        return canViewPatient(patient, actor);
+        if (actor.getRole() == Role.DOCTOR) {
+            return patient.getAssignedDoctor() != null
+                    && Objects.equals(patient.getAssignedDoctor().getId(), actor.getId());
+        }
+        if (actor.getRole() == Role.NURSE) {
+            return patient.getAssignedNurse() != null
+                    && Objects.equals(patient.getAssignedNurse().getId(), actor.getId());
+        }
+        return false;
     }
 
     private PatientDTO convertToDTO(Patient patient) {
+        return convertToDTO(patient, null);
+    }
+
+    private PatientDTO convertToDTO(Patient patient, User actor) {
         PatientDTO dto = new PatientDTO();
         dto.setId(patient.getId());
         dto.setFirstName(patient.getFirstName());
@@ -155,16 +170,21 @@ public class PatientService {
         dto.setEmail(patient.getEmail());
         dto.setPhoneNumber(patient.getPhoneNumber());
         dto.setAddress(patient.getAddress());
-        dto.setMedicalHistory(decryptNullable(patient.getMedicalHistory()));
-        dto.setPreviousDiagnoses(decryptNullable(patient.getPreviousDiagnoses()));
         dto.setBloodType(patient.getBloodType());
-        dto.setAllergies(decryptNullable(patient.getAllergies()));
-        dto.setCurrentMedications(decryptNullable(patient.getCurrentMedications()));
+        boolean canSeeMedical = actor == null || actor.getRole() == Role.DOCTOR || actor.getRole() == Role.NURSE;
+        if (canSeeMedical) {
+            dto.setMedicalHistory(decryptNullable(patient.getMedicalHistory()));
+            dto.setPreviousDiagnoses(decryptNullable(patient.getPreviousDiagnoses()));
+            dto.setAllergies(decryptNullable(patient.getAllergies()));
+            dto.setCurrentMedications(decryptNullable(patient.getCurrentMedications()));
+        }
         if (patient.getAssignedDoctor() != null) {
             dto.setAssignedDoctorId(patient.getAssignedDoctor().getId());
+            dto.setAssignedDoctorName(patient.getAssignedDoctor().getFullName());
         }
         if (patient.getAssignedNurse() != null) {
             dto.setAssignedNurseId(patient.getAssignedNurse().getId());
+            dto.setAssignedNurseName(patient.getAssignedNurse().getFullName());
         }
         return dto;
     }

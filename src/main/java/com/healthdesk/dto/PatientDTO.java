@@ -33,6 +33,8 @@ public class PatientDTO {
     private String currentMedications;
     private String assignedDoctorId;
     private String assignedNurseId;
+    private String assignedDoctorName;
+    private String assignedNurseName;
 
     // Getters
     public String getId() { return id; }
@@ -51,6 +53,8 @@ public class PatientDTO {
     public String getCurrentMedications() { return currentMedications; }
     public String getAssignedDoctorId() { return assignedDoctorId; }
     public String getAssignedNurseId() { return assignedNurseId; }
+    public String getAssignedDoctorName() { return assignedDoctorName; }
+    public String getAssignedNurseName() { return assignedNurseName; }
 
     // Setters
     public void setId(String id) { this.id = id; }
@@ -69,4 +73,6 @@ public class PatientDTO {
     public void setCurrentMedications(String currentMedications) { this.currentMedications = currentMedications; }
     public void setAssignedDoctorId(String assignedDoctorId) { this.assignedDoctorId = assignedDoctorId; }
     public void setAssignedNurseId(String assignedNurseId) { this.assignedNurseId = assignedNurseId; }
+    public void setAssignedDoctorName(String assignedDoctorName) { this.assignedDoctorName = assignedDoctorName; }
+    public void setAssignedNurseName(String assignedNurseName) { this.assignedNurseName = assignedNurseName; }
 }

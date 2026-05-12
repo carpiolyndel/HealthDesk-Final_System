@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -59,6 +60,7 @@ public class AuthService {
             "staff", new DemoUser("staff@healthdesk.com", "Mike Johnson", Role.STAFF, "staff123")
     );
 
+    @Transactional
     public LoginResponseDTO login(LoginRequestDTO loginRequest, String ipAddress) {
         Authentication authentication = authenticate(loginRequest);
 
@@ -71,10 +73,10 @@ public class AuthService {
 
         if (user.isMfaEnabled() && (loginRequest.getOtpCode() == null || loginRequest.getOtpCode().isEmpty())) {
             String otp = mfaProvider.generateOtp(user.getId());
-            otpNotificationService.sendOtp(user.getEmail(), otp);
+            otpNotificationService.sendOtp(user.getEmail(), otp, user.getUsername());
             auditLogService.logAction(user.getId(), "MFA_CHALLENGE", "OTP challenge created");
             return new LoginResponseDTO(null, null, "Bearer", user.getId(), user.getUsername(),
-                    user.getRole().toString(), true);
+                    user.getEmail(), user.getFullName(), user.getRole().toString(), true);
         }
 
         if (user.isMfaEnabled() && !mfaProvider.validateOtp(user.getId(), loginRequest.getOtpCode())) {
@@ -92,7 +94,7 @@ public class AuthService {
         auditLogService.logAction(user.getId(), "LOGIN", "User logged in from IP: " + ipAddress);
 
         return new LoginResponseDTO(accessToken, refreshToken, "Bearer", user.getId(),
-                user.getUsername(), user.getRole().toString(), false);
+                user.getUsername(), user.getEmail(), user.getFullName(), user.getRole().toString(), false);
     }
 
     private Authentication authenticate(LoginRequestDTO loginRequest) {
@@ -129,12 +131,11 @@ public class AuthService {
     }
 
     private String generateRefreshToken(User user) {
-        refreshTokenRepository.deleteByUser(user);
-
-        RefreshToken refreshToken = new RefreshToken();
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(user).orElseGet(RefreshToken::new);
         refreshToken.setUser(user);
         refreshToken.setToken(UUID.randomUUID().toString());
         refreshToken.setExpiryDate(LocalDateTime.now().plusDays(7));
+        refreshToken.setRevoked(false);
 
         refreshTokenRepository.save(refreshToken);
         return refreshToken.getToken();
