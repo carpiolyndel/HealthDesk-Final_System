@@ -187,3 +187,387 @@
     border-radius: var(--radius-md);
     cursor: pointer;
 }
+
+.section-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-subtitle {
+    margin-left: auto;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.doctor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.doctor-toolbar select {
+    min-height: 42px;
+    min-width: 160px;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    font: inherit;
+    font-weight: 600;
+}
+
+.doctor-patient-grid,
+.medical-record-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.doctor-patient-card,
+.medical-summary-card,
+.schedule-card,
+.clinic-list-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+}
+
+.doctor-patient-card,
+.medical-summary-card {
+    border-radius: 14px;
+    padding: 18px;
+}
+
+.patient-card-header,
+.medical-summary-header,
+.schedule-title-row,
+.clinic-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.patient-card-header,
+.medical-summary-header {
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.patient-card-header h4,
+.medical-summary-header h4,
+.schedule-title-row h4 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.patient-id,
+.medical-summary-header span,
+.record-patient-banner span {
+    display: block;
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 12px;
+    word-break: break-word;
+}
+
+.patient-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.patient-meta-grid div,
+.record-detail-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.patient-meta-grid span,
+.medical-summary-body span,
+.record-detail-item span {
+    display: block;
+    margin-bottom: 6px;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.patient-meta-grid strong {
+    color: #0f172a;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+.patient-note {
+    margin-bottom: 14px;
+    padding: 12px;
+    border-left: 3px solid #0d9488;
+    border-radius: 10px;
+    background: #f0fdfa;
+}
+
+.patient-note strong {
+    color: #0f766e;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.patient-note p,
+.medical-summary-body p,
+.record-detail-item p,
+.schedule-details p {
+    margin: 0;
+    color: #334155;
+    line-height: 1.5;
+}
+
+.patient-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-secondary,
+.patient-card-actions button,
+.medical-summary-card button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 9px 13px;
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.btn-secondary {
+    background: #475569;
+}
+
+.schedule-list {
+    display: grid;
+    gap: 14px;
+}
+
+.schedule-card {
+    display: flex;
+    gap: 16px;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.schedule-date-box {
+    width: 72px;
+    min-width: 72px;
+    border-radius: 12px;
+    background: #ecfdf5;
+    color: #0f766e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.schedule-date-box span {
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 900;
+}
+
+.schedule-date-box strong {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.schedule-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.schedule-title-row {
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.schedule-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 9px 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.clinic-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 26px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #0f766e;
+    background: #ccfbf1;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-active,
+.status-scheduled,
+.status-rescheduled {
+    background: #dcfce7;
+    color: #047857;
+}
+
+.status-completed {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.status-cancelled {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.status-in_progress {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.clinic-list-item {
+    justify-content: space-between;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+}
+
+.clinic-list-icon,
+.medical-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f766e;
+    background: #ccfbf1;
+}
+
+.clinic-list-main {
+    flex: 1;
+}
+
+.clinic-list-main strong {
+    display: block;
+    color: #0f172a;
+    font-size: 14px;
+}
+
+.clinic-list-main small {
+    color: #64748b;
+}
+
+.medical-summary-header {
+    justify-content: flex-start;
+}
+
+.medical-summary-body {
+    display: grid;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.medical-summary-body div {
+    padding: 12px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.medical-record-modal {
+    max-width: 760px;
+    border-radius: 18px;
+}
+
+.record-patient-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 16px;
+    border: 1px solid #ccfbf1;
+    border-radius: 14px;
+    background: #f0fdfa;
+}
+
+.record-patient-banner h4 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.record-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.record-detail-item.full {
+    grid-column: 1 / -1;
+}
+
+.empty-state {
+    padding: 28px;
+    text-align: center;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+}
+
+@media (max-width: 700px) {
+    .section-subtitle {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .doctor-patient-grid,
+    .medical-record-grid,
+    .record-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .schedule-card,
+    .clinic-list-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .schedule-date-box {
+        width: 100%;
+        min-width: 0;
+        min-height: 70px;
+    }
+}

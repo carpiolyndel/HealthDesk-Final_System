@@ -66,18 +66,26 @@
         overflow-y: auto;
       }
       .sidebar-header {
-        padding: 24px;
+        padding: 20px 18px 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
         text-align: center;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
       .sidebar-header img {
-        width: 50px;
-        margin-bottom: 12px;
-        border-radius: 12px;
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto 10px;
+        border-radius: 14px;
       }
       .sidebar-header h3 {
         font-size: 20px;
         font-weight: 600;
+        margin: 0;
       }
       .sidebar-header p {
         font-size: 11px;
@@ -679,6 +687,118 @@
         color: white;
       }
 
+      #usersPage .section-card {
+        border-radius: 12px;
+        padding: 24px;
+      }
+      #usersPage .section-header {
+        padding-bottom: 0;
+        margin-bottom: 20px;
+        border-bottom: 0;
+      }
+      #usersPage .section-header h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 22px;
+        color: #0f172a;
+      }
+      #usersPage .search-bar {
+        display: flex !important;
+        width: 100% !important;
+        max-width: none !important;
+        align-items: stretch;
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      #usersPage .user-search-field {
+        position: relative;
+        width: auto !important;
+        flex: 1 1 auto !important;
+        min-width: 260px;
+      }
+      #usersPage .user-search-field i {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        color: #94a3b8;
+        font-size: 14px;
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
+      #usersPage .search-bar input {
+        width: 100%;
+        min-height: 48px;
+        padding: 0 18px 0 44px;
+        border: 1px solid #dbe3ef;
+        border-radius: 12px;
+        background: #ffffff;
+        font-size: 15px;
+        box-shadow: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      #usersPage .search-bar input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.12);
+      }
+      #usersPage .search-bar button {
+        flex: 0 0 120px !important;
+        min-height: 48px;
+        padding: 0 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        white-space: nowrap;
+      }
+      #usersPage .data-table th {
+        padding: 12px;
+        background: #f8fafc;
+        color: var(--gray-700);
+      }
+      #usersPage .data-table td {
+        padding: 12px;
+        vertical-align: middle;
+      }
+      .password-mask {
+        font-family: monospace;
+        letter-spacing: 2px;
+        font-size: 15px;
+      }
+      .user-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .user-actions button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 34px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .user-actions .btn-edit {
+        background: #f59e0b;
+      }
+      .user-actions .btn-archive {
+        background: #64748b;
+      }
+      .user-actions .btn-danger {
+        background: #ef4444;
+      }
+      .user-actions .btn-warning {
+        background: #eab308;
+      }
+
       @media (max-width: 1024px) {
         .stats-grid,
         .charts-grid {
@@ -705,6 +825,10 @@
         .table-controls {
           flex-direction: column;
           align-items: stretch;
+        }
+        #usersPage .search-bar {
+          grid-template-columns: 1fr;
+          max-width: 100%;
         }
       }
     </style>
@@ -852,11 +976,15 @@
                 </button>
               </div>
               <div class="search-bar">
-                <input
-                  type="text"
-                  id="searchUsersInput"
-                  placeholder="Search by username or name..."
-                /><button id="searchUsersBtn">
+                <div class="user-search-field">
+                  <i class="fas fa-search"></i>
+                  <input
+                    type="text"
+                    id="searchUsersInput"
+                    placeholder="Search by username or name..."
+                  />
+                </div>
+                <button id="searchUsersBtn">
                   <i class="fas fa-search"></i> Search
                 </button>
               </div>
@@ -906,18 +1034,26 @@
           <div id="reportsPage" class="page-content">
             <div class="section-card">
               <h3><i class="fas fa-chart-line"></i> System Reports</h3>
-              <div class="report-buttons">
-                <button class="btn-primary" id="userReportBtn">
-                  <i class="fas fa-users"></i> User Report
+              <div class="report-menu">
+                <button class="report-action-card" id="userReportBtn">
+                  <i class="fas fa-users"></i>
+                  <span>User Report</span>
+                  <small>View account totals and role distribution.</small>
                 </button>
-                <button class="btn-primary" id="activityReportBtn">
-                  <i class="fas fa-chart-line"></i> Activity Report
+                <button class="report-action-card" id="activityReportBtn">
+                  <i class="fas fa-chart-line"></i>
+                  <span>Activity Report</span>
+                  <small>Review recent system activity metrics.</small>
                 </button>
-                <button class="btn-primary" onclick="printSection('reportResult')">
-                  <i class="fas fa-print"></i> Print Report
+                <button class="report-action-card print-card" onclick="printSection('reportResult')">
+                  <i class="fas fa-print"></i>
+                  <span>Print Report</span>
+                  <small>Print the currently generated report.</small>
                 </button>
               </div>
-              <div id="reportResult"></div>
+              <div id="reportResult" class="report-output empty">
+                <p>Choose a report to generate.</p>
+              </div>
             </div>
           </div>
 

@@ -41,17 +41,29 @@ function renderPatients(list = nursePatients) {
     const container = document.getElementById('patientsList');
     if (!container) return;
     container.innerHTML = list.length ? list.map(p => `
-        <div class="patient-card" style="background:white;border-radius:12px;padding:20px;border:1px solid #e2e8f0;margin-bottom:16px;">
-            <div style="display:flex;justify-content:space-between;margin-bottom:12px;gap:12px;">
-                <span style="font-size:18px;font-weight:700;color:#0f172a;">${escapeHtml(fullName(p))}</span>
-                <span style="background:#f1f5f9;padding:4px 10px;border-radius:20px;font-size:12px;color:#64748b;">${escapeHtml(p.id)}</span>
+        <article class="nurse-patient-card">
+            <div class="nurse-patient-header">
+                <div class="patient-avatar"><i class="fas fa-user-injured"></i></div>
+                <div>
+                    <h4>${escapeHtml(fullName(p))}</h4>
+                    <span class="patient-id">${escapeHtml(p.id)}</span>
+                </div>
             </div>
-            <div style="margin:8px 0;"><i class="fas fa-venus-mars" style="color:#0d9488;"></i> <strong>Gender:</strong> ${escapeHtml(p.gender || 'N/A')}</div>
-            <div style="margin:8px 0;"><i class="fas fa-calendar" style="color:#0d9488;"></i> <strong>Age:</strong> ${p.age ?? 'N/A'}</div>
-            <div style="margin:8px 0;"><i class="fas fa-notes-medical" style="color:#0d9488;"></i> <strong>History:</strong> ${escapeHtml((p.medicalHistory || 'No notes').substring(0, 120))}</div>
-            <button class="btn-primary" style="width:100%;margin-top:12px;" onclick="openVitalsModal('${p.id}')">Update Vitals</button>
-        </div>
-    `).join('') : '<p style="text-align:center;padding:40px;">No assigned patients found</p>';
+            <div class="nurse-patient-meta">
+                <div><span>Gender</span><strong>${escapeHtml(p.gender || 'N/A')}</strong></div>
+                <div><span>Age</span><strong>${p.age ?? 'N/A'}</strong></div>
+                <div><span>Contact</span><strong>${escapeHtml(p.phoneNumber || 'N/A')}</strong></div>
+                <div><span>Doctor</span><strong>${escapeHtml(p.assignedDoctorName || 'N/A')}</strong></div>
+            </div>
+            <div class="nurse-history-note">
+                <span><i class="fas fa-notes-medical"></i> Medical History</span>
+                <p>${escapeHtml((p.medicalHistory || 'No notes').substring(0, 140))}</p>
+            </div>
+            <button class="btn-primary nurse-action-btn" onclick="openVitalsModal('${p.id}')">
+                <i class="fas fa-heartbeat"></i> Update Vitals
+            </button>
+        </article>
+    `).join('') : '<div class="empty-state">No assigned patients found</div>';
 }
 
 function openVitalsModal(id) {
@@ -113,21 +125,54 @@ function searchPatients() {
 }
 
 function generateVitalsReport() {
-    document.getElementById('reportResult').innerHTML = `
-        <div style="background:white;border-radius:12px;padding:24px;">
-            <h3><i class="fas fa-heartbeat" style="color:#0d9488;"></i> Vitals Summary Report</h3>
-            <p>Assigned patients: <strong>${nursePatients.length}</strong></p>
-            <p>Vitals updated today: <strong>${vitalsUpdatedToday}</strong></p>
+    const reportResult = document.getElementById('reportResult');
+    const withHistory = nursePatients.filter(p => p.medicalHistory).length;
+    reportResult.classList.remove('empty');
+    reportResult.innerHTML = `
+        <div class="report-dashboard">
+            <div class="report-header">
+                <h3><i class="fas fa-heartbeat"></i> Vitals Summary Report</h3>
+                <p>Care team summary for assigned patient vital sign updates.</p>
+            </div>
+            <div class="report-kpi-grid">
+                <div class="report-kpi-card"><span>Assigned Patients</span><strong>${nursePatients.length}</strong><small>Total patient load</small></div>
+                <div class="report-kpi-card"><span>Updated Today</span><strong>${vitalsUpdatedToday}</strong><small>Vitals saved this session</small></div>
+                <div class="report-kpi-card"><span>With Notes</span><strong>${withHistory}</strong><small>Patients with clinical notes</small></div>
+            </div>
+            <div class="report-detail-card">
+                <h4><i class="fas fa-clipboard-check"></i> Vitals Workflow</h4>
+                <div class="report-list">
+                    <div class="report-list-row"><span>Blood pressure</span><strong>Tracked</strong></div>
+                    <div class="report-list-row"><span>Temperature</span><strong>Tracked</strong></div>
+                    <div class="report-list-row"><span>Weight and heart rate</span><strong>Tracked</strong></div>
+                </div>
+            </div>
         </div>
     `;
 }
 
 function generatePatientReport() {
-    document.getElementById('reportResult').innerHTML = `
-        <div style="background:white;border-radius:12px;padding:24px;">
-            <h3><i class="fas fa-users" style="color:#0d9488;"></i> Patient Activity Report</h3>
-            <p>Assigned patients: <strong>${nursePatients.length}</strong></p>
-            <p>Today's appointments: <strong>${appointments.length}</strong></p>
+    const reportResult = document.getElementById('reportResult');
+    const withContact = nursePatients.filter(p => p.phoneNumber || p.email).length;
+    reportResult.classList.remove('empty');
+    reportResult.innerHTML = `
+        <div class="report-dashboard">
+            <div class="report-header">
+                <h3><i class="fas fa-users"></i> Patient Activity Report</h3>
+                <p>Assigned patient activity and care coordination overview.</p>
+            </div>
+            <div class="report-kpi-grid">
+                <div class="report-kpi-card"><span>Assigned Patients</span><strong>${nursePatients.length}</strong><small>Active assignment list</small></div>
+                <div class="report-kpi-card"><span>Today Appointments</span><strong>${appointments.length}</strong><small>Appointments due today</small></div>
+                <div class="report-kpi-card"><span>With Contact</span><strong>${withContact}</strong><small>Reachable patient records</small></div>
+            </div>
+            <div class="report-detail-card">
+                <h4><i class="fas fa-user-nurse"></i> Nurse Coverage</h4>
+                <div class="report-list">
+                    <div class="report-list-row"><span>Care role</span><strong>Vitals and monitoring</strong></div>
+                    <div class="report-list-row"><span>Patient records</span><strong>Assigned only</strong></div>
+                </div>
+            </div>
         </div>
     `;
 }

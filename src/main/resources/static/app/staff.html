@@ -112,14 +112,26 @@
                     <div class="section-card">
                         <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
                             <h3>Staff Reports</h3>
-                            <button class="btn-primary" onclick="printSection('reportResult')"><i class="fas fa-print"></i> Print Report</button>
                         </div>
-                        <div class="report-buttons" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
-                            <button class="btn-primary" onclick="generateAppointmentsReport()"><i class="fas fa-calendar-check"></i> Appointments Report</button>
-                            <button class="btn-primary" onclick="generatePatientsReport()"><i class="fas fa-users"></i> Patients Report</button>
+                        <div class="report-menu">
+                            <button class="report-action-card" onclick="generateAppointmentsReport()">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Appointments Report</span>
+                                <small>Summarize scheduled clinic appointments.</small>
+                            </button>
+                            <button class="report-action-card" onclick="generatePatientsReport()">
+                                <i class="fas fa-users"></i>
+                                <span>Patients Report</span>
+                                <small>Review patient registration totals.</small>
+                            </button>
+                            <button class="report-action-card print-card" onclick="printSection('reportResult')">
+                                <i class="fas fa-print"></i>
+                                <span>Print Report</span>
+                                <small>Print the currently generated report.</small>
+                            </button>
                         </div>
-                        <div id="reportResult" class="report-container">
-                            <p style="color:#64748b;">Choose a report to generate.</p>
+                        <div id="reportResult" class="report-output empty">
+                            <p>Choose a report to generate.</p>
                         </div>
                     </div>
                 </div>

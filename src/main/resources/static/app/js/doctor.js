@@ -1,6 +1,7 @@
 let currentUser = null;
 let patients = [];
 let appointments = [];
+let nurses = [];
 let selectedPatient = null;
 let confirmCallback = null;
 
@@ -29,9 +30,10 @@ function requireDoctor() {
 
 async function refreshDoctorData() {
     try {
-        [patients, appointments] = await Promise.all([
+        [patients, appointments, nurses] = await Promise.all([
             api.getPatients(0, 500, ''),
-            api.getAppointments()
+            api.getAppointments(),
+            loadNurses()
         ]);
         updateStats();
         loadPatients();
@@ -51,14 +53,33 @@ function loadUserData() {
     document.getElementById('userRole').textContent = 'Physician';
 }
 
+async function loadNurses() {
+    try {
+        return await api.getNurses();
+    } catch (error) {
+        console.warn('Unable to load nurses:', error);
+        return [];
+    }
+}
+
+function renderNurseOptions(selectedId = '') {
+    const select = document.getElementById('updateAssignedNurse');
+    if (!select) return;
+    select.innerHTML = '<option value="">No nurse assigned</option>' + nurses.map(nurse => `
+        <option value="${escapeHtml(nurse.id)}" ${nurse.id === selectedId ? 'selected' : ''}>
+            ${escapeHtml(nurse.name || nurse.email || nurse.id)}
+        </option>
+    `).join('');
+}
+
 function setupModalEventListeners() {
     document.getElementById('confirmYes')?.addEventListener('click', () => {
-        document.getElementById('confirmationModal').style.display = 'none';
+        document.getElementById('confirmationModal').classList.remove('active');
         if (confirmCallback) confirmCallback();
         confirmCallback = null;
     });
     document.getElementById('confirmNo')?.addEventListener('click', () => {
-        document.getElementById('confirmationModal').style.display = 'none';
+        document.getElementById('confirmationModal').classList.remove('active');
         confirmCallback = null;
     });
     document.getElementById('patientForm')?.addEventListener('submit', updatePatientRecord);
@@ -113,17 +134,65 @@ function setText(id, value) {
     if (el) el.textContent = value;
 }
 
+function parseDate(value) {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateTime(value) {
+    const date = parseDate(value);
+    if (!date) return 'No schedule';
+    return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function formatDate(value) {
+    const date = parseDate(value);
+    if (!date) return 'No date';
+    return date.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    });
+}
+
+function formatTime(value) {
+    const date = parseDate(value);
+    if (!date) return 'No time';
+    return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function formatDatePart(value, part) {
+    const date = parseDate(value);
+    if (!date) return part === 'day' ? '--' : 'TBA';
+    if (part === 'day') return date.toLocaleDateString('en-US', { day: '2-digit' });
+    return date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+}
+
+function formatStatus(status) {
+    return String(status || 'SCHEDULED').replace(/_/g, ' ');
+}
+
 function loadRecentAppointments() {
     const container = document.getElementById('recentAppointments');
     if (!container) return;
     const recent = [...appointments].sort((a, b) => new Date(b.appointmentDateTime) - new Date(a.appointmentDateTime)).slice(0, 10);
     container.innerHTML = recent.length ? recent.map(a => `
-        <div class="history-item">
-            <div class="history-info">
+        <div class="clinic-list-item">
+            <div class="clinic-list-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="clinic-list-main">
                 <strong>${escapeHtml(a.patientName || a.patientId)}</strong>
-                <br><small>${new Date(a.appointmentDateTime).toLocaleString()}</small>
+                <small>${formatDateTime(a.appointmentDateTime)}</small>
             </div>
-            <span class="status-badge status-${(a.status || '').toLowerCase()}">${escapeHtml(a.status)}</span>
+            <span class="clinic-status status-${(a.status || '').toLowerCase()}">${formatStatus(a.status)}</span>
         </div>
     `).join('') : '<div class="empty-state">No recent appointments</div>';
 }
@@ -137,56 +206,98 @@ function loadPatients() {
     const container = document.getElementById('patientsList');
     if (!container) return;
     container.innerHTML = filtered.length ? filtered.map(p => `
-        <div class="data-card">
-            <div class="data-info">
-                <h4>${escapeHtml(fullName(p))} <span style="color:#666;font-weight:normal;">(${escapeHtml(p.id)})</span></h4>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;">
-                    <div><strong>Age:</strong> ${p.age ?? ''}</div>
-                    <div><strong>Gender:</strong> ${escapeHtml(p.gender || '')}</div>
-                    <div><strong>Contact:</strong> ${escapeHtml(p.phoneNumber || 'N/A')}</div>
-                    <div><strong>Email:</strong> ${escapeHtml(p.email || 'N/A')}</div>
+        <article class="doctor-patient-card">
+            <div class="patient-card-header">
+                <div>
+                    <h4>${escapeHtml(fullName(p))}</h4>
+                    <span class="patient-id">${escapeHtml(p.id)}</span>
                 </div>
-                ${p.medicalHistory ? `<div><strong>Medical History:</strong> ${escapeHtml(p.medicalHistory.substring(0, 80))}${p.medicalHistory.length > 80 ? '...' : ''}</div>` : ''}
+                <span class="clinic-status status-active">Active</span>
             </div>
-            <div class="data-actions">
+            <div class="patient-meta-grid">
+                <div><span>Age</span><strong>${p.age ?? 'N/A'}</strong></div>
+                <div><span>Gender</span><strong>${escapeHtml(p.gender || 'N/A')}</strong></div>
+                <div><span>Contact</span><strong>${escapeHtml(p.phoneNumber || 'N/A')}</strong></div>
+                <div><span>Email</span><strong>${escapeHtml(p.email || 'N/A')}</strong></div>
+                <div><span>Assigned Nurse</span><strong>${escapeHtml(p.assignedNurseName || 'Not assigned')}</strong></div>
+            </div>
+            ${p.medicalHistory ? `<div class="patient-note"><strong>Medical History</strong><p>${escapeHtml(p.medicalHistory.substring(0, 100))}${p.medicalHistory.length > 100 ? '...' : ''}</p></div>` : ''}
+            <div class="patient-card-actions">
                 <button class="btn-secondary" onclick="viewMedicalRecord('${p.id}')"><i class="fas fa-eye"></i> View Record</button>
                 <button class="btn-primary" onclick="updateMedicalRecord('${p.id}')"><i class="fas fa-edit"></i> Update Record</button>
                 <button class="btn-warning" onclick="archivePatient('${p.id}')"><i class="fas fa-archive"></i> Archive</button>
             </div>
-        </div>
+        </article>
     `).join('') : '<div class="empty-state">No assigned patients found</div>';
 }
 
 function loadAppointments() {
-    const filter = document.getElementById('appointmentFilter')?.value || 'today';
+    const filter = document.getElementById('appointmentFilter')?.value || 'upcoming';
     const today = new Date().toDateString();
-    let filtered = [...appointments];
+    let filtered = [...appointments].sort((a, b) => new Date(a.appointmentDateTime) - new Date(b.appointmentDateTime));
     if (filter === 'today') filtered = appointments.filter(a => new Date(a.appointmentDateTime).toDateString() === today);
-    if (filter === 'upcoming') filtered = appointments.filter(a => new Date(a.appointmentDateTime) > new Date());
+    if (filter === 'upcoming') {
+        filtered = appointments
+            .filter(a => new Date(a.appointmentDateTime) >= new Date())
+            .filter(a => !['COMPLETED', 'CANCELLED'].includes((a.status || '').toUpperCase()))
+            .sort((a, b) => new Date(a.appointmentDateTime) - new Date(b.appointmentDateTime));
+    }
     const container = document.getElementById('appointmentsList');
     if (!container) return;
-    container.innerHTML = filtered.length ? filtered.map(a => `
-        <div class="data-card">
-            <div class="data-info">
-                <h4>${escapeHtml(a.patientName || a.patientId)}</h4>
-                <p>Date: <strong>${new Date(a.appointmentDateTime).toLocaleString()}</strong></p>
-                <p>Reason: ${escapeHtml(a.reason || 'No reason provided')}</p>
-                <p>Status: <span class="status-badge status-${(a.status || '').toLowerCase()}">${escapeHtml(a.status)}</span></p>
-            </div>
+    container.innerHTML = filtered.length ? `
+        <div class="schedule-list">
+            ${filtered.map(a => `
+                <article class="schedule-card">
+                    <div class="schedule-date-box">
+                        <span>${formatDatePart(a.appointmentDateTime, 'day')}</span>
+                        <strong>${formatDatePart(a.appointmentDateTime, 'month')}</strong>
+                    </div>
+                    <div class="schedule-details">
+                        <div class="schedule-title-row">
+                            <h4>${escapeHtml(a.patientName || a.patientId)}</h4>
+                            <span class="clinic-status status-${(a.status || '').toLowerCase()}">${formatStatus(a.status)}</span>
+                        </div>
+                        <div class="schedule-meta">
+                            <span><i class="fas fa-clock"></i> ${formatTime(a.appointmentDateTime)}</span>
+                            <span><i class="fas fa-calendar"></i> ${formatDate(a.appointmentDateTime)}</span>
+                        </div>
+                        <p><strong>Reason:</strong> ${escapeHtml(a.reason || 'No reason provided')}</p>
+                    </div>
+                </article>
+            `).join('')}
         </div>
-    `).join('') : '<div class="empty-state">No appointments found</div>';
+    ` : '<div class="empty-state">No appointments found</div>';
 }
 
 function loadMedicalRecords() {
     const container = document.getElementById('medicalRecordsList');
     if (!container) return;
-    container.innerHTML = patients.length ? patients.map(p => `
-        <div class="data-card">
-            <h4>${escapeHtml(fullName(p))}</h4>
-            <p><strong>Medical History:</strong> ${escapeHtml(p.medicalHistory || 'No history recorded')}</p>
-            <p><strong>Previous Diagnoses:</strong> ${escapeHtml(p.previousDiagnoses || 'No diagnoses recorded')}</p>
+    container.innerHTML = patients.length ? `
+        <div class="medical-record-grid">
+            ${patients.map(p => `
+                <article class="medical-summary-card">
+                    <div class="medical-summary-header">
+                        <div class="medical-icon"><i class="fas fa-file-medical-alt"></i></div>
+                        <div>
+                            <h4>${escapeHtml(fullName(p))}</h4>
+                            <span>${escapeHtml(p.id)}</span>
+                        </div>
+                    </div>
+                    <div class="medical-summary-body">
+                        <div>
+                            <span>Medical History</span>
+                            <p>${escapeHtml(p.medicalHistory || 'No history recorded')}</p>
+                        </div>
+                        <div>
+                            <span>Previous Diagnoses</span>
+                            <p>${escapeHtml(p.previousDiagnoses || 'No diagnoses recorded')}</p>
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="viewMedicalRecord('${p.id}')"><i class="fas fa-eye"></i> Open Record</button>
+                </article>
+            `).join('')}
         </div>
-    `).join('') : '<div class="empty-state">No assigned medical records</div>';
+    ` : '<div class="empty-state">No assigned medical records</div>';
 }
 
 function viewMedicalRecord(id) {
@@ -194,19 +305,43 @@ function viewMedicalRecord(id) {
     if (!patient) return;
     const modal = document.createElement('div');
     modal.className = 'modal';
-    modal.style.display = 'block';
+    modal.classList.add('active');
     modal.innerHTML = `
-        <div class="modal-content" style="max-width:600px;">
+        <div class="modal-content medical-record-modal">
             <div class="modal-header">
-                <h3><i class="fas fa-file-medical"></i> Medical Record - ${escapeHtml(fullName(patient))}</h3>
-                <span class="modal-close" onclick="this.closest('.modal').remove()">&times;</span>
+                <h3><i class="fas fa-file-medical"></i> Medical Record</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
             </div>
-            <div style="padding:20px;">
-                <p><strong>Patient ID:</strong> ${escapeHtml(patient.id)}</p>
-                <p><strong>Medical History:</strong><br>${escapeHtml(patient.medicalHistory || 'No medical history recorded')}</p>
-                <p><strong>Previous Diagnoses:</strong><br>${escapeHtml(patient.previousDiagnoses || 'No previous diagnoses recorded')}</p>
-                <p><strong>Allergies:</strong> ${escapeHtml(patient.allergies || 'N/A')}</p>
-                <p><strong>Current Medications:</strong> ${escapeHtml(patient.currentMedications || 'N/A')}</p>
+            <div class="modal-body">
+                <div class="record-patient-banner">
+                    <div class="medical-icon"><i class="fas fa-user-injured"></i></div>
+                    <div>
+                        <h4>${escapeHtml(fullName(patient))}</h4>
+                        <span>Patient ID: ${escapeHtml(patient.id)}</span>
+                    </div>
+                </div>
+                <div class="record-detail-grid">
+                    <div class="record-detail-item full">
+                        <span>Medical History</span>
+                        <p>${escapeHtml(patient.medicalHistory || 'No medical history recorded')}</p>
+                    </div>
+                    <div class="record-detail-item full">
+                        <span>Previous Diagnoses</span>
+                        <p>${escapeHtml(patient.previousDiagnoses || 'No previous diagnoses recorded')}</p>
+                    </div>
+                    <div class="record-detail-item">
+                        <span>Allergies</span>
+                        <p>${escapeHtml(patient.allergies || 'N/A')}</p>
+                    </div>
+                    <div class="record-detail-item">
+                        <span>Current Medications</span>
+                        <p>${escapeHtml(patient.currentMedications || 'N/A')}</p>
+                    </div>
+                    <div class="record-detail-item full">
+                        <span>Assigned Nurse</span>
+                        <p>${escapeHtml(patient.assignedNurseName || 'Not assigned')}</p>
+                    </div>
+                </div>
             </div>
         </div>`;
     document.body.appendChild(modal);
@@ -219,12 +354,13 @@ function updateMedicalRecord(id) {
     document.getElementById('updatePatientAge').value = selectedPatient.age || '';
     document.getElementById('updatePatientGender').value = selectedPatient.gender || '';
     document.getElementById('updatePatientContact').value = selectedPatient.phoneNumber || '';
+    renderNurseOptions(selectedPatient.assignedNurseId || '');
     document.getElementById('updatePatientAddress').value = selectedPatient.address || '';
     document.getElementById('updatePatientMedicalHistory').value = selectedPatient.medicalHistory || '';
     document.getElementById('updatePatientPreviousDiagnoses').value = selectedPatient.previousDiagnoses || '';
     document.getElementById('updateCurrentDiagnosis').value = '';
     document.getElementById('updateTreatmentNotes').value = '';
-    document.getElementById('patientModal').style.display = 'block';
+    document.getElementById('patientModal').classList.add('active');
 }
 
 async function updatePatientRecord(e) {
@@ -244,11 +380,12 @@ async function updatePatientRecord(e) {
             age: parseInt(document.getElementById('updatePatientAge').value, 10),
             gender: document.getElementById('updatePatientGender').value,
             phoneNumber: document.getElementById('updatePatientContact').value.trim(),
+            assignedNurseId: document.getElementById('updateAssignedNurse')?.value || null,
             address: document.getElementById('updatePatientAddress').value.trim(),
             medicalHistory: document.getElementById('updatePatientMedicalHistory').value.trim(),
             previousDiagnoses
         });
-        document.getElementById('patientModal').style.display = 'none';
+        document.getElementById('patientModal').classList.remove('active');
         await refreshDoctorData();
         showToast('Patient record updated successfully!', false);
     } catch (error) {
@@ -271,7 +408,7 @@ function archivePatient(id) {
 function showConfirmation(message, callback) {
     document.getElementById('confirmMessage').textContent = message;
     confirmCallback = callback;
-    document.getElementById('confirmationModal').style.display = 'block';
+    document.getElementById('confirmationModal').classList.add('active');
 }
 
 function searchPatients() {
@@ -286,12 +423,56 @@ function loadDoctorReports() {
 
 function generateDiagnosisReport() {
     const count = patients.filter(p => p.previousDiagnoses).length;
-    document.getElementById('reportResult').innerHTML = `<div class="report-section"><h3>Diagnosis Summary Report</h3><p>Assigned patients with diagnoses: <strong>${count}</strong></p></div>`;
+    const withHistory = patients.filter(p => p.medicalHistory).length;
+    const reportResult = document.getElementById('reportResult');
+    reportResult.classList.remove('empty');
+    reportResult.innerHTML = `
+        <div class="report-dashboard">
+            <div class="report-header">
+                <h3><i class="fas fa-stethoscope"></i> Diagnosis Summary Report</h3>
+                <p>Clinical documentation summary for assigned patients.</p>
+            </div>
+            <div class="report-kpi-grid">
+                <div class="report-kpi-card"><span>Assigned Patients</span><strong>${patients.length}</strong><small>Under your care</small></div>
+                <div class="report-kpi-card"><span>With Diagnoses</span><strong>${count}</strong><small>Previous diagnoses recorded</small></div>
+                <div class="report-kpi-card"><span>With History</span><strong>${withHistory}</strong><small>Medical history documented</small></div>
+            </div>
+            <div class="report-detail-card">
+                <h4><i class="fas fa-file-medical-alt"></i> Documentation Coverage</h4>
+                <div class="report-list">
+                    <div class="report-list-row"><span>Diagnosis completion</span><strong>${patients.length ? Math.round((count / patients.length) * 100) : 0}%</strong></div>
+                    <div class="report-list-row"><span>History completion</span><strong>${patients.length ? Math.round((withHistory / patients.length) * 100) : 0}%</strong></div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function generateMedicationReport() {
     const count = patients.filter(p => p.currentMedications).length;
-    document.getElementById('reportResult').innerHTML = `<div class="report-section"><h3>Medication Report</h3><p>Assigned patients with medications: <strong>${count}</strong></p></div>`;
+    const allergies = patients.filter(p => p.allergies).length;
+    const reportResult = document.getElementById('reportResult');
+    reportResult.classList.remove('empty');
+    reportResult.innerHTML = `
+        <div class="report-dashboard">
+            <div class="report-header">
+                <h3><i class="fas fa-pills"></i> Medication Report</h3>
+                <p>Medication and allergy documentation summary for assigned patients.</p>
+            </div>
+            <div class="report-kpi-grid">
+                <div class="report-kpi-card"><span>Assigned Patients</span><strong>${patients.length}</strong><small>Total clinical load</small></div>
+                <div class="report-kpi-card"><span>With Medication</span><strong>${count}</strong><small>Current medications recorded</small></div>
+                <div class="report-kpi-card"><span>With Allergies</span><strong>${allergies}</strong><small>Allergy notes available</small></div>
+            </div>
+            <div class="report-detail-card">
+                <h4><i class="fas fa-prescription-bottle-alt"></i> Medication Coverage</h4>
+                <div class="report-list">
+                    <div class="report-list-row"><span>Medication completion</span><strong>${patients.length ? Math.round((count / patients.length) * 100) : 0}%</strong></div>
+                    <div class="report-list-row"><span>Allergy completion</span><strong>${patients.length ? Math.round((allergies / patients.length) * 100) : 0}%</strong></div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function updateDateTime() {

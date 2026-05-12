@@ -39,6 +39,22 @@ public class PublicController {
         return ResponseEntity.ok(doctors);
     }
 
+    @GetMapping("/nurses")
+    public ResponseEntity<List<Map<String, String>>> getNurses() {
+        List<Map<String, String>> nurses = new ArrayList<>();
+        userRepository.findByRole(Role.NURSE).stream()
+                .filter(user -> user.isActive())
+                .forEach(user -> {
+                    Map<String, String> nurse = new HashMap<>();
+                    nurse.put("id", user.getId());
+                    nurse.put("name", user.getFullName());
+                    nurse.put("email", user.getEmail());
+                    nurses.add(nurse);
+                });
+
+        return ResponseEntity.ok(nurses);
+    }
+
     @GetMapping("/hours")
     public ResponseEntity<Map<String, String>> getClinicHours() {
         Map<String, String> hours = new HashMap<>();

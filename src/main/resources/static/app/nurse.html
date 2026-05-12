@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link rel="stylesheet" href="/app/css/admin.css" />
+    <link rel="stylesheet" href="/app/css/nurse.css" />
 </head>
 <body>
     <div class="dashboard">
@@ -91,24 +92,42 @@
 
                 <div id="patientsPage" class="page-content">
                     <div class="section-card">
-                        <div class="section-header"><h3>Assigned Patients</h3></div>
-                        <div class="search-bar">
-                            <input type="text" id="searchPatientsInput" placeholder="Search by name or ID..." />
+                        <div class="section-header">
+                            <h3><i class="fas fa-user-injured"></i> Assigned Patients</h3>
+                            <span class="section-subtitle">Patients assigned to your care</span>
+                        </div>
+                        <div class="nurse-search-bar">
+                            <div class="nurse-search-field">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchPatientsInput" placeholder="Search by name or ID..." />
+                            </div>
                             <button onclick="searchPatients()"><i class="fas fa-search"></i> Search</button>
                         </div>
-                        <div id="patientsList" class="patients-grid"></div>
+                        <div id="patientsList" class="nurse-patient-grid"></div>
                     </div>
                 </div>
 
                 <div id="reportsPage" class="page-content">
                     <div class="section-card">
                         <h3>Patient Reports</h3>
-                        <div style="display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0">
-                            <button class="btn-primary" onclick="generateVitalsReport()">Vitals Summary</button>
-                            <button class="btn-primary" onclick="generatePatientReport()">Patient Activity</button>
-                            <button class="btn-primary" onclick="printSection('reportResult')"><i class="fas fa-print"></i> Print Report</button>
+                        <div class="report-menu">
+                            <button class="report-action-card" onclick="generateVitalsReport()">
+                                <i class="fas fa-heartbeat"></i>
+                                <span>Vitals Summary</span>
+                                <small>Review assigned patient vitals coverage.</small>
+                            </button>
+                            <button class="report-action-card" onclick="generatePatientReport()">
+                                <i class="fas fa-user-injured"></i>
+                                <span>Patient Activity</span>
+                                <small>View active assigned patient activity.</small>
+                            </button>
+                            <button class="report-action-card print-card" onclick="printSection('reportResult')">
+                                <i class="fas fa-print"></i>
+                                <span>Print Report</span>
+                                <small>Print the currently generated report.</small>
+                            </button>
                         </div>
-                        <div id="reportResult"></div>
+                        <div id="reportResult" class="report-output empty"><p>Choose a report to generate.</p></div>
                     </div>
                 </div>
             </div>

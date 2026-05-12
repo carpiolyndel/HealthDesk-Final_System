@@ -217,22 +217,68 @@ function searchPatientsList() {
 }
 
 function generateAppointmentsReport() {
-    document.getElementById('reportResult').innerHTML = `
-        <div class="report-container">
-            <h3><i class="fas fa-calendar-check"></i> Appointments Report</h3>
-            <p>Total appointments: <strong>${staffAppointments.length}</strong></p>
-            <p>Today's appointments: <strong>${calculateStats().today}</strong></p>
-            <p>This week's appointments: <strong>${calculateStats().week}</strong></p>
+    const reportResult = document.getElementById('reportResult');
+    const stats = calculateStats();
+    const scheduled = staffAppointments.filter(a => (a.status || '').toUpperCase() === 'SCHEDULED').length;
+    const completed = staffAppointments.filter(a => (a.status || '').toUpperCase() === 'COMPLETED').length;
+    const cancelled = staffAppointments.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length;
+    reportResult.classList.remove('empty');
+    reportResult.innerHTML = `
+        <div class="report-dashboard">
+            <div class="report-header">
+                <h3><i class="fas fa-calendar-check"></i> Appointments Report</h3>
+                <p>Operational summary of clinic appointment scheduling.</p>
+            </div>
+            <div class="report-kpi-grid">
+                <div class="report-kpi-card"><span>Total</span><strong>${staffAppointments.length}</strong><small>All scheduled records</small></div>
+                <div class="report-kpi-card"><span>Today</span><strong>${stats.today}</strong><small>Appointments for today</small></div>
+                <div class="report-kpi-card"><span>This Week</span><strong>${stats.week}</strong><small>Upcoming within 7 days</small></div>
+                <div class="report-kpi-card"><span>Open Slots</span><strong>${stats.slots}</strong><small>Estimated availability today</small></div>
+            </div>
+            <div class="report-detail-grid">
+                <div class="report-detail-card">
+                    <h4><i class="fas fa-clipboard-list"></i> Status Breakdown</h4>
+                    <div class="report-list">
+                        <div class="report-list-row"><span>Scheduled</span><strong>${scheduled}</strong></div>
+                        <div class="report-list-row"><span>Completed</span><strong>${completed}</strong></div>
+                        <div class="report-list-row"><span>Cancelled</span><strong>${cancelled}</strong></div>
+                    </div>
+                </div>
+                <div class="report-detail-card">
+                    <h4><i class="fas fa-user-md"></i> Doctors Available</h4>
+                    <div class="report-list">
+                        <div class="report-list-row"><span>Listed doctors</span><strong>${doctors.length}</strong></div>
+                        <div class="report-list-row"><span>Registered patients</span><strong>${staffPatients.length}</strong></div>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 }
 
 function generatePatientsReport() {
-    document.getElementById('reportResult').innerHTML = `
-        <div class="report-container">
-            <h3><i class="fas fa-users"></i> Patient Registration Report</h3>
-            <p>Total registered patients: <strong>${staffPatients.length}</strong></p>
-            <p>Medical records are hidden from staff accounts.</p>
+    const reportResult = document.getElementById('reportResult');
+    const withContact = staffPatients.filter(p => p.phoneNumber || p.email).length;
+    const withDoctor = staffPatients.filter(p => p.assignedDoctorName || p.assignedDoctorId).length;
+    reportResult.classList.remove('empty');
+    reportResult.innerHTML = `
+        <div class="report-dashboard">
+            <div class="report-header">
+                <h3><i class="fas fa-users"></i> Patient Registration Report</h3>
+                <p>Registration-only overview. Medical notes remain hidden from staff accounts.</p>
+            </div>
+            <div class="report-kpi-grid">
+                <div class="report-kpi-card"><span>Total Patients</span><strong>${staffPatients.length}</strong><small>Registered records</small></div>
+                <div class="report-kpi-card"><span>With Contact</span><strong>${withContact}</strong><small>Phone or email available</small></div>
+                <div class="report-kpi-card"><span>Assigned Doctor</span><strong>${withDoctor}</strong><small>Clinical owner set</small></div>
+            </div>
+            <div class="report-detail-card">
+                <h4><i class="fas fa-shield-alt"></i> Staff Access Note</h4>
+                <div class="report-list">
+                    <div class="report-list-row"><span>Medical history visibility</span><strong>Restricted</strong></div>
+                    <div class="report-list-row"><span>Registration workflow</span><strong>Enabled</strong></div>
+                </div>
+            </div>
         </div>
     `;
 }

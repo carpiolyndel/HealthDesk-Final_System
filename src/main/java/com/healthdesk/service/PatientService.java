@@ -111,6 +111,19 @@ public class PatientService {
             patient.setCurrentMedications(encryptNullable(patientDTO.getCurrentMedications()));
         }
 
+        if (actor.getRole() == Role.DOCTOR) {
+            if (patientDTO.getAssignedNurseId() == null || patientDTO.getAssignedNurseId().isBlank()) {
+                patient.setAssignedNurse(null);
+            } else {
+                User nurse = userRepository.findById(patientDTO.getAssignedNurseId())
+                        .orElseThrow(() -> new IllegalArgumentException("Assigned nurse not found."));
+                if (nurse.getRole() != Role.NURSE) {
+                    throw new IllegalArgumentException("Assigned nurse must have the NURSE role.");
+                }
+                patient.setAssignedNurse(nurse);
+            }
+        }
+
         Patient updated = patientRepository.save(patient);
         auditLogService.logAction(actor.getId(), "UPDATE_PATIENT", "Updated patient: " + updated.getId());
         return convertToDTO(updated, actor);

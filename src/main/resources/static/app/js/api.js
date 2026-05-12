@@ -210,6 +210,10 @@ class ApiService {
         return this.get(`/appointments/slots?doctorId=${doctorId}&date=${date}`);
     }
 
+    async getNurses() {
+        return this.get('/public/nurses');
+    }
+
     async getMedicalHistory(patientId) {
         return this.get(`/medical-history/${patientId}`);
     }

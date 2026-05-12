@@ -220,30 +220,57 @@ function initCharts() {
 
 // ============ USER MANAGEMENT ============
 
+function sameId(left, right) {
+    return String(left) === String(right);
+}
+
+function safeActionId(id) {
+    return JSON.stringify(String(id));
+}
+
+function userMatchesQuery(user, query) {
+    const haystack = [
+        user.username,
+        user.fullname,
+        user.name,
+        user.email,
+        user.role,
+        user.status
+    ].filter(Boolean).join(' ').toLowerCase();
+    return haystack.includes(query);
+}
+
+function renderUserRows(users) {
+    if (!users.length) {
+        return '<tr><td colspan="6" style="text-align:center;">No users found</td></tr>';
+    }
+
+    return users.map(u => {
+        const id = safeActionId(u.id);
+        return `
+            <tr>
+                <td>${escapeHtml(u.username)}</td>
+                <td>${escapeHtml(u.fullname)}</td>
+                <td><span class="role-badge role-${u.role.toLowerCase()}">${u.role}</span></td>
+                <td class="status-${u.status.toLowerCase()}">${u.status}</td>
+                <td><span class="password-mask">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span></td>
+                <td>
+                    <div class="user-actions">
+                        <button class="btn-edit" onclick="editUser(${id})"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn-archive" onclick="archiveUser(${id})"><i class="fas fa-archive"></i> Archive</button>
+                        <button class="btn-danger" onclick="deleteUser(${id})"><i class="fas fa-trash"></i> Delete</button>
+                        <button class="btn-warning" onclick="openResetPasswordModal(${id})"><i class="fas fa-key"></i> Reset</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
 function renderUsers() {
     const tbody = document.getElementById('usersList');
     if (!tbody) return;
-    
-    if (systemUsers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users found</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = systemUsers.map(u => `
-        <tr>
-            <td>${escapeHtml(u.username)}</td>
-            <td>${escapeHtml(u.fullname)}</td>
-            <td><span class="role-badge role-${u.role.toLowerCase()}">${u.role}</span></td>
-            <td class="status-${u.status.toLowerCase()}">${u.status}</td>
-            <td><span style="font-family:monospace;">••••••••</span></td>
-            <td>
-                <button class="btn-edit" onclick="editUser(${u.id})"><i class="fas fa-edit"></i> Edit</button>
-                <button class="btn-archive" onclick="archiveUser(${u.id})"><i class="fas fa-archive"></i> Archive</button>
-                <button class="btn-danger" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i> Delete</button>
-                <button class="btn-warning" onclick="openResetPasswordModal(${u.id})"><i class="fas fa-key"></i> Reset</button>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = renderUserRows(systemUsers);
 }
 
 function renderArchive() {
@@ -261,7 +288,7 @@ function renderArchive() {
             <td>${escapeHtml(u.fullname)}</td>
             <td><span class="role-badge role-${u.role.toLowerCase()}">${u.role}</span></td>
             <td>${u.archivedDate || 'Unknown'}</td>
-            <td><button class="btn-danger" onclick="permanentDelete(${u.id})"><i class="fas fa-trash"></i> Delete</button></td>
+            <td><button class="btn-danger" onclick="permanentDelete(${safeActionId(u.id)})"><i class="fas fa-trash"></i> Delete</button></td>
         </tr>
     `).join('');
 }
@@ -284,7 +311,7 @@ function closeUserModal() {
 }
 
 function editUser(id) {
-    const u = systemUsers.find(u => u.id === id);
+    const u = systemUsers.find(u => sameId(u.id, id));
     if (u) {
         document.getElementById('userId').value = u.id;
         document.getElementById('username').value = u.username;
@@ -417,7 +444,7 @@ async function saveUser() {
 // ============ PASSWORD RESET ============
 
 function openResetPasswordModal(id) {
-    const user = systemUsers.find(u => u.id === id);
+    const user = systemUsers.find(u => sameId(u.id, id));
     if (user) {
         document.getElementById('resetUserId').value = user.id;
         document.getElementById('resetUserName').value = user.username;
@@ -436,7 +463,7 @@ function closeResetPasswordModal() {
 }
 
 function resetPassword() {
-    const userId = parseInt(document.getElementById('resetUserId').value);
+    const userId = document.getElementById('resetUserId').value;
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     
@@ -453,7 +480,7 @@ function resetPassword() {
         return;
     }
     
-    const index = systemUsers.findIndex(u => u.id === userId);
+    const index = systemUsers.findIndex(u => sameId(u.id, userId));
     if (index !== -1) {
         systemUsers[index].password = newPassword;
         saveToStorage();
@@ -466,7 +493,7 @@ function resetPassword() {
 // ============ ARCHIVE & DELETE ============
 
 async function archiveUser(id) {
-    const u = systemUsers.find(u => u.id === id);
+    const u = systemUsers.find(u => sameId(u.id, id));
     if (u && confirm(`Archive user "${u.username}"?`)) {
         if (typeof api !== 'undefined' && api.getToken()) {
             try {
@@ -477,7 +504,7 @@ async function archiveUser(id) {
                 return;
             }
         } else {
-            systemUsers = systemUsers.filter(u => u.id !== id);
+            systemUsers = systemUsers.filter(u => !sameId(u.id, id));
             archivedUsers.push({
                 ...u,
                 archivedDate: new Date().toISOString().split('T')[0]
@@ -493,7 +520,7 @@ async function archiveUser(id) {
 }
 
 async function deleteUser(id) {
-    const u = systemUsers.find(u => u.id === id);
+    const u = systemUsers.find(u => sameId(u.id, id));
     if (u && confirm(`Permanently delete "${u.username}"? This cannot be undone.`)) {
         if (typeof api !== 'undefined' && api.getToken()) {
             try {
@@ -504,7 +531,7 @@ async function deleteUser(id) {
                 return;
             }
         } else {
-            systemUsers = systemUsers.filter(u => u.id !== id);
+            systemUsers = systemUsers.filter(u => !sameId(u.id, id));
         }
         saveToStorage();
         updateStats();
@@ -515,9 +542,9 @@ async function deleteUser(id) {
 }
 
 function permanentDelete(id) {
-    const u = archivedUsers.find(u => u.id === id);
+    const u = archivedUsers.find(u => sameId(u.id, id));
     if (u && confirm(`Permanently delete "${u.username}" from archive?`)) {
-        archivedUsers = archivedUsers.filter(u => u.id !== id);
+        archivedUsers = archivedUsers.filter(u => !sameId(u.id, id));
         saveToStorage();
         renderArchive();
         showToast(`User "${u.username}" removed from archive`, 'success');
@@ -527,42 +554,10 @@ function permanentDelete(id) {
 // ============ SEARCH FUNCTIONS ============
 
 function searchUsers() {
-    const query = document.getElementById('searchUsersInput').value.toLowerCase();
+    const query = document.getElementById('searchUsersInput').value.trim().toLowerCase();
     const tbody = document.getElementById('usersList');
-    
-    if (!query) { 
-        renderUsers(); 
-        return; 
-    }
-    
-    const filtered = systemUsers.filter(u => 
-        u.username.toLowerCase().includes(query) || 
-        u.fullname.toLowerCase().includes(query) || 
-        (u.email && u.email.toLowerCase().includes(query)) ||
-        (u.role && u.role.toLowerCase().includes(query)) ||
-        (u.status && u.status.toLowerCase().includes(query))
-    );
-    
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users found</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = filtered.map(u => `
-        <tr>
-            <td>${escapeHtml(u.username)}</td>
-            <td>${escapeHtml(u.fullname)}</td>
-            <td><span class="role-badge role-${u.role.toLowerCase()}">${u.role}</span></td>
-            <td class="status-${u.status.toLowerCase()}">${u.status}</td>
-            <td><span style="font-family:monospace;">••••••••</span></td>
-            <td>
-                <button class="btn-edit" onclick="editUser(${u.id})">Edit</button>
-                <button class="btn-archive" onclick="archiveUser(${u.id})">Archive</button>
-                <button class="btn-danger" onclick="deleteUser(${u.id})">Delete</button>
-                <button class="btn-warning" onclick="openResetPasswordModal(${u.id})">Reset</button>
-            </td>
-        </tr>
-    `).join('');
+    if (!tbody) return;
+    tbody.innerHTML = renderUserRows(query ? systemUsers.filter(u => userMatchesQuery(u, query)) : systemUsers);
 }
 
 function searchArchive() {
@@ -592,7 +587,7 @@ function searchArchive() {
             <td>${escapeHtml(u.fullname)}</td>
             <td><span class="role-badge role-${u.role.toLowerCase()}">${u.role}</span></td>
             <td>${u.archivedDate || 'Unknown'}</td>
-            <td><button class="btn-danger" onclick="permanentDelete(${u.id})">Delete</button></td>
+            <td><button class="btn-danger" onclick="permanentDelete(${safeActionId(u.id)})">Delete</button></td>
         </tr>
     `).join('');
 }
@@ -741,46 +736,29 @@ function deleteInquiry(id) {
 // ============ REPORTS ============
 
 function generateUserReport() {
-    document.getElementById('reportResult').innerHTML = `
-        <div class="report-container">
+    const reportResult = document.getElementById('reportResult');
+    reportResult.classList.remove('empty');
+    reportResult.innerHTML = `
+        <div class="report-dashboard">
             <div class="report-header">
                 <h3><i class="fas fa-users"></i> User Report</h3>
                 <p>Summary of system users and account activity for administrators.</p>
             </div>
-            <div class="stats-cards">
-                <div class="stat-item">
-                    <div class="stat-number">${systemUsers.length}</div>
-                    <div class="stat-label">Total Users</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${systemUsers.filter(u => u.role === 'ADMIN').length}</div>
-                    <div class="stat-label">Admins</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${systemUsers.filter(u => u.role === 'DOCTOR').length}</div>
-                    <div class="stat-label">Doctors</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${systemUsers.filter(u => u.role === 'NURSE').length}</div>
-                    <div class="stat-label">Nurses</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${systemUsers.filter(u => u.role === 'STAFF').length}</div>
-                    <div class="stat-label">Staff</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${archivedUsers.length}</div>
-                    <div class="stat-label">Archived Users</div>
-                </div>
+            <div class="report-kpi-grid">
+                <div class="report-kpi-card"><span>Total Users</span><strong>${systemUsers.length}</strong><small>Active system accounts</small></div>
+                <div class="report-kpi-card"><span>Admins</span><strong>${systemUsers.filter(u => u.role === 'ADMIN').length}</strong><small>Administration accounts</small></div>
+                <div class="report-kpi-card"><span>Doctors</span><strong>${systemUsers.filter(u => u.role === 'DOCTOR').length}</strong><small>Physician accounts</small></div>
+                <div class="report-kpi-card"><span>Nurses</span><strong>${systemUsers.filter(u => u.role === 'NURSE').length}</strong><small>Nursing accounts</small></div>
+                <div class="report-kpi-card"><span>Staff</span><strong>${systemUsers.filter(u => u.role === 'STAFF').length}</strong><small>Front desk accounts</small></div>
+                <div class="report-kpi-card"><span>Archived</span><strong>${archivedUsers.length}</strong><small>Archived users</small></div>
             </div>
-            <div class="role-distribution">
-                <div class="role-item">
-                    <span>Guest Inquiries</span>
-                    <strong>${guestInquiries.length}</strong>
-                </div>
-                <div class="role-item">
-                    <span>Active System Since</span>
-                    <strong>March 6, 2026</strong>
+            <div class="report-detail-grid">
+                <div class="report-detail-card">
+                    <h4><i class="fas fa-id-badge"></i> Account Overview</h4>
+                    <div class="report-list">
+                        <div class="report-list-row"><span>Guest inquiries</span><strong>${guestInquiries.length}</strong></div>
+                        <div class="report-list-row"><span>System status</span><strong>Active</strong></div>
+                    </div>
                 </div>
             </div>
             <div class="report-actions">
@@ -796,42 +774,28 @@ function generateActivityReport() {
     const pendingInquiries = guestInquiries.filter(i => i.status === 'pending').length;
     const repliedInquiries = guestInquiries.filter(i => i.status === 'replied').length;
     
-    document.getElementById('reportResult').innerHTML = `
-        <div class="report-container">
+    const reportResult = document.getElementById('reportResult');
+    reportResult.classList.remove('empty');
+    reportResult.innerHTML = `
+        <div class="report-dashboard">
             <div class="report-header">
                 <h3><i class="fas fa-chart-line"></i> Activity Report</h3>
                 <p>Activity overview for users and guest interactions across the system.</p>
             </div>
-            <div class="stats-cards">
-                <div class="stat-item">
-                    <div class="stat-number">${activeUsers}</div>
-                    <div class="stat-label">Active Users</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${inactiveUsers}</div>
-                    <div class="stat-label">Inactive Users</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${pendingInquiries}</div>
-                    <div class="stat-label">Pending Inquiries</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${repliedInquiries}</div>
-                    <div class="stat-label">Replied Inquiries</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${archivedUsers.length}</div>
-                    <div class="stat-label">Archived Records</div>
-                </div>
+            <div class="report-kpi-grid">
+                <div class="report-kpi-card"><span>Active Users</span><strong>${activeUsers}</strong><small>Enabled accounts</small></div>
+                <div class="report-kpi-card"><span>Inactive Users</span><strong>${inactiveUsers}</strong><small>Disabled accounts</small></div>
+                <div class="report-kpi-card"><span>Pending Inquiries</span><strong>${pendingInquiries}</strong><small>Waiting for reply</small></div>
+                <div class="report-kpi-card"><span>Replied Inquiries</span><strong>${repliedInquiries}</strong><small>Handled messages</small></div>
+                <div class="report-kpi-card"><span>Archived Records</span><strong>${archivedUsers.length}</strong><small>Archived accounts</small></div>
             </div>
-            <div class="role-distribution">
-                <div class="role-item">
-                    <span>System Uptime</span>
-                    <strong>Stable</strong>
-                </div>
-                <div class="role-item">
-                    <span>Data Refresh</span>
-                    <strong>Live</strong>
+            <div class="report-detail-grid">
+                <div class="report-detail-card">
+                    <h4><i class="fas fa-server"></i> System Overview</h4>
+                    <div class="report-list">
+                        <div class="report-list-row"><span>System uptime</span><strong>Stable</strong></div>
+                        <div class="report-list-row"><span>Data refresh</span><strong>Live</strong></div>
+                    </div>
                 </div>
             </div>
             <div class="report-actions">
@@ -903,6 +867,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('closeReplyModalBtn')?.addEventListener('click', closeReplyModal);
     document.getElementById('cancelReplyBtn')?.addEventListener('click', closeReplyModal);
     document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
+    document.getElementById('searchUsersInput')?.addEventListener('input', searchUsers);
+    document.getElementById('searchUsersInput')?.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            event.currentTarget.value = '';
+            searchUsers();
+        }
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            searchUsers();
+        }
+    });
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        sidebar?.classList.toggle('active');
+        document.getElementById('mobileMenuBtn')?.setAttribute('aria-expanded', sidebar?.classList.contains('active') ? 'true' : 'false');
+    });
     
     // Sidebar navigation
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -926,6 +906,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (page === 'archive') renderArchive();
             if (page === 'dashboard') renderRecentUsersTable();
             if (page === 'contact') renderInquiries();
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar')?.classList.remove('active');
+                document.getElementById('mobileMenuBtn')?.setAttribute('aria-expanded', 'false');
+            }
         });
     });
     
