@@ -4,6 +4,7 @@ import com.healthdesk.model.Role;
 import com.healthdesk.model.User;
 import com.healthdesk.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,30 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${healthdesk.initial-admin.username:admin}")
+    private String adminUsername;
+
+    @Value("${healthdesk.initial-admin.email:}")
+    private String adminEmail;
+
+    @Value("${healthdesk.initial-admin.full-name:System Administrator}")
+    private String adminFullName;
+
+    @Value("${healthdesk.initial-admin.password:}")
+    private String adminPassword;
+
+    @Value("${healthdesk.demo-users.enabled:false}")
+    private boolean demoUsersEnabled;
+
+    @Value("${healthdesk.demo.doctor.password:}")
+    private String doctorPassword;
+
+    @Value("${healthdesk.demo.nurse.password:}")
+    private String nursePassword;
+
+    @Value("${healthdesk.demo.staff.password:}")
+    private String staffPassword;
+
     public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -20,10 +45,16 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        upsertUser("admin", "admin@healthdesk.com", "System Administrator", Role.ADMIN, "admin123");
-        upsertUser("doctor", "doctor@healthdesk.com", "Dr. John Smith", Role.DOCTOR, "doctor123");
-        upsertUser("nurse", "nurse@healthdesk.com", "Jane Wilson", Role.NURSE, "nurse123");
-        upsertUser("staff", "staff@healthdesk.com", "Mike Johnson", Role.STAFF, "staff123");
+        if (hasText(adminPassword)) {
+            String email = hasText(adminEmail) ? adminEmail : adminUsername + "@healthdesk.local";
+            upsertUser(adminUsername, email, adminFullName, Role.ADMIN, adminPassword);
+        }
+
+        if (demoUsersEnabled) {
+            upsertDemoUser("doctor", "doctor@healthdesk.local", "Demo Doctor", Role.DOCTOR, doctorPassword);
+            upsertDemoUser("nurse", "nurse@healthdesk.local", "Demo Nurse", Role.NURSE, nursePassword);
+            upsertDemoUser("staff", "staff@healthdesk.local", "Demo Staff", Role.STAFF, staffPassword);
+        }
     }
 
     private void upsertUser(String username, String email, String fullName, Role role, String password) {
@@ -36,5 +67,15 @@ public class DataInitializer implements CommandLineRunner {
         user.setActive(true);
         user.setMfaEnabled(false);
         userRepository.save(user);
+    }
+
+    private void upsertDemoUser(String username, String email, String fullName, Role role, String password) {
+        if (hasText(password)) {
+            upsertUser(username, email, fullName, role, password);
+        }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

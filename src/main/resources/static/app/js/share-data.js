@@ -11,11 +11,11 @@ const SharedData = {
     initUsers: function() {
         if (!localStorage.getItem('systemUsers')) {
             const users = [
-                { id: 1, username: 'admin', password: 'admin123', fullname: 'Admin User', email: 'admin@healthdesk.com', role: 'ADMIN', status: 'Active', lastLogin: '2026-03-10' },
-                { id: 2, username: 'doctor', password: 'doctor123', fullname: 'Dr. James Cruz', email: 'doctor@healthdesk.com', role: 'DOCTOR', status: 'Active', lastLogin: '2026-03-10' },
-                { id: 3, username: 'nurse1', password: 'nurse123', fullname: 'Anna Reyes', email: 'nurse1@healthdesk.com', role: 'NURSE', status: 'Active', lastLogin: '2026-03-10' },
-                { id: 4, username: 'nurse2', password: 'nurse123', fullname: 'Bea Gomez', email: 'nurse2@healthdesk.com', role: 'NURSE', status: 'Active', lastLogin: '2026-03-10' },
-                { id: 5, username: 'staff', password: 'staff123', fullname: 'Maria Santos', email: 'staff@healthdesk.com', role: 'STAFF', status: 'Active', lastLogin: '2026-03-10' }
+                { id: 1, username: 'admin', fullname: 'Admin User', email: 'admin@healthdesk.com', role: 'ADMIN', status: 'Active', lastLogin: '2026-03-10' },
+                { id: 2, username: 'doctor', fullname: 'Dr. James Cruz', email: 'doctor@healthdesk.com', role: 'DOCTOR', status: 'Active', lastLogin: '2026-03-10' },
+                { id: 3, username: 'nurse1', fullname: 'Anna Reyes', email: 'nurse1@healthdesk.com', role: 'NURSE', status: 'Active', lastLogin: '2026-03-10' },
+                { id: 4, username: 'nurse2', fullname: 'Bea Gomez', email: 'nurse2@healthdesk.com', role: 'NURSE', status: 'Active', lastLogin: '2026-03-10' },
+                { id: 5, username: 'staff', fullname: 'Maria Santos', email: 'staff@healthdesk.com', role: 'STAFF', status: 'Active', lastLogin: '2026-03-10' }
             ];
             localStorage.setItem('systemUsers', JSON.stringify(users));
         }

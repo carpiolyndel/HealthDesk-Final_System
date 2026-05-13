@@ -461,6 +461,20 @@
         background: #fef3c7;
         color: #92400e;
       }
+      .credential-badge {
+        display: inline-flex;
+        align-items: center;
+        max-width: 180px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       .status-active {
         color: var(--success);
         font-weight: 500;
@@ -536,6 +550,12 @@
       }
       .form-group textarea {
         resize: vertical;
+      }
+      .form-hint {
+        display: block;
+        margin-top: 6px;
+        color: var(--gray-500);
+        font-size: 12px;
       }
       .modal-buttons {
         display: flex;
@@ -703,56 +723,8 @@
         font-size: 22px;
         color: #0f172a;
       }
-      #usersPage .search-bar {
-        display: flex !important;
-        width: 100% !important;
-        max-width: none !important;
-        align-items: stretch;
-        gap: 14px;
-        margin-bottom: 24px;
-      }
-      #usersPage .user-search-field {
-        position: relative;
-        width: auto !important;
-        flex: 1 1 auto !important;
-        min-width: 260px;
-      }
-      #usersPage .user-search-field i {
-        position: absolute;
-        top: 50%;
-        left: 16px;
-        color: #94a3b8;
-        font-size: 14px;
-        transform: translateY(-50%);
-        pointer-events: none;
-      }
-      #usersPage .search-bar input {
-        width: 100%;
-        min-height: 48px;
-        padding: 0 18px 0 44px;
-        border: 1px solid #dbe3ef;
-        border-radius: 12px;
-        background: #ffffff;
-        font-size: 15px;
-        box-shadow: none;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      }
-      #usersPage .search-bar input:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.12);
-      }
-      #usersPage .search-bar button {
-        flex: 0 0 120px !important;
-        min-height: 48px;
-        padding: 0 24px;
-        border-radius: 12px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        white-space: nowrap;
-      }
+
+      
       #usersPage .data-table th {
         padding: 12px;
         background: #f8fafc;
@@ -994,6 +966,7 @@
                     <th>Username</th>
                     <th>Full Name</th>
                     <th>Role</th>
+                    <th>Credential</th>
                     <th>Status</th>
                     <th>Password</th>
                     <th>Actions</th>
@@ -1128,11 +1101,22 @@
             <div class="form-group">
               <label>Role</label
               ><select id="role">
-                <option value="staff">Staff</option>
-                <option value="nurse">Nurse</option>
-                <option value="doctor">Doctor</option>
-                <option value="admin">Admin</option>
+                <option value="STAFF">Staff</option>
+                <option value="NURSE">Nurse</option>
+                <option value="DOCTOR">Doctor</option>
+                <option value="ADMIN">Admin</option>
               </select>
+            </div>
+            <div class="form-group" id="credentialGroup">
+              <label id="credentialLabel">Employee ID *</label>
+              <input
+                type="text"
+                id="credentialNumber"
+                placeholder="Enter employee ID"
+              />
+              <small id="credentialHint" class="form-hint">
+                Required to verify legitimate staff account.
+              </small>
             </div>
             <div class="form-group">
               <label>Status</label

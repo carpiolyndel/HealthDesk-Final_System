@@ -2,7 +2,6 @@ package com.healthdesk.service;
 
 import com.healthdesk.dto.LoginRequestDTO;
 import com.healthdesk.dto.LoginResponseDTO;
-import com.healthdesk.model.Role;
 import com.healthdesk.model.RefreshToken;
 import com.healthdesk.model.User;
 import com.healthdesk.repository.RefreshTokenRepository;
@@ -16,11 +15,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -45,20 +42,10 @@ public class AuthService {
     private UserDetailsService userDetailsService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private AuditLogService auditLogService;
 
     @Autowired
     private OtpNotificationService otpNotificationService;
-
-    private static final Map<String, DemoUser> DEMO_USERS = Map.of(
-            "admin", new DemoUser("admin@healthdesk.com", "System Administrator", Role.ADMIN, "admin123"),
-            "doctor", new DemoUser("doctor@healthdesk.com", "Dr. John Smith", Role.DOCTOR, "doctor123"),
-            "nurse", new DemoUser("nurse@healthdesk.com", "Jane Wilson", Role.NURSE, "nurse123"),
-            "staff", new DemoUser("staff@healthdesk.com", "Mike Johnson", Role.STAFF, "staff123")
-    );
 
     @Transactional
     public LoginResponseDTO login(LoginRequestDTO loginRequest, String ipAddress) {
@@ -98,36 +85,9 @@ public class AuthService {
     }
 
     private Authentication authenticate(LoginRequestDTO loginRequest) {
-        try {
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-            );
-        } catch (RuntimeException ex) {
-            if (!repairDemoUser(loginRequest.getUsername(), loginRequest.getPassword())) {
-                throw ex;
-            }
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-            );
-        }
-    }
-
-    private boolean repairDemoUser(String username, String password) {
-        DemoUser demoUser = DEMO_USERS.get(username);
-        if (demoUser == null || !demoUser.password().equals(password)) {
-            return false;
-        }
-
-        User user = userRepository.findByUsername(username).orElseGet(User::new);
-        user.setUsername(username);
-        user.setEmail(demoUser.email());
-        user.setFullName(demoUser.fullName());
-        user.setRole(demoUser.role());
-        user.setPassword(passwordEncoder.encode(password));
-        user.setActive(true);
-        user.setMfaEnabled(true);
-        userRepository.save(user);
-        return true;
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+        );
     }
 
     private String generateRefreshToken(User user) {
@@ -140,6 +100,4 @@ public class AuthService {
         refreshTokenRepository.save(refreshToken);
         return refreshToken.getToken();
     }
-
-    private record DemoUser(String email, String fullName, Role role, String password) {}
 }

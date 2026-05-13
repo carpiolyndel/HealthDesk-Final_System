@@ -23,7 +23,7 @@ function requireNurse() {
 }
 
 function fullName(patient) {
-    return `${patient.firstName || ''} ${patient.lastName || ''}`.trim() || patient.id;
+    return `${patient.firstName || ''} ${patient.lastName || ''}`.trim() || displayPatientId(patient.id);
 }
 
 function updateStats() {
@@ -46,7 +46,7 @@ function renderPatients(list = nursePatients) {
                 <div class="patient-avatar"><i class="fas fa-user-injured"></i></div>
                 <div>
                     <h4>${escapeHtml(fullName(p))}</h4>
-                    <span class="patient-id">${escapeHtml(p.id)}</span>
+                    <span class="patient-id" title="${escapeHtml(p.id)}">${escapeHtml(displayPatientId(p.id))}</span>
                 </div>
             </div>
             <div class="nurse-patient-meta">
@@ -69,7 +69,7 @@ function renderPatients(list = nursePatients) {
 function openVitalsModal(id) {
     currentPatient = nursePatients.find(p => p.id === id);
     if (!currentPatient) return;
-    setValue('vitalPatientId', currentPatient.id);
+    setValue('vitalPatientId', displayPatientId(currentPatient.id));
     setValue('vitalPatientName', fullName(currentPatient));
     setValue('bpInput', '');
     setValue('tempInput', '');
@@ -119,7 +119,8 @@ function searchPatients() {
     const query = (document.getElementById('searchPatientsInput')?.value || '').toLowerCase();
     const filtered = nursePatients.filter(p =>
         fullName(p).toLowerCase().includes(query) ||
-        (p.id || '').toLowerCase().includes(query)
+        (p.id || '').toLowerCase().includes(query) ||
+        displayPatientId(p.id).toLowerCase().includes(query)
     );
     renderPatients(query ? filtered : nursePatients);
 }

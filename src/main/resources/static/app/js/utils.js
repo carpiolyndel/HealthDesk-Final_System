@@ -174,6 +174,114 @@ function printSection(sectionId) {
                 color: #0f172a;
                 font-size: 18px;
             }
+            .report-dashboard {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 10px !important;
+                background: #ffffff !important;
+                padding: 16px !important;
+                margin: 0 0 14px !important;
+                box-shadow: none !important;
+            }
+            .report-header {
+                border-bottom: 1px solid #cbd5e1 !important;
+                padding-bottom: 10px !important;
+                margin-bottom: 14px !important;
+            }
+            .report-header h3 {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin: 0 0 4px !important;
+                color: #0f172a;
+                font-size: 16px;
+            }
+            .report-header p {
+                margin: 0 !important;
+                color: #475569;
+                font-size: 11px;
+            }
+            .report-kpi-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                margin: 12px 0;
+            }
+            .report-kpi-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                border: 1px solid #dbeafe;
+                border-radius: 8px;
+                background: #f8fafc !important;
+                padding: 10px;
+                min-height: 82px;
+            }
+            .report-kpi-card span {
+                display: block;
+                margin-bottom: 4px;
+                color: #475569;
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .report-kpi-card strong {
+                display: block;
+                margin-bottom: 4px;
+                color: #0f172a;
+                font-size: 22px;
+                line-height: 1.1;
+            }
+            .report-kpi-card small {
+                display: block;
+                color: #64748b;
+                font-size: 10px;
+                line-height: 1.35;
+            }
+            .report-detail-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-top: 12px;
+            }
+            .report-detail-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                background: #f8fafc !important;
+                padding: 10px;
+            }
+            .report-detail-card h4 {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                margin: 0 0 8px !important;
+                color: #0f172a;
+                font-size: 13px;
+            }
+            .report-list {
+                display: grid;
+                gap: 6px;
+            }
+            .report-list-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                padding-bottom: 5px;
+                border-bottom: 1px solid #e2e8f0;
+                color: #334155;
+            }
+            .report-list-row:last-child {
+                border-bottom: 0;
+                padding-bottom: 0;
+            }
+            .report-list-row strong {
+                color: #0f172a;
+                font-weight: 700;
+            }
             .section-card,
             .card,
             .doctor-patient-card,
@@ -365,4 +473,13 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function displayPatientId(id) {
+    if (!id) return 'N/A';
+    const cleanId = String(id).trim();
+    if (!cleanId) return 'N/A';
+    if (/^P\d{3,}$/i.test(cleanId)) return cleanId.toUpperCase();
+    const compact = cleanId.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    return `HD-${compact.slice(-6) || cleanId}`;
 }

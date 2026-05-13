@@ -45,7 +45,7 @@ async function refreshDoctorData() {
 }
 
 function fullName(patient) {
-    return `${patient.firstName || ''} ${patient.lastName || ''}`.trim() || patient.id;
+    return `${patient.firstName || ''} ${patient.lastName || ''}`.trim() || displayPatientId(patient.id);
 }
 
 function loadUserData() {
@@ -189,7 +189,7 @@ function loadRecentAppointments() {
         <div class="clinic-list-item">
             <div class="clinic-list-icon"><i class="fas fa-calendar-day"></i></div>
             <div class="clinic-list-main">
-                <strong>${escapeHtml(a.patientName || a.patientId)}</strong>
+                <strong>${escapeHtml(a.patientName || displayPatientId(a.patientId))}</strong>
                 <small>${formatDateTime(a.appointmentDateTime)}</small>
             </div>
             <span class="clinic-status status-${(a.status || '').toLowerCase()}">${formatStatus(a.status)}</span>
@@ -201,7 +201,8 @@ function loadPatients() {
     const searchTerm = (document.getElementById('searchPatientsInput')?.value || '').toLowerCase();
     const filtered = patients.filter(p =>
         fullName(p).toLowerCase().includes(searchTerm) ||
-        (p.id || '').toLowerCase().includes(searchTerm)
+        (p.id || '').toLowerCase().includes(searchTerm) ||
+        displayPatientId(p.id).toLowerCase().includes(searchTerm)
     );
     const container = document.getElementById('patientsList');
     if (!container) return;
@@ -210,7 +211,7 @@ function loadPatients() {
             <div class="patient-card-header">
                 <div>
                     <h4>${escapeHtml(fullName(p))}</h4>
-                    <span class="patient-id">${escapeHtml(p.id)}</span>
+                    <span class="patient-id" title="${escapeHtml(p.id)}">${escapeHtml(displayPatientId(p.id))}</span>
                 </div>
                 <span class="clinic-status status-active">Active</span>
             </div>
@@ -254,7 +255,7 @@ function loadAppointments() {
                     </div>
                     <div class="schedule-details">
                         <div class="schedule-title-row">
-                            <h4>${escapeHtml(a.patientName || a.patientId)}</h4>
+                            <h4>${escapeHtml(a.patientName || displayPatientId(a.patientId))}</h4>
                             <span class="clinic-status status-${(a.status || '').toLowerCase()}">${formatStatus(a.status)}</span>
                         </div>
                         <div class="schedule-meta">
@@ -280,7 +281,7 @@ function loadMedicalRecords() {
                         <div class="medical-icon"><i class="fas fa-file-medical-alt"></i></div>
                         <div>
                             <h4>${escapeHtml(fullName(p))}</h4>
-                            <span>${escapeHtml(p.id)}</span>
+                            <span title="${escapeHtml(p.id)}">${escapeHtml(displayPatientId(p.id))}</span>
                         </div>
                     </div>
                     <div class="medical-summary-body">
@@ -317,7 +318,7 @@ function viewMedicalRecord(id) {
                     <div class="medical-icon"><i class="fas fa-user-injured"></i></div>
                     <div>
                         <h4>${escapeHtml(fullName(patient))}</h4>
-                        <span>Patient ID: ${escapeHtml(patient.id)}</span>
+                        <span title="${escapeHtml(patient.id)}">Patient ID: ${escapeHtml(displayPatientId(patient.id))}</span>
                     </div>
                 </div>
                 <div class="record-detail-grid">

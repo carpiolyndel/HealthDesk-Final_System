@@ -7,6 +7,8 @@ public class UserDTO {
     private String password;
     private String fullName;
     private String phoneNumber;
+    private String licenseNumber;
+    private String employeeId;
     private String role;
 
     // Getters
@@ -16,6 +18,8 @@ public class UserDTO {
     public String getPassword() { return password; }
     public String getFullName() { return fullName; }
     public String getPhoneNumber() { return phoneNumber; }
+    public String getLicenseNumber() { return licenseNumber; }
+    public String getEmployeeId() { return employeeId; }
     public String getRole() { return role; }
 
     // Setters
@@ -25,5 +29,7 @@ public class UserDTO {
     public void setPassword(String password) { this.password = password; }
     public void setFullName(String fullName) { this.fullName = fullName; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
+    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
     public void setRole(String role) { this.role = role; }
 }

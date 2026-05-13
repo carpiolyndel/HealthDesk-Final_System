@@ -4,12 +4,6 @@ const API_CONFIG = {
     VERSION: '1.0.0'
 };
 
-const EMAILJS_CONFIG = {
-    PUBLIC_KEY: 'npKnUDMwHaijuVsN7',
-    SERVICE_ID: 'service_munourv',
-    TEMPLATE_ID: 'template_cg9qwi3'
-};
-
 const ROLES = {
     ADMIN: 'ADMIN',
     DOCTOR: 'DOCTOR',

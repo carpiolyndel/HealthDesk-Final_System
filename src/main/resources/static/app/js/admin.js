@@ -60,16 +60,6 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-function defaultPasswordForRole(role, username) {
-    const normalizedRole = (role || '').toUpperCase();
-    const normalizedUsername = (username || '').toLowerCase();
-    if (normalizedUsername === 'admin' || normalizedRole === 'ADMIN') return 'admin123';
-    if (normalizedUsername === 'doctor' || normalizedRole === 'DOCTOR') return 'doctor123';
-    if (normalizedUsername === 'nurse' || normalizedRole === 'NURSE') return 'nurse123';
-    if (normalizedUsername === 'staff' || normalizedRole === 'STAFF') return 'staff123';
-    return '';
-}
-
 function normalizeUser(user) {
     return {
         id: user.id,
@@ -78,8 +68,10 @@ function normalizeUser(user) {
         name: user.fullname || user.name || '',
         email: user.email || '',
         role: (user.role || 'STAFF').toUpperCase(),
+        licenseNumber: user.licenseNumber || '',
+        employeeId: user.employeeId || '',
         status: user.status || 'Active',
-        password: user.password || defaultPasswordForRole(user.role, user.username),
+        password: user.password || '',
         lastLogin: user.lastLogin || 'Never',
         createdAt: user.createdAt || new Date().toISOString()
     };
@@ -103,12 +95,7 @@ async function loadData() {
     } else if (storedUsers) {
         systemUsers = JSON.parse(storedUsers).map(normalizeUser);
     } else {
-        systemUsers = [
-            { id: 1, username: 'admin', fullname: 'Admin User', name: 'Admin User', email: 'admin@healthdesk.com', role: 'ADMIN', status: 'Active', password: 'admin123', lastLogin: new Date().toLocaleDateString(), createdAt: new Date().toISOString() },
-            { id: 2, username: 'doctor', fullname: 'Dr. James Cruz', name: 'Dr. James Cruz', email: 'doctor@healthdesk.com', role: 'DOCTOR', status: 'Active', password: 'doctor123', lastLogin: new Date().toLocaleDateString(), createdAt: new Date().toISOString() },
-            { id: 3, username: 'nurse', fullname: 'Anna Reyes', name: 'Anna Reyes', email: 'nurse@healthdesk.com', role: 'NURSE', status: 'Active', password: 'nurse123', lastLogin: new Date().toLocaleDateString(), createdAt: new Date().toISOString() },
-            { id: 4, username: 'staff', fullname: 'Maria Santos', name: 'Maria Santos', email: 'staff@healthdesk.com', role: 'STAFF', status: 'Active', password: 'staff123', lastLogin: new Date().toLocaleDateString(), createdAt: new Date().toISOString() }
-        ];
+        systemUsers = [];
         localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
     }
     
@@ -235,14 +222,49 @@ function userMatchesQuery(user, query) {
         user.name,
         user.email,
         user.role,
-        user.status
+        user.status,
+        user.licenseNumber,
+        user.employeeId
     ].filter(Boolean).join(' ').toLowerCase();
     return haystack.includes(query);
 }
 
+function credentialValue(user) {
+    return user.licenseNumber || user.employeeId || '';
+}
+
+function updateCredentialField() {
+    const role = (document.getElementById('role')?.value || 'staff').toUpperCase();
+    const label = document.getElementById('credentialLabel');
+    const input = document.getElementById('credentialNumber');
+    const hint = document.getElementById('credentialHint');
+    if (!label || !input || !hint) return;
+
+    if (role === 'DOCTOR' || role === 'NURSE') {
+        label.textContent = 'Professional License No. *';
+        input.placeholder = role === 'DOCTOR' ? 'Example: PRC-MD-1234567' : 'Example: PRC-RN-1234567';
+        input.required = true;
+        hint.textContent = `Required to verify legitimate ${role.toLowerCase()} account.`;
+        return;
+    }
+
+    if (role === 'STAFF') {
+        label.textContent = 'Staff Employee ID *';
+        input.placeholder = 'Example: STAFF-2026-001';
+        input.required = true;
+        hint.textContent = 'Required to verify legitimate staff account.';
+        return;
+    }
+
+    label.textContent = 'Admin Credential / Employee ID';
+    input.placeholder = 'Optional internal admin credential';
+    input.required = false;
+    hint.textContent = 'Optional for administrator accounts.';
+}
+
 function renderUserRows(users) {
     if (!users.length) {
-        return '<tr><td colspan="6" style="text-align:center;">No users found</td></tr>';
+        return '<tr><td colspan="7" style="text-align:center;">No users found</td></tr>';
     }
 
     return users.map(u => {
@@ -252,6 +274,7 @@ function renderUserRows(users) {
                 <td>${escapeHtml(u.username)}</td>
                 <td>${escapeHtml(u.fullname)}</td>
                 <td><span class="role-badge role-${u.role.toLowerCase()}">${u.role}</span></td>
+                <td><span class="credential-badge">${escapeHtml(credentialValue(u) || 'Not set')}</span></td>
                 <td class="status-${u.status.toLowerCase()}">${u.status}</td>
                 <td><span class="password-mask">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span></td>
                 <td>
@@ -302,6 +325,8 @@ function openUserModal() {
     document.getElementById('passwordHint').innerHTML = '<i class="fas fa-info-circle"></i> Required for new user (min 6 characters)';
     document.getElementById('modalTitle').innerText = 'Add New User';
     document.getElementById('role').value = 'STAFF';
+    document.getElementById('credentialNumber').value = '';
+    updateCredentialField();
     document.getElementById('status').value = 'Active';
     document.getElementById('userModal').classList.add('active');
 }
@@ -321,12 +346,14 @@ function editUser(id) {
         document.getElementById('passwordHint').innerHTML = '<i class="fas fa-info-circle"></i> Leave blank to keep current password';
         document.getElementById('modalTitle').innerText = 'Edit User';
         document.getElementById('role').value = u.role;
+        document.getElementById('credentialNumber').value = credentialValue(u);
+        updateCredentialField();
         document.getElementById('status').value = u.status;
         document.getElementById('userModal').classList.add('active');
     }
 }
 
-function backendUserToLocal(user, password, status = 'Active') {
+function backendUserToLocal(user, status = 'Active') {
     return normalizeUser({
         id: user.id,
         username: user.username,
@@ -334,8 +361,9 @@ function backendUserToLocal(user, password, status = 'Active') {
         name: user.fullName || user.fullname || user.name,
         email: user.email,
         role: user.role,
+        licenseNumber: user.licenseNumber,
+        employeeId: user.employeeId,
         status,
-        password,
         lastLogin: 'Never',
         createdAt: new Date().toISOString()
     });
@@ -348,6 +376,8 @@ async function saveUser() {
     const email = document.getElementById('userEmail').value.trim();
     const password = document.getElementById('password').value;
     const role = document.getElementById('role').value;
+    const normalizedRole = role.toUpperCase();
+    const credentialNumber = document.getElementById('credentialNumber').value.trim();
     const status = document.getElementById('status').value;
     
     if (!username || !fullname) {
@@ -359,6 +389,21 @@ async function saveUser() {
         showToast('Invalid email format', 'error');
         return;
     }
+
+    if ((normalizedRole === 'DOCTOR' || normalizedRole === 'NURSE') && !credentialNumber) {
+        showToast('Professional license number is required for doctors and nurses', 'error');
+        return;
+    }
+
+    if (normalizedRole === 'STAFF' && !credentialNumber) {
+        showToast('Employee ID is required for staff users', 'error');
+        return;
+    }
+
+    const credentialPayload = {
+        licenseNumber: ['DOCTOR', 'NURSE'].includes(normalizedRole) ? credentialNumber : '',
+        employeeId: ['STAFF', 'ADMIN'].includes(normalizedRole) ? credentialNumber : ''
+    };
     
     if (id) {
         // EDIT EXISTING USER
@@ -371,11 +416,12 @@ async function saveUser() {
                         fullName: fullname,
                         email,
                         password: password || undefined,
-                        role: role.toUpperCase()
+                        role: normalizedRole,
+                        ...credentialPayload
                     });
                     systemUsers[index] = {
                         ...systemUsers[index],
-                        ...backendUserToLocal(saved, password || systemUsers[index].password, status)
+                        ...backendUserToLocal(saved, status)
                     };
                     showToast('User updated in database successfully', 'success');
                 } catch (error) {
@@ -390,8 +436,9 @@ async function saveUser() {
                 name: fullname,
                 email, 
                 role, 
-                status,
-                password: password || systemUsers[index].password
+                licenseNumber: credentialPayload.licenseNumber,
+                employeeId: credentialPayload.employeeId,
+                status
             };
             showToast('User updated successfully', 'success');
             }
@@ -420,9 +467,10 @@ async function saveUser() {
                     fullName: fullname,
                     email,
                     password,
-                    role: role.toUpperCase()
+                    role: normalizedRole,
+                    ...credentialPayload
                 });
-                systemUsers.push(backendUserToLocal(saved, password, status));
+                systemUsers.push(backendUserToLocal(saved, status));
                 showToast(`User "${username}" saved to database successfully!`, 'success');
             } catch (error) {
                 showToast(error.message, 'error');
@@ -462,7 +510,7 @@ function closeResetPasswordModal() {
     document.getElementById('passwordMatchError').innerHTML = '';
 }
 
-function resetPassword() {
+async function resetPassword() {
     const userId = document.getElementById('resetUserId').value;
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
@@ -482,7 +530,17 @@ function resetPassword() {
     
     const index = systemUsers.findIndex(u => sameId(u.id, userId));
     if (index !== -1) {
-        systemUsers[index].password = newPassword;
+        if (typeof api !== 'undefined' && api.getToken()) {
+            try {
+                await api.resetUserPassword(userId, newPassword);
+            } catch (error) {
+                showToast(error.message, 'error');
+                return;
+            }
+        } else {
+            showToast('Please login again as admin so the app can reset passwords in the database.', 'error');
+            return;
+        }
         saveToStorage();
         showToast(`Password reset for "${systemUsers[index].username}"`, 'success');
         closeResetPasswordModal();
@@ -811,6 +869,7 @@ function exportUserReport() {
         Name: u.fullname, 
         Email: u.email, 
         Role: u.role, 
+        Credential: credentialValue(u) || 'Not set',
         Status: u.status,
         Created: u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'
     }));
@@ -862,6 +921,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('activityReportBtn')?.addEventListener('click', generateActivityReport);
     document.getElementById('logoutBtn')?.addEventListener('click', logout);
     document.getElementById('userForm')?.addEventListener('submit', (e) => { e.preventDefault(); saveUser(); });
+    document.getElementById('role')?.addEventListener('change', updateCredentialField);
+    updateCredentialField();
     document.getElementById('entriesSelect')?.addEventListener('change', changeEntries);
     document.getElementById('tableSearch')?.addEventListener('input', searchRecentUsers);
     document.getElementById('closeReplyModalBtn')?.addEventListener('click', closeReplyModal);

@@ -51,7 +51,9 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setFullName(dto.getFullName());
         user.setPhoneNumber(dto.getPhoneNumber());
-        user.setRole(parseRole(dto.getRole()));
+        Role role = parseRole(dto.getRole());
+        applyCredentials(user, dto, role);
+        user.setRole(role);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setActive(true);
         user.setMfaEnabled(true);
@@ -76,7 +78,9 @@ public class UserService {
         existing.setEmail(dto.getEmail());
         existing.setFullName(dto.getFullName());
         existing.setPhoneNumber(dto.getPhoneNumber());
-        existing.setRole(parseRole(dto.getRole()));
+        Role role = parseRole(dto.getRole());
+        applyCredentials(existing, dto, role);
+        existing.setRole(role);
 
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             existing.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -123,7 +127,13 @@ public class UserService {
         String lower = search.toLowerCase();
         return user.getUsername().toLowerCase().contains(lower)
                 || user.getFullName().toLowerCase().contains(lower)
-                || user.getEmail().toLowerCase().contains(lower);
+                || user.getEmail().toLowerCase().contains(lower)
+                || containsIgnoreCase(user.getLicenseNumber(), lower)
+                || containsIgnoreCase(user.getEmployeeId(), lower);
+    }
+
+    private boolean containsIgnoreCase(String value, String lowerSearch) {
+        return value != null && value.toLowerCase().contains(lowerSearch);
     }
 
     private Role parseRole(String roleName) {
@@ -152,6 +162,39 @@ public class UserService {
         }
     }
 
+    private void applyCredentials(User user, UserDTO dto, Role role) {
+        String licenseNumber = normalizeBlank(dto.getLicenseNumber());
+        String employeeId = normalizeBlank(dto.getEmployeeId());
+
+        if (role == Role.DOCTOR || role == Role.NURSE) {
+            if (licenseNumber == null) {
+                throw new IllegalArgumentException("Professional license number is required for doctors and nurses.");
+            }
+            user.setLicenseNumber(licenseNumber);
+            user.setEmployeeId(null);
+            return;
+        }
+
+        if (role == Role.STAFF) {
+            if (employeeId == null) {
+                throw new IllegalArgumentException("Employee ID is required for staff users.");
+            }
+            user.setEmployeeId(employeeId);
+            user.setLicenseNumber(null);
+            return;
+        }
+
+        user.setLicenseNumber(licenseNumber);
+        user.setEmployeeId(employeeId);
+    }
+
+    private String normalizeBlank(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
+    }
+
     private UserDTO toDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
@@ -159,6 +202,8 @@ public class UserService {
         dto.setEmail(user.getEmail());
         dto.setFullName(user.getFullName());
         dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setLicenseNumber(user.getLicenseNumber());
+        dto.setEmployeeId(user.getEmployeeId());
         dto.setRole(user.getRole() != null ? user.getRole().name() : Role.STAFF.name());
         return dto;
     }

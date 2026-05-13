@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(100) NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('GUEST', 'STAFF', 'ADMIN', 'DOCTOR', 'NURSE')),
     phone_number VARCHAR(20),
+    license_number VARCHAR(80),
+    employee_id VARCHAR(80),
     is_active BOOLEAN DEFAULT TRUE,
     mfa_enabled BOOLEAN DEFAULT TRUE,
     mfa_secret VARCHAR(255),

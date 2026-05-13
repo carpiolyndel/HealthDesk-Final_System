@@ -1,7 +1,7 @@
 :root {
-    --primary: #8b5cf6;
-    --primary-dark: #7c3aed;
-    --primary-light: #ede9fe;
+    --primary: #0d9488;
+    --primary-dark: #0f766e;
+    --primary-light: #ccfbf1;
     --bg-primary: #ffffff;
     --bg-secondary: #f8fafc;
     --bg-tertiary: #f1f5f9;
@@ -47,7 +47,7 @@
 }
 
 .sidebar .sidebar-header .role-badge {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, #0d9488, #0f766e);
 }
 
 .status-badge {
@@ -102,6 +102,99 @@
     background: var(--bg-tertiary);
 }
 
+.staff-action-modal {
+    max-width: 560px;
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.staff-action-modal .modal-header {
+    background: #f8fafc;
+    align-items: flex-start;
+}
+
+.staff-action-modal .modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #0f172a;
+    margin: 0;
+}
+
+.modal-subtitle {
+    color: #64748b;
+    font-size: 13px;
+    margin: 6px 0 0;
+}
+
+.appointment-summary {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid #ccfbf1;
+    border-radius: 12px;
+    background: #f0fdfa;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: #475569;
+    font-size: 13px;
+}
+
+.summary-row strong {
+    color: #0f172a;
+    text-align: right;
+}
+
+.summary-muted {
+    margin: 0;
+    color: #64748b;
+}
+
+.patient-id,
+.patient-id-short {
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+    max-width: 100%;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.staff-action-modal input,
+.staff-action-modal textarea {
+    min-height: 46px;
+    border-radius: 10px;
+}
+
+.staff-action-modal textarea {
+    min-height: 96px;
+}
+
+.staff-action-modal .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #ef4444;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
 @media (max-width: 768px) {
     .data-card {
         flex-direction: column;
@@ -110,5 +203,15 @@
     
     .data-actions {
         justify-content: center;
+    }
+
+    .summary-row {
+        display: block;
+    }
+
+    .summary-row strong {
+        display: block;
+        margin-top: 3px;
+        text-align: left;
     }
 }

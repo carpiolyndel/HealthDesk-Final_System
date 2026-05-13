@@ -91,11 +91,43 @@ HealthDesk/
 - Nurse dashboard: http://localhost:8080/app/nurse.html
 - Staff dashboard: http://localhost:8080/app/staff.html
 
-### Default Seed Credentials
-- **Admin**: admin / admin123
-- **Doctor**: doctor / doctor123
-- **Nurse**: nurse / nurse123
-- **Staff**: staff / staff123
+### Initial Admin Account
+Default passwords are not committed. Set these environment variables before running or deploying:
+
+```bash
+JWT_SECRET=replace-with-a-long-random-secret
+ENCRYPTION_SECRET_KEY=replace-with-a-long-random-encryption-key
+HEALTHDESK_ADMIN_USERNAME=admin
+HEALTHDESK_ADMIN_EMAIL=admin@example.com
+HEALTHDESK_ADMIN_PASSWORD=replace-with-a-strong-password
+```
+
+Optional demo role accounts can be seeded only when `HEALTHDESK_DEMO_USERS_ENABLED=true` and the matching demo passwords are supplied.
+
+## Render Deployment
+
+This repository includes `render.yaml` and a Dockerfile for Render.
+
+Recommended Render PostgreSQL environment variables:
+
+```bash
+SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:<port>/<database>
+SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+SPRING_DATASOURCE_USERNAME=<database-user>
+SPRING_DATASOURCE_PASSWORD=<database-password>
+SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+JWT_SECRET=<long-random-secret>
+ENCRYPTION_SECRET_KEY=<long-random-secret>
+HEALTHDESK_ADMIN_EMAIL=<admin-email>
+HEALTHDESK_ADMIN_PASSWORD=<strong-admin-password>
+MAIL_USERNAME=<smtp-email-address>
+MAIL_PASSWORD=<smtp-app-password>
+MFA_DELIVERY_MODE=email
+```
+
+Use `/hello` as the health check path. After deploy, open `/app/login.html`.
+
+For real OTP email, use `MFA_DELIVERY_MODE=email` and set valid SMTP credentials. Render Free may block SMTP ports such as 587; if email OTP fails after deploy, use an email API provider or a hosting plan/network that allows SMTP.
 
 ## 🔐 Security Features
 

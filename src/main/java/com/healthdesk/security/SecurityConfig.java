@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/h2-console/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/hello")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/hello")).permitAll()
                 
                 // API Private endpoints
                 .requestMatchers(new AntPathRequestMatcher("/api/patients/**")).authenticated()

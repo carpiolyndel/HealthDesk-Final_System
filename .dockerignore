@@ -1,0 +1,10 @@
+target/
+build/
+.gradle/
+.gradle-local/
+.m2/
+.m2-local/
+.git/
+.idea/
+.vscode/
+*.iml

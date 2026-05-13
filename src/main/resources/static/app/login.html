@@ -6,7 +6,6 @@
     <title>HealthDesk | Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -502,15 +501,6 @@
     <div class="toast-container"></div>
 
     <script>
-        const EMAILJS_CONFIG = {
-            PUBLIC_KEY: 'AWKJFPcxzwvpV-xAp',
-            SERVICE_ID: 'service_b3vovaj',
-            TEMPLATE_ID: 'template_4fgq7ho'
-        };
-
-        emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
-        console.log('EmailJS initialized');
-
         const STORAGE_KEYS = {
             CURRENT_USER: 'currentUser'
         };
@@ -547,78 +537,6 @@
                 STAFF: 'staff.html'
             };
             return dashboards[role] || 'staff.html';
-        }
-
-        const defaultUsers = [
-            { id: 1, username: 'admin', fullname: 'Admin User', email: 'admin@healthdesk.com', role: 'ADMIN', status: 'Active', password: 'admin123' },
-            { id: 2, username: 'doctor', fullname: 'Dr. James Cruz', email: 'doctor@healthdesk.com', role: 'DOCTOR', status: 'Active', password: 'doctor123' },
-            { id: 3, username: 'nurse', fullname: 'Anna Reyes', email: 'nurse@healthdesk.com', role: 'NURSE', status: 'Active', password: 'nurse123' },
-            { id: 4, username: 'staff', fullname: 'Maria Santos', email: 'staff@healthdesk.com', role: 'STAFF', status: 'Active', password: 'staff123' }
-        ];
-
-        function loadSystemUsers() {
-            const users = JSON.parse(localStorage.getItem('systemUsers') || '[]');
-            const merged = users.length ? users : defaultUsers;
-
-            defaultUsers.forEach(defaultUser => {
-                const existing = merged.find(user => user.username?.toLowerCase() === defaultUser.username);
-                if (existing) {
-                    existing.fullname = existing.fullname || defaultUser.fullname;
-                    existing.name = existing.name || defaultUser.fullname;
-                    existing.email = existing.email || defaultUser.email;
-                    existing.role = (existing.role || defaultUser.role).toUpperCase();
-                    existing.status = existing.status || defaultUser.status;
-                    existing.password = existing.password || defaultUser.password;
-                } else {
-                    merged.push({ ...defaultUser, name: defaultUser.fullname });
-                }
-            });
-
-            localStorage.setItem('systemUsers', JSON.stringify(merged));
-            return merged;
-        }
-
-        async function sendOtpEmail(email, otp, name) {
-            console.log('Sending OTP to:', email);
-            console.log('OTP:', otp);
-            
-            if (!email || email === '') {
-                showToast('No email address for this user', 'error');
-                return false;
-            }
-            
-            if (email === 'admin@healthdesk.com' || email === 'doctor@healthdesk.com' || 
-                email === 'nurse@healthdesk.com' || email === 'staff@healthdesk.com') {
-                showToast(`Your OTP is: ${otp}`, 'info');
-                return true;
-            }
-            
-            try {
-                const templateParams = {
-                    to_name: name,
-                    otp_code: otp,
-                    email: email
-                };
-                
-                const response = await emailjs.send(
-                    'service_b3vovaj',
-                    'template_4fgq7ho',
-                    templateParams,
-                    'AWKJFPcxzwvpV-xAp'
-                );
-                
-                if (response.status === 200) {
-                    showToast(`Code sent to ${email}`, 'success');
-                    return true;
-                } else {
-                    showToast(`Your OTP: ${otp}`, 'info');
-                    return false;
-                }
-            } catch (error) {
-                console.error('Email error:', error);
-                showToast(`Your OTP: ${otp}`, 'info');
-                return false;
-            }
         }
 
         async function login(username, password) {
@@ -804,7 +722,6 @@
 
         document.getElementById('verifyBtn').addEventListener('click', async () => {
             const enteredOtp = getOtpValue();
-            console.log('Verify button clicked. OTP entered:', enteredOtp);
             
             if (enteredOtp.length !== 6) {
                 showToast('Please enter 6-digit code', 'error');
@@ -812,7 +729,6 @@
             }
             
             const result = await verifyOtp(enteredOtp);
-            console.log('Verify result:', result);
             
             if (result.success) {
                 showToast(`Welcome back, ${result.user.name}!`, 'success');
@@ -853,7 +769,6 @@
             }
         });
 
-        console.log('Login page ready');
         showToast('System Ready - Enter your Credential', 'info');
     </script>
 </body>

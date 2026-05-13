@@ -1,5 +1,5 @@
 # Use OpenJDK 21 as base image
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk-jammy
 
 # Set working directory
 WORKDIR /app
@@ -10,7 +10,7 @@ COPY .mvn .mvn
 COPY pom.xml .
 
 # Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN ./mvnw dependency:go-offline -B
+RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
 
 # Copy source code
 COPY src ./src

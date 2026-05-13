@@ -20,7 +20,7 @@ function requireStaff() {
 }
 
 function patientName(patient) {
-    return `${patient.lastName || ''}, ${patient.firstName || ''}`.replace(/^,\s*/, '').trim() || patient.id;
+    return `${patient.lastName || ''}, ${patient.firstName || ''}`.replace(/^,\s*/, '').trim() || displayPatientId(patient.id);
 }
 
 function formatDateTime(value) {
@@ -68,7 +68,7 @@ function populatePatientOptions() {
     const select = document.getElementById('appPatient');
     if (!select) return;
     select.innerHTML = '<option value="">Select patient</option>' + staffPatients.map(p =>
-        `<option value="${p.id}">${escapeHtml(patientName(p))} (${escapeHtml(p.id)})</option>`
+        `<option value="${p.id}">${escapeHtml(patientName(p))} (${escapeHtml(displayPatientId(p.id))})</option>`
     ).join('');
 }
 
@@ -87,7 +87,7 @@ function appointmentRow(a, includeDate) {
         <tr>
             ${includeDate ? `<td>${dt.date}</td>` : ''}
             <td>${dt.time}</td>
-            <td>${escapeHtml(a.patientName || a.patientId)}</td>
+            <td>${escapeHtml(a.patientName || displayPatientId(a.patientId))}</td>
             <td>${escapeHtml(a.doctorName || a.doctorId)}</td>
             <td><span class="status-scheduled">${escapeHtml(status || 'scheduled')}</span></td>
             <td>
@@ -121,7 +121,7 @@ function renderPatients(list = staffPatients) {
     if (!tbody) return;
     tbody.innerHTML = list.length ? list.map(p => `
         <tr>
-            <td>${escapeHtml(p.id)}</td>
+            <td><span class="patient-id-short" title="${escapeHtml(p.id)}">${escapeHtml(displayPatientId(p.id))}</span></td>
             <td><strong>${escapeHtml(patientName(p))}</strong></td>
             <td>${p.age ?? ''}</td>
             <td>${escapeHtml(p.phoneNumber || '')}</td>
@@ -166,35 +166,64 @@ function validateAge(dob) {
     return { valid: true, age };
 }
 
-async function rescheduleAppointment(id) {
-    const newDate = prompt('New date (YYYY-MM-DD):');
-    const newTime = prompt('New time (HH:mm):');
-    const reason = prompt('Reason for reschedule:') || 'Schedule adjustment';
-    if (!newDate || !newTime) return;
-    const validation = validateAppointmentDate(newDate);
-    if (!validation.valid) {
-        showToast(validation.message, 'error');
-        return;
-    }
-    try {
-        await api.rescheduleAppointment(id, newDate, newTime, reason);
-        await loadData();
-        showToast('Appointment rescheduled', 'success');
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
+function findAppointment(id) {
+    return staffAppointments.find(a => String(a.id) === String(id));
 }
 
-async function cancelAppointment(id) {
-    const reason = prompt('Reason for cancellation:');
-    if (!reason) return;
-    try {
-        await api.cancelAppointment(id, reason);
-        await loadData();
-        showToast('Appointment cancelled', 'success');
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
+function appointmentSummaryMarkup(appointment) {
+    if (!appointment) return '<p class="summary-muted">Appointment details unavailable.</p>';
+    const dt = formatDateTime(appointment.appointmentDateTime);
+    return `
+        <div class="summary-row"><span>Patient</span><strong>${escapeHtml(appointment.patientName || displayPatientId(appointment.patientId) || 'Patient')}</strong></div>
+        <div class="summary-row"><span>Doctor</span><strong>${escapeHtml(appointment.doctorName || appointment.doctorId || 'Doctor')}</strong></div>
+        <div class="summary-row"><span>Current Schedule</span><strong>${escapeHtml(dt.date)} at ${escapeHtml(dt.time)}</strong></div>
+    `;
+}
+
+function openRescheduleModal(id) {
+    const appointment = findAppointment(id);
+    const dt = appointment ? formatDateTime(appointment.appointmentDateTime) : { date: '', time: '' };
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+    document.getElementById('rescheduleId').value = id;
+    document.getElementById('rescheduleDate').value = dt.date;
+    document.getElementById('rescheduleDate').min = tomorrow;
+    document.getElementById('rescheduleTime').value = dt.time ? toTimeInputValue(appointment.appointmentDateTime) : '';
+    document.getElementById('rescheduleReason').value = '';
+    document.getElementById('rescheduleSummary').innerHTML = appointmentSummaryMarkup(appointment);
+    document.getElementById('rescheduleModal').classList.add('active');
+}
+
+function closeRescheduleModal() {
+    document.getElementById('rescheduleModal')?.classList.remove('active');
+    document.getElementById('rescheduleForm')?.reset();
+}
+
+function toTimeInputValue(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+function rescheduleAppointment(id) {
+    openRescheduleModal(id);
+}
+
+function openCancelAppointmentModal(id) {
+    const appointment = findAppointment(id);
+    document.getElementById('cancelAppointmentId').value = id;
+    document.getElementById('cancelAppointmentReason').value = '';
+    document.getElementById('cancelAppointmentSummary').innerHTML = appointmentSummaryMarkup(appointment);
+    document.getElementById('cancelAppointmentModal').classList.add('active');
+}
+
+function closeCancelAppointmentModal() {
+    document.getElementById('cancelAppointmentModal')?.classList.remove('active');
+    document.getElementById('cancelAppointmentForm')?.reset();
+}
+
+function cancelAppointment(id) {
+    openCancelAppointmentModal(id);
 }
 
 function searchAppointments() {
@@ -202,7 +231,8 @@ function searchAppointments() {
     const filtered = staffAppointments.filter(a =>
         (a.patientName || '').toLowerCase().includes(query) ||
         (a.doctorName || '').toLowerCase().includes(query) ||
-        (a.patientId || '').toLowerCase().includes(query)
+        (a.patientId || '').toLowerCase().includes(query) ||
+        displayPatientId(a.patientId).toLowerCase().includes(query)
     );
     renderAllAppointments(query ? filtered : staffAppointments);
 }
@@ -211,7 +241,8 @@ function searchPatientsList() {
     const query = document.getElementById('searchPatientsInput').value.toLowerCase();
     const filtered = staffPatients.filter(p =>
         patientName(p).toLowerCase().includes(query) ||
-        (p.id || '').toLowerCase().includes(query)
+        (p.id || '').toLowerCase().includes(query) ||
+        displayPatientId(p.id).toLowerCase().includes(query)
     );
     renderPatients(query ? filtered : staffPatients);
 }
@@ -368,6 +399,53 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
+    document.getElementById('rescheduleForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const id = document.getElementById('rescheduleId').value;
+        const newDate = document.getElementById('rescheduleDate').value;
+        const newTime = document.getElementById('rescheduleTime').value;
+        const reason = document.getElementById('rescheduleReason').value.trim() || 'Schedule adjustment';
+        const validation = validateAppointmentDate(newDate);
+
+        if (!id || !newTime) {
+            showToast('Please select a valid date and time', 'error');
+            return;
+        }
+        if (!validation.valid) {
+            showToast(validation.message, 'error');
+            return;
+        }
+
+        try {
+            await api.rescheduleAppointment(id, newDate, newTime, reason);
+            closeRescheduleModal();
+            await loadData();
+            showToast('Appointment rescheduled', 'success');
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    });
+
+    document.getElementById('cancelAppointmentForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const id = document.getElementById('cancelAppointmentId').value;
+        const reason = document.getElementById('cancelAppointmentReason').value.trim();
+
+        if (!id || !reason) {
+            showToast('Please enter a cancellation reason', 'error');
+            return;
+        }
+
+        try {
+            await api.cancelAppointment(id, reason);
+            closeCancelAppointmentModal();
+            await loadData();
+            showToast('Appointment cancelled', 'success');
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    });
+
     document.getElementById('patientForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
         const firstName = document.getElementById('firstName').value.trim();
@@ -405,6 +483,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 window.openAppointmentModal = openAppointmentModal;
 window.closeAppointmentModal = closeAppointmentModal;
+window.openRescheduleModal = openRescheduleModal;
+window.closeRescheduleModal = closeRescheduleModal;
+window.openCancelAppointmentModal = openCancelAppointmentModal;
+window.closeCancelAppointmentModal = closeCancelAppointmentModal;
 window.openPatientModal = openPatientModal;
 window.closePatientModal = closePatientModal;
 window.searchAppointments = searchAppointments;

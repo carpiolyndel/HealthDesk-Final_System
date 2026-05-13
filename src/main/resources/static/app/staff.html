@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="/app/css/admin.css">
+    <link rel="stylesheet" href="/app/css/staff.css">
 </head>
 <body>
     <div class="dashboard">
@@ -135,6 +136,70 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reschedule Modal -->
+    <div id="rescheduleModal" class="modal">
+        <div class="modal-content staff-action-modal">
+            <div class="modal-header">
+                <div>
+                    <h3><i class="fas fa-calendar-alt"></i> Reschedule Appointment</h3>
+                    <p class="modal-subtitle">Set a new clinic date and time for this appointment.</p>
+                </div>
+                <button class="close-btn" onclick="closeRescheduleModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="rescheduleForm">
+                    <input type="hidden" id="rescheduleId">
+                    <div class="appointment-summary" id="rescheduleSummary"></div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>New Date *</label>
+                            <input type="date" id="rescheduleDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>New Time *</label>
+                            <input type="time" id="rescheduleTime" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Reason</label>
+                        <textarea id="rescheduleReason" rows="3" placeholder="Example: Patient requested a different schedule."></textarea>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-cancel-modal" onclick="closeRescheduleModal()">Cancel</button>
+                        <button type="submit" class="btn-save"><i class="fas fa-check"></i> Save Schedule</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Appointment Modal -->
+    <div id="cancelAppointmentModal" class="modal">
+        <div class="modal-content staff-action-modal">
+            <div class="modal-header">
+                <div>
+                    <h3><i class="fas fa-ban"></i> Cancel Appointment</h3>
+                    <p class="modal-subtitle">Add a clear reason before cancelling the appointment.</p>
+                </div>
+                <button class="close-btn" onclick="closeCancelAppointmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="cancelAppointmentForm">
+                    <input type="hidden" id="cancelAppointmentId">
+                    <div class="appointment-summary" id="cancelAppointmentSummary"></div>
+                    <div class="form-group">
+                        <label>Cancellation Reason *</label>
+                        <textarea id="cancelAppointmentReason" rows="3" placeholder="Example: Patient unavailable on scheduled date." required></textarea>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-cancel-modal" onclick="closeCancelAppointmentModal()">Keep Appointment</button>
+                        <button type="submit" class="btn-danger"><i class="fas fa-trash-alt"></i> Cancel Appointment</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

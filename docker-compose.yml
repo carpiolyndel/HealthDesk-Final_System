@@ -9,7 +9,10 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:mysql://healthdesk-db:3306/healthdesk
       - SPRING_DATASOURCE_USERNAME=healthdesk
-      - SPRING_DATASOURCE_PASSWORD=healthdesk123
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - ENCRYPTION_SECRET_KEY=${ENCRYPTION_SECRET_KEY}
+      - HEALTHDESK_ADMIN_PASSWORD=${HEALTHDESK_ADMIN_PASSWORD}
     depends_on:
       - healthdesk-db
     networks:
@@ -22,8 +25,8 @@ services:
     environment:
       - MYSQL_DATABASE=healthdesk
       - MYSQL_USER=healthdesk
-      - MYSQL_PASSWORD=healthdesk123
-      - MYSQL_ROOT_PASSWORD=root123
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
