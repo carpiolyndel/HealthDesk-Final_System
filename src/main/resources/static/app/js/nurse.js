@@ -225,9 +225,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
-    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
-        document.getElementById('sidebar')?.classList.toggle('active');
-    });
+    setupResponsiveSidebar();
 
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {

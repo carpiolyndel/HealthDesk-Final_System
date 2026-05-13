@@ -67,20 +67,24 @@
         }
         
         .login-logo .logo-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #0f766e, #0d9488);
+            width: 92px;
+            height: 92px;
+            background: #ffffff;
+            border: 1px solid #ccfbf1;
             border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 16px;
             box-shadow: 0 8px 20px rgba(13,148,136,0.3);
+            overflow: hidden;
         }
         
-        .login-logo .logo-icon i {
-            font-size: 40px;
-            color: white;
+        .login-logo .logo-icon img {
+            width: 76px;
+            height: 76px;
+            object-fit: contain;
+            display: block;
         }
         
         .login-logo h1 {
@@ -378,11 +382,12 @@
                 font-size: 28px;
             }
             .login-logo .logo-icon {
-                width: 65px;
-                height: 65px;
+                width: 74px;
+                height: 74px;
             }
-            .login-logo .logo-icon i {
-                font-size: 32px;
+            .login-logo .logo-icon img {
+                width: 62px;
+                height: 62px;
             }
         }
         
@@ -433,7 +438,7 @@
         <div class="login-card">
             <div class="login-logo">
                 <div class="logo-icon">
-                    <i class="fas fa-hospital-user"></i>
+                    <img src="/app/images/logo.png" alt="HealthDesk logo" />
                 </div>
                 <h1>Health<span>Desk</span></h1>
                 <p>Clinic Patient Record & Appointment System</p>

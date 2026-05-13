@@ -939,11 +939,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             searchUsers();
         }
     });
-    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        sidebar?.classList.toggle('active');
-        document.getElementById('mobileMenuBtn')?.setAttribute('aria-expanded', sidebar?.classList.contains('active') ? 'true' : 'false');
-    });
+    setupResponsiveSidebar();
     
     // Sidebar navigation
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -967,10 +963,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (page === 'archive') renderArchive();
             if (page === 'dashboard') renderRecentUsersTable();
             if (page === 'contact') renderInquiries();
-            if (window.innerWidth <= 768) {
-                document.getElementById('sidebar')?.classList.remove('active');
-                document.getElementById('mobileMenuBtn')?.setAttribute('aria-expanded', 'false');
-            }
         });
     });
     

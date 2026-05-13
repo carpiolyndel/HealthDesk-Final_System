@@ -86,6 +86,8 @@ function setupModalEventListeners() {
 }
 
 function setupEventListeners() {
+    setupResponsiveSidebar();
+
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
