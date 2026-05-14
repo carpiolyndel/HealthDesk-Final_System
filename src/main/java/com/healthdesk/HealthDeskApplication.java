@@ -8,4 +8,4 @@ public class HealthDeskApplication {
     public static void main(String[] args) {
         SpringApplication.run(HealthDeskApplication.class, args);
     }
-}
+}   
