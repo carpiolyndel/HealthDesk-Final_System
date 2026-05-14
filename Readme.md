@@ -69,11 +69,17 @@ HealthDesk/
 1. Clone the repository
 2. Navigate to project directory
 3. Run with Maven for local development (H2):
-   ```bash
-   ./mvnw spring-boot:run
+   ```powershell
+   $env:SPRING_PROFILES_ACTIVE="local"
+   .\mvnw.cmd spring-boot:run
    ```
-4. Access H2 console at: http://localhost:8080/h2-console
+4. Access H2 console at: http://localhost:8080/api/h2-console
 5. Access API at: http://localhost:8080
+6. Local trial login:
+   - URL: http://localhost:8080/app/login.html
+   - Username: `admin`
+   - Password: `Admin12345!`
+   - OTP: printed in the Spring Boot console when requested
 
 ### Docker / MySQL Setup
 1. Start services with Docker Compose:
@@ -128,6 +134,82 @@ MFA_DELIVERY_MODE=email
 Use `/hello` as the health check path. After deploy, open `/app/login.html`.
 
 For real OTP email, use `MFA_DELIVERY_MODE=email` and set valid SMTP credentials. Render Free may block SMTP ports such as 587; if email OTP fails after deploy, use an email API provider or a hosting plan/network that allows SMTP.
+
+## Separate Netlify Frontends
+
+You can host the public guest pages and the dashboard app as two separate Netlify sites while keeping the Spring Boot API on Render, Railway, Koyeb, or another Java backend host.
+
+### Backend API
+
+Deploy the Spring Boot backend first and keep the `/api` routes available. Example backend URL:
+
+```text
+https://healthdesk-api.onrender.com
+```
+
+Set backend CORS to allow both Netlify sites:
+
+```bash
+APP_CORS_ALLOWED_ORIGINS=https://healthdesk-clinic.netlify.app,https://healthdesk-app.netlify.app
+```
+
+### Guest Site on Netlify
+
+Create a Netlify site from the same GitHub repository:
+
+```text
+Base directory: leave blank
+Build command: leave blank
+Publish directory: src/main/resources/static/guest
+```
+
+Before deploying, set the backend API URL in:
+
+```text
+src/main/resources/static/guest/js/runtime-config.js
+```
+
+Example:
+
+```javascript
+window.HEALTHDESK_API_BASE_URL = 'https://healthdesk-api.onrender.com/api';
+```
+
+The guest site opens at:
+
+```text
+https://healthdesk-clinic.netlify.app/
+```
+
+### App Site on Netlify
+
+Create a second Netlify site from the same GitHub repository:
+
+```text
+Base directory: leave blank
+Build command: leave blank
+Publish directory: src/main/resources/static/app
+```
+
+Before deploying, set the backend API URL in:
+
+```text
+src/main/resources/static/app/js/runtime-config.js
+```
+
+Example:
+
+```javascript
+window.HEALTHDESK_API_BASE_URL = 'https://healthdesk-api.onrender.com/api';
+```
+
+The app opens at:
+
+```text
+https://healthdesk-app.netlify.app/
+```
+
+The included `_redirects` files keep existing `/guest/...` and `/app/...` links working even when each folder is hosted separately.
 
 ## 🔐 Security Features
 

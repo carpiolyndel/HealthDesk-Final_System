@@ -1,11 +1,23 @@
 document.addEventListener('DOMContentLoaded', async () => {
     await loadClinicInfo();
     await loadClinicHours();
+    await loadDoctors();
+    await loadServices();
     setupInquiryForm();
     setupFloatingSupport();
     setupMobileMenu();
     setupScrollEffects();
 });
+
+function escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[char]));
+}
 
 async function loadClinicInfo() {
     const info = await GuestAPI.getClinicInfo();
@@ -68,6 +80,60 @@ function setupScrollEffects() {
         updateHeader();
         window.addEventListener('scroll', updateHeader);
     }
+}
+
+async function loadDoctors() {
+    const grid = document.getElementById('doctorsGrid');
+    if (!grid) return;
+
+    const doctors = await GuestAPI.getDoctors();
+    if (!Array.isArray(doctors) || doctors.length === 0) return;
+
+    grid.innerHTML = doctors.map((doctor) => `
+        <div class="doctor-card">
+            <div class="doctor-avatar"><i class="fas fa-user-md"></i></div>
+            <h3 class="doctor-name">${escapeHtml(doctor.name || 'Clinic Doctor')}</h3>
+            <p class="doctor-specialty">${escapeHtml(doctor.specialty || 'General Medicine')}</p>
+            <p>Licensed HealthDesk physician available for patient consultations.</p>
+            <p class="doctor-schedule"><i class="fas fa-calendar"></i> ${escapeHtml(doctor.schedule || 'By appointment')}</p>
+            <a class="card-action" href="/guest/contact.html"><i class="fas fa-calendar-plus"></i> Request appointment</a>
+        </div>
+    `).join('');
+}
+
+async function loadServices() {
+    const grid = document.getElementById('servicesGrid');
+    if (!grid) return;
+
+    const services = await GuestAPI.getServices();
+    if (!Array.isArray(services) || services.length === 0) return;
+
+    const iconMap = {
+        consultation: 'fa-stethoscope',
+        vaccination: 'fa-syringe',
+        laboratory: 'fa-flask',
+        dental: 'fa-tooth',
+        physical: 'fa-heartbeat',
+        pediatric: 'fa-baby-carriage'
+    };
+
+    grid.innerHTML = services.map((service) => {
+        const name = typeof service === 'string' ? service : service.name;
+        const description = typeof service === 'string'
+            ? 'Available at HealthDesk Clinic. Contact us for requirements, schedule, and preparation details.'
+            : (service.description || 'Available at HealthDesk Clinic.');
+        const key = String(name || '').toLowerCase();
+        const icon = Object.entries(iconMap).find(([word]) => key.includes(word))?.[1] || 'fa-notes-medical';
+
+        return `
+            <div class="service-card">
+                <i class="fas ${icon} service-icon"></i>
+                <h3>${escapeHtml(name || 'Clinic Service')}</h3>
+                <p>${escapeHtml(description)}</p>
+                <a class="card-action" href="/guest/contact.html"><i class="fas fa-paper-plane"></i> Inquire now</a>
+            </div>
+        `;
+    }).join('');
 }
 
 function setupInquiryForm() {
@@ -146,16 +212,16 @@ function setupFloatingSupport() {
     const getReply = (message) => {
         const text = message.toLowerCase();
         if (text.includes('appointment')) {
-            return 'To schedule an appointment, please call our clinic or visit during clinic hours. Patient self-booking is not enabled for this version.';
+            return 'To request an appointment, open /guest/contact.html and choose Appointment Request, or call 09486729942.';
         }
         if (text.includes('record') || text.includes('medical')) {
             return 'Medical records are confidential and can only be accessed by authorized clinic personnel.';
         }
         if (text.includes('hour')) {
-            return 'Clinic hours are Monday-Friday 8:00 AM - 8:00 PM, Saturday 9:00 AM - 5:00 PM, and closed on Sundays.';
+            return 'Clinic hours are shown on /guest/hours.html. You can also call 09486729942 before visiting.';
         }
         if (text.includes('doctor')) {
-            return 'You can contact the clinic to ask about doctor availability or schedule a consultation.';
+            return 'Doctor availability is listed on /guest/doctors.html. For consultation requests, send a message through /guest/contact.html.';
         }
         return 'Thank you for your message. Our clinic staff will get back to you as soon as possible.';
     };
@@ -166,6 +232,7 @@ function setupFloatingSupport() {
 
         addMessage(message, true);
         csMessageInput.value = '';
+        csMessageInput.focus();
 
         await GuestAPI.submitInquiry({
             name: 'Guest Chat Visitor',
@@ -176,7 +243,10 @@ function setupFloatingSupport() {
             source: 'floating_chat'
         });
 
-        setTimeout(() => addMessage(getReply(message), false), 500);
+        setTimeout(() => {
+            addMessage(getReply(message), false);
+            csMessageInput.focus();
+        }, 500);
     };
 
     csSendBtn.addEventListener('click', sendMessage);

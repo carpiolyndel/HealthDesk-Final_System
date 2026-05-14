@@ -54,7 +54,7 @@ async function loadData() {
     [staffPatients, staffAppointments, doctors] = await Promise.all([
         api.getPatients(0, 500, ''),
         api.getAppointments(),
-        fetch('/api/public/doctors').then(r => r.json())
+        fetch(`${API_BASE_URL}/public/doctors`).then(r => r.json())
     ]);
     populatePatientOptions();
     populateDoctorOptions();

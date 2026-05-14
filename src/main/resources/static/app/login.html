@@ -185,6 +185,28 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(13,148,136,0.3);
         }
+
+        .guest-link {
+            width: 100%;
+            min-height: 48px;
+            margin-top: 12px;
+            border: 1px solid #ccfbf1;
+            border-radius: 16px;
+            color: #0f766e;
+            background: #f0fdfa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .guest-link:hover {
+            background: #ccfbf1;
+            transform: translateY(-2px);
+        }
         
         .security-footer {
             text-align: center;
@@ -469,6 +491,10 @@
                     <span>Sign In</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
+                <a href="/guest/index.html" class="guest-link">
+                    <i class="fas fa-globe"></i>
+                    <span>Open Guest View</span>
+                </a>
             </form>
             
             <div class="security-footer">
@@ -505,11 +531,9 @@
 
     <div class="toast-container"></div>
 
+    <script src="/app/js/runtime-config.js"></script>
+    <script src="/app/js/config.js"></script>
     <script>
-        const STORAGE_KEYS = {
-            CURRENT_USER: 'currentUser'
-        };
-
         let pendingUser = null;
         let otpExpiry = null;
         let currentOtpTimer = null;
@@ -546,7 +570,7 @@
 
         async function login(username, password) {
             try {
-                const response = await fetch('/api/auth/login', {
+                const response = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
@@ -600,7 +624,7 @@
             }
 
             try {
-                const response = await fetch('/api/auth/login', {
+                const response = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -646,7 +670,7 @@
 
         async function syncBackendSession(username, password) {
             try {
-                const response = await fetch('/api/auth/login', {
+                const response = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })

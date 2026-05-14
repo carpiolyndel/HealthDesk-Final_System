@@ -366,6 +366,78 @@ function updateMedicalRecord(id) {
     document.getElementById('patientModal').classList.add('active');
 }
 
+function closeMedicalModal() {
+    document.getElementById('medicalModal')?.classList.remove('active');
+    document.getElementById('medicalForm')?.reset();
+}
+
+async function saveMedicalRecord() {
+    const patientId = document.getElementById('modalPatientId')?.value;
+    const patient = patients.find(p => p.id === patientId);
+    if (!patient) {
+        showToast('Select a patient record first.', true);
+        return;
+    }
+
+    const diagnosis = document.getElementById('diagnosisInput')?.value.trim() || '';
+    const history = document.getElementById('historyInput')?.value.trim() || '';
+    const medications = document.getElementById('medicationsInput')?.value.trim() || '';
+    const allergies = document.getElementById('allergiesInput')?.value.trim() || '';
+    const datedDiagnosis = diagnosis ? `[${new Date().toLocaleDateString()}] Diagnosis: ${diagnosis}` : '';
+
+    try {
+        await api.updatePatient(patientId, {
+            ...patient,
+            medicalHistory: history || patient.medicalHistory || '',
+            previousDiagnoses: [patient.previousDiagnoses, datedDiagnosis].filter(Boolean).join('\n'),
+            currentMedications: medications || patient.currentMedications || '',
+            allergies: allergies || patient.allergies || ''
+        });
+        closeMedicalModal();
+        await refreshDoctorData();
+        showToast('Medical record saved successfully.', false);
+    } catch (error) {
+        showToast(error.message, true);
+    }
+}
+
+function closePrescriptionModal() {
+    document.getElementById('prescriptionModal')?.classList.remove('active');
+    document.getElementById('prescriptionForm')?.reset();
+}
+
+async function savePrescription() {
+    const patientId = document.getElementById('rxPatientId')?.value;
+    const patient = patients.find(p => p.id === patientId);
+    if (!patient) {
+        showToast('Select a patient before writing a prescription.', true);
+        return;
+    }
+
+    const medication = document.getElementById('medName')?.value.trim() || '';
+    const dosage = document.getElementById('dosage')?.value.trim() || '';
+    const duration = document.getElementById('duration')?.value.trim() || '';
+    const instructions = document.getElementById('instructions')?.value.trim() || '';
+    if (!medication) {
+        showToast('Medication name is required.', true);
+        return;
+    }
+
+    const prescriptionLine = `[${new Date().toLocaleDateString()}] Medication: ${medication}${dosage ? `, Dosage: ${dosage}` : ''}${duration ? `, Duration: ${duration}` : ''}${instructions ? `, Instructions: ${instructions}` : ''}`;
+
+    try {
+        await api.updatePatient(patientId, {
+            ...patient,
+            currentMedications: [patient.currentMedications, prescriptionLine].filter(Boolean).join('\n')
+        });
+        closePrescriptionModal();
+        await refreshDoctorData();
+        showToast('Prescription saved successfully.', false);
+    } catch (error) {
+        showToast(error.message, true);
+    }
+}
+
 async function updatePatientRecord(e) {
     e.preventDefault();
     if (!selectedPatient) return;
@@ -506,6 +578,10 @@ function escapeHtml(text) {
 
 window.viewMedicalRecord = viewMedicalRecord;
 window.updateMedicalRecord = updateMedicalRecord;
+window.closeMedicalModal = closeMedicalModal;
+window.saveMedicalRecord = saveMedicalRecord;
+window.closePrescriptionModal = closePrescriptionModal;
+window.savePrescription = savePrescription;
 window.archivePatient = archivePatient;
 window.searchPatients = searchPatients;
 window.loadAppointments = loadAppointments;

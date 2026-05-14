@@ -28,6 +28,168 @@ function getToastIcon(type) {
     }
 }
 
+function ensureConfirmDialogStyles() {
+    if (document.getElementById('healthdeskConfirmStyles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'healthdeskConfirmStyles';
+    style.textContent = `
+        .hd-confirm-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(15, 23, 42, 0.58);
+            backdrop-filter: blur(4px);
+        }
+        .hd-confirm-dialog {
+            width: min(440px, 100%);
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            animation: hdConfirmIn 0.18s ease-out;
+        }
+        .hd-confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 22px 24px 16px;
+        }
+        .hd-confirm-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fef3c7;
+            color: #b45309;
+            font-size: 18px;
+            flex: 0 0 auto;
+        }
+        .hd-confirm-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .hd-confirm-message {
+            margin: 0;
+            padding: 0 24px 22px;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+        .hd-confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 16px 24px 22px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .hd-confirm-btn {
+            min-width: 104px;
+            min-height: 42px;
+            border: none;
+            border-radius: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+        .hd-confirm-btn:hover {
+            transform: translateY(-1px);
+        }
+        .hd-confirm-cancel {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        .hd-confirm-ok {
+            background: #0d9488;
+            color: #ffffff;
+            box-shadow: 0 10px 18px rgba(13, 148, 136, 0.18);
+        }
+        .hd-confirm-ok.danger {
+            background: #ef4444;
+            box-shadow: 0 10px 18px rgba(239, 68, 68, 0.18);
+        }
+        @keyframes hdConfirmIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (max-width: 480px) {
+            .hd-confirm-actions {
+                flex-direction: column-reverse;
+            }
+            .hd-confirm-btn {
+                width: 100%;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function confirmAction({
+    title = 'Confirm Action',
+    message = 'Are you sure you want to continue?',
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    danger = false
+} = {}) {
+    ensureConfirmDialogStyles();
+
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'hd-confirm-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+
+        overlay.innerHTML = `
+            <div class="hd-confirm-dialog">
+                <div class="hd-confirm-header">
+                    <div class="hd-confirm-icon"><i class="fas ${danger ? 'fa-triangle-exclamation' : 'fa-circle-question'}"></i></div>
+                    <h3 class="hd-confirm-title">${escapeText(title)}</h3>
+                </div>
+                <p class="hd-confirm-message">${escapeText(message)}</p>
+                <div class="hd-confirm-actions">
+                    <button type="button" class="hd-confirm-btn hd-confirm-cancel">${escapeText(cancelText)}</button>
+                    <button type="button" class="hd-confirm-btn hd-confirm-ok ${danger ? 'danger' : ''}">${escapeText(confirmText)}</button>
+                </div>
+            </div>
+        `;
+
+        const close = (result) => {
+            overlay.remove();
+            document.removeEventListener('keydown', onKeydown);
+            resolve(result);
+        };
+        const onKeydown = (event) => {
+            if (event.key === 'Escape') close(false);
+        };
+
+        overlay.querySelector('.hd-confirm-cancel').addEventListener('click', () => close(false));
+        overlay.querySelector('.hd-confirm-ok').addEventListener('click', () => close(true));
+        overlay.addEventListener('click', (event) => {
+            if (event.target === overlay) close(false);
+        });
+        document.addEventListener('keydown', onKeydown);
+
+        document.body.appendChild(overlay);
+        overlay.querySelector('.hd-confirm-ok').focus();
+    });
+}
+
+function escapeText(value) {
+    const div = document.createElement('div');
+    div.textContent = value || '';
+    return div.innerHTML;
+}
+
 function formatTime(time) {
     return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
         hour: 'numeric',

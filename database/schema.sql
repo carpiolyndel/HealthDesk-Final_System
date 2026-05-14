@@ -83,9 +83,27 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Customer inquiries from guest pages
+CREATE TABLE IF NOT EXISTS customer_inquiries (
+    id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    phone VARCHAR(30),
+    subject VARCHAR(120) NOT NULL,
+    message CLOB NOT NULL,
+    source VARCHAR(40),
+    status VARCHAR(20) DEFAULT 'pending',
+    reply_message CLOB,
+    replied_by VARCHAR(100),
+    replied_at TIMESTAMP,
+    received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_patients_name ON patients(first_name, last_name);
 CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(appointment_date_time);
 CREATE INDEX IF NOT EXISTS idx_appointments_patient ON appointments(patient_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_doctor ON appointments(doctor_id);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_customer_inquiries_received ON customer_inquiries(received_at);
+CREATE INDEX IF NOT EXISTS idx_customer_inquiries_status ON customer_inquiries(status);

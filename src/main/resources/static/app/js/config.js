@@ -1,5 +1,5 @@
 const API_CONFIG = {
-    BASE_URL: '/api',
+    BASE_URL: window.HEALTHDESK_API_BASE_URL || '/api',
     TIMEOUT: 30000,
     VERSION: '1.0.0'
 };

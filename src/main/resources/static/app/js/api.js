@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = window.HEALTHDESK_API_BASE_URL || API_CONFIG?.BASE_URL || '/api';
 
 class ApiService {
     constructor() {

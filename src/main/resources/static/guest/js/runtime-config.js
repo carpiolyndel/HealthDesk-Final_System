@@ -1,0 +1,1 @@
+window.HEALTHDESK_API_BASE_URL = window.HEALTHDESK_API_BASE_URL || '/api';

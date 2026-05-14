@@ -1081,6 +1081,8 @@ body.sidebar-open::before {
     gap: 8px;
     align-items: center;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
 }
 
 .user-actions button {
@@ -1095,6 +1097,7 @@ body.sidebar-open::before {
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
+    pointer-events: auto;
 }
 
 .user-actions .btn-edit {

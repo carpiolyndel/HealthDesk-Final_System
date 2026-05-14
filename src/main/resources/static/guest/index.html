@@ -64,7 +64,7 @@
     bottom: 100px;
     right: 30px;
     width: 380px;
-    height: 550px;
+    height: min(550px, calc(100vh - 130px));
     background: white;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
@@ -87,6 +87,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
 }
 
 .cs-modal-header {
@@ -143,6 +144,7 @@
     display: flex;
     flex-direction: column;
     background: #f8fafc;
+    min-height: 0;
 }
 
 .cs-agent-info {
@@ -154,6 +156,7 @@
     border-radius: 15px;
     margin-bottom: 15px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    flex: 0 0 auto;
 }
 
 .cs-agent-avatar {
@@ -202,7 +205,9 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-    max-height: 250px;
+    min-height: 130px;
+    max-height: none;
+    padding-right: 4px;
 }
 
 .cs-message {
@@ -257,6 +262,7 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 15px;
+    flex: 0 0 auto;
 }
 
 .cs-quick-reply {
@@ -284,6 +290,7 @@
     background: white;
     border-radius: 25px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    flex: 0 0 auto;
 }
 
 .cs-input {
@@ -337,6 +344,41 @@
         right: 5%;
         left: 5%;
         bottom: 80px;
+        height: min(560px, calc(100vh - 105px));
+    }
+
+    .cs-modal-body {
+        padding: 14px;
+    }
+
+    .cs-agent-info {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .cs-agent-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 22px;
+    }
+
+    .cs-chat-messages {
+        min-height: 150px;
+        margin-bottom: 12px;
+    }
+
+    .cs-quick-replies {
+        max-height: 70px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+    }
+
+    .cs-input-area {
+        border-radius: 18px;
+    }
+
+    .cs-modal-footer {
+        display: none;
     }
 }
     </style>
@@ -372,6 +414,9 @@
               healthcare services with modern facilities and experienced
               doctors.
             </p>
+            <div class="hero-actions">
+              <a href="/guest/contact.html" class="guest-btn primary"><i class="fas fa-calendar-plus"></i> Request Appointment</a>
+            </div>
           </div>
           <div class="hero-image">
             <i class="fas fa-stethoscope"></i>
@@ -567,6 +612,7 @@
               <li><a href="/guest/services.html">Services</a></li>
               <li><a href="/guest/contact.html">Contact</a></li>
               <li><a href="/guest/hours.html">Hours</a></li>
+
             </ul>
           </div>
           <div class="footer-info">
@@ -582,6 +628,7 @@
       </div>
     </footer>
 
+    <script src="/guest/js/runtime-config.js"></script>
     <script src="/guest/js/api.js"></script>
     <script src="/guest/js/guest.js"></script>
     <script src="/guest/js/components.js"></script>

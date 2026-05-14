@@ -77,6 +77,69 @@ function normalizeUser(user) {
     };
 }
 
+function normalizeInquiry(inquiry) {
+    const receivedAt = inquiry.receivedAt || inquiry.timestamp || inquiry.date;
+    return {
+        id: inquiry.id || Date.now(),
+        name: inquiry.name || 'Guest Visitor',
+        email: inquiry.email || '',
+        phone: inquiry.phone || '',
+        subject: inquiry.subject || 'General Inquiry',
+        message: inquiry.message || '',
+        source: inquiry.source || 'guest',
+        status: inquiry.status || 'pending',
+        date: inquiry.date || (receivedAt ? new Date(receivedAt).toLocaleString() : new Date().toLocaleString()),
+        receivedAt: receivedAt || new Date().toISOString(),
+        replyMessage: inquiry.replyMessage || '',
+        repliedAt: inquiry.repliedAt || '',
+        repliedBy: inquiry.repliedBy || ''
+    };
+}
+
+function mergeInquiries(localInquiries, backendInquiries) {
+    const byId = new Map();
+    [...backendInquiries, ...localInquiries].forEach((inquiry) => {
+        const normalized = normalizeInquiry(inquiry);
+        byId.set(String(normalized.id), {
+            ...byId.get(String(normalized.id)),
+            ...normalized
+        });
+    });
+    return Array.from(byId.values()).sort((a, b) => new Date(b.receivedAt) - new Date(a.receivedAt));
+}
+
+async function fetchBackendInquiries() {
+    try {
+        const response = await fetch('/api/public/customer-inquiries');
+        if (!response.ok) return [];
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+async function sendBackendInquiryReply(inquiryId, replyMessage, repliedBy) {
+    const response = await fetch(`/api/public/customer-inquiries/${encodeURIComponent(inquiryId)}/reply`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ replyMessage, repliedBy })
+    });
+    if (!response.ok) {
+        throw new Error('Unable to save reply to database.');
+    }
+    return response.json();
+}
+
+async function deleteBackendInquiry(inquiryId) {
+    const response = await fetch(`/api/public/customer-inquiries/${encodeURIComponent(inquiryId)}`, {
+        method: 'DELETE'
+    });
+    if (!response.ok) {
+        throw new Error('Unable to delete inquiry from database.');
+    }
+}
+
 // ============ DATA LOADING ============
 
 async function loadData() {
@@ -106,12 +169,10 @@ async function loadData() {
         localStorage.setItem('archivedUsers', JSON.stringify(archivedUsers));
     }
     
-    if (storedInquiries) {
-        guestInquiries = JSON.parse(storedInquiries);
-    } else {
-        guestInquiries = [];
-        localStorage.setItem('guestInquiries', JSON.stringify(guestInquiries));
-    }
+    const localInquiries = storedInquiries ? JSON.parse(storedInquiries) : [];
+    const backendInquiries = await fetchBackendInquiries();
+    guestInquiries = mergeInquiries(localInquiries, backendInquiries);
+    localStorage.setItem('guestInquiries', JSON.stringify(guestInquiries));
 }
 
 function saveToStorage() {
@@ -268,7 +329,7 @@ function renderUserRows(users) {
     }
 
     return users.map(u => {
-        const id = safeActionId(u.id);
+        const id = escapeHtml(String(u.id || ''));
         return `
             <tr>
                 <td>${escapeHtml(u.username)}</td>
@@ -279,10 +340,10 @@ function renderUserRows(users) {
                 <td><span class="password-mask">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span></td>
                 <td>
                     <div class="user-actions">
-                        <button class="btn-edit" onclick="editUser(${id})"><i class="fas fa-edit"></i> Edit</button>
-                        <button class="btn-archive" onclick="archiveUser(${id})"><i class="fas fa-archive"></i> Archive</button>
-                        <button class="btn-danger" onclick="deleteUser(${id})"><i class="fas fa-trash"></i> Delete</button>
-                        <button class="btn-warning" onclick="openResetPasswordModal(${id})"><i class="fas fa-key"></i> Reset</button>
+                        <button type="button" class="btn-edit" data-user-action="edit" data-user-id="${id}"><i class="fas fa-edit"></i> Edit</button>
+                        <button type="button" class="btn-archive" data-user-action="archive" data-user-id="${id}"><i class="fas fa-archive"></i> Archive</button>
+                        <button type="button" class="btn-danger" data-user-action="delete" data-user-id="${id}"><i class="fas fa-trash"></i> Delete</button>
+                        <button type="button" class="btn-warning" data-user-action="reset" data-user-id="${id}"><i class="fas fa-key"></i> Reset</button>
                     </div>
                 </td>
             </tr>
@@ -350,6 +411,8 @@ function editUser(id) {
         updateCredentialField();
         document.getElementById('status').value = u.status;
         document.getElementById('userModal').classList.add('active');
+    } else {
+        showToast('User record was not found. Please refresh the user list.', 'error');
     }
 }
 
@@ -500,6 +563,8 @@ function openResetPasswordModal(id) {
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
         document.getElementById('passwordMatchError').innerHTML = '';
+    } else {
+        showToast('User record was not found. Please refresh the user list.', 'error');
     }
 }
 
@@ -552,7 +617,17 @@ async function resetPassword() {
 
 async function archiveUser(id) {
     const u = systemUsers.find(u => sameId(u.id, id));
-    if (u && confirm(`Archive user "${u.username}"?`)) {
+    if (!u) {
+        showToast('User record was not found. Please refresh the user list.', 'error');
+        return;
+    }
+    const confirmed = await confirmAction({
+        title: 'Archive User',
+        message: `Archive user "${u.username}"? You can still review archived records later.`,
+        confirmText: 'Archive',
+        danger: false
+    });
+    if (confirmed) {
         if (typeof api !== 'undefined' && api.getToken()) {
             try {
                 await api.archiveUser(id);
@@ -579,7 +654,17 @@ async function archiveUser(id) {
 
 async function deleteUser(id) {
     const u = systemUsers.find(u => sameId(u.id, id));
-    if (u && confirm(`Permanently delete "${u.username}"? This cannot be undone.`)) {
+    if (!u) {
+        showToast('User record was not found. Please refresh the user list.', 'error');
+        return;
+    }
+    const confirmed = await confirmAction({
+        title: 'Delete User Permanently',
+        message: `Permanently delete "${u.username}"? This cannot be undone.`,
+        confirmText: 'Delete',
+        danger: true
+    });
+    if (confirmed) {
         if (typeof api !== 'undefined' && api.getToken()) {
             try {
                 await api.deleteUser(id);
@@ -599,9 +684,19 @@ async function deleteUser(id) {
     }
 }
 
-function permanentDelete(id) {
+async function permanentDelete(id) {
     const u = archivedUsers.find(u => sameId(u.id, id));
-    if (u && confirm(`Permanently delete "${u.username}" from archive?`)) {
+    if (!u) {
+        showToast('Archived user was not found.', 'error');
+        return;
+    }
+    const confirmed = await confirmAction({
+        title: 'Delete Archived User',
+        message: `Permanently delete "${u.username}" from archive? This cannot be undone.`,
+        confirmText: 'Delete',
+        danger: true
+    });
+    if (confirmed) {
         archivedUsers = archivedUsers.filter(u => !sameId(u.id, id));
         saveToStorage();
         renderArchive();
@@ -616,6 +711,26 @@ function searchUsers() {
     const tbody = document.getElementById('usersList');
     if (!tbody) return;
     tbody.innerHTML = renderUserRows(query ? systemUsers.filter(u => userMatchesQuery(u, query)) : systemUsers);
+}
+
+function handleUserActionClick(event) {
+    const button = event.target.closest('[data-user-action]');
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const id = button.dataset.userId;
+    const action = button.dataset.userAction;
+    if (!id) {
+        showToast('This user has no valid ID. Please refresh or reload users from the database.', 'error');
+        return;
+    }
+
+    if (action === 'edit') editUser(id);
+    if (action === 'archive') archiveUser(id);
+    if (action === 'delete') deleteUser(id);
+    if (action === 'reset') openResetPasswordModal(id);
 }
 
 function searchArchive() {
@@ -683,7 +798,9 @@ function renderInquiries() {
     container.style.display = 'block';
     if (noInquiriesDiv) noInquiriesDiv.style.display = 'none';
     
-    container.innerHTML = filtered.map(inquiry => `
+    container.innerHTML = filtered.map(inquiry => {
+        const id = escapeHtml(String(inquiry.id || ''));
+        return `
         <div class="inquiry-card">
             <div class="inquiry-header">
                 <div class="inquiry-name">
@@ -709,16 +826,17 @@ function renderInquiries() {
             ` : ''}
             <div style="display: flex; gap: 8px; margin-top: 12px;">
                 ${inquiry.status !== 'replied' ? `
-                    <button class="btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openReplyModal(${inquiry.id}, '${escapeHtml(inquiry.name)}', '${escapeHtml(inquiry.email)}', '${escapeHtml(inquiry.message).replace(/'/g, "\\'")}')">
+                    <button type="button" class="btn-primary" data-inquiry-action="reply" data-inquiry-id="${id}" style="padding: 6px 12px; font-size: 12px;">
                         <i class="fas fa-reply"></i> Reply
                     </button>
                 ` : ''}
-                <button class="btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="deleteInquiry(${inquiry.id})">
+                <button type="button" class="btn-danger" data-inquiry-action="delete" data-inquiry-id="${id}" style="padding: 6px 12px; font-size: 12px;">
                     <i class="fas fa-trash"></i> Delete
                 </button>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function openReplyModal(inquiryId, guestName, guestEmail, guestMessage) {
@@ -731,12 +849,39 @@ function openReplyModal(inquiryId, guestName, guestEmail, guestMessage) {
     modal.classList.add('active');
 }
 
+function openReplyModalById(inquiryId) {
+    const inquiry = guestInquiries.find(i => sameId(i.id, inquiryId));
+    if (!inquiry) {
+        showToast('Inquiry was not found. Please refresh the inquiry list.', 'error');
+        return;
+    }
+    openReplyModal(inquiry.id, inquiry.name, inquiry.email, inquiry.message);
+}
+
+function handleInquiryActionClick(event) {
+    const button = event.target.closest('[data-inquiry-action]');
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const id = button.dataset.inquiryId;
+    const action = button.dataset.inquiryAction;
+    if (!id) {
+        showToast('This inquiry has no valid ID. Please refresh the page.', 'error');
+        return;
+    }
+
+    if (action === 'reply') openReplyModalById(id);
+    if (action === 'delete') deleteInquiry(id);
+}
+
 function closeReplyModal() {
     document.getElementById('replyModal').classList.remove('active');
 }
 
-function sendReply() {
-    const inquiryId = parseInt(document.getElementById('replyInquiryId').value);
+async function sendReply() {
+    const inquiryId = document.getElementById('replyInquiryId').value;
     const guestName = document.getElementById('replyToName').value;
     const guestEmail = document.getElementById('replyToEmail').value;
     const replyMessage = document.getElementById('replyMessage').value.trim();
@@ -768,23 +913,40 @@ Phone: 09486729942
 Email: healthdesk.info1@gmail.com`);
     console.log('========================================');
     
-    const index = guestInquiries.findIndex(i => i.id === inquiryId);
+    const index = guestInquiries.findIndex(i => sameId(i.id, inquiryId));
     if (index !== -1) {
-        guestInquiries[index].status = 'replied';
-        guestInquiries[index].repliedAt = new Date().toLocaleString();
-        guestInquiries[index].replyMessage = replyMessage;
-        guestInquiries[index].repliedBy = adminName;
+        try {
+            const savedReply = await sendBackendInquiryReply(inquiryId, replyMessage, adminName);
+            guestInquiries[index] = normalizeInquiry(savedReply);
+        } catch (error) {
+            guestInquiries[index].status = 'replied';
+            guestInquiries[index].repliedAt = new Date().toLocaleString();
+            guestInquiries[index].replyMessage = replyMessage;
+            guestInquiries[index].repliedBy = adminName;
+            showToast(`${error.message} Saved locally for this browser.`, 'error');
+        }
         saveToStorage();
         renderInquiries();
-        showToast(`Reply sent to ${guestEmail} (Demo - check console for email content)`, 'success');
+        showToast(`Reply saved for ${guestEmail || guestName}`, 'success');
     }
     
     closeReplyModal();
 }
 
-function deleteInquiry(id) {
-    if (confirm('Delete this inquiry?')) {
-        guestInquiries = guestInquiries.filter(i => i.id !== id);
+async function deleteInquiry(id) {
+    const confirmed = await confirmAction({
+        title: 'Delete Inquiry',
+        message: 'Delete this guest inquiry from the admin inbox?',
+        confirmText: 'Delete',
+        danger: true
+    });
+    if (confirmed) {
+        try {
+            await deleteBackendInquiry(id);
+        } catch (error) {
+            showToast(`${error.message} Removed locally for this browser.`, 'error');
+        }
+        guestInquiries = guestInquiries.filter(i => !sameId(i.id, id));
         saveToStorage();
         renderInquiries();
         showToast('Inquiry deleted', 'success');
@@ -928,6 +1090,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('closeReplyModalBtn')?.addEventListener('click', closeReplyModal);
     document.getElementById('cancelReplyBtn')?.addEventListener('click', closeReplyModal);
     document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
+    document.getElementById('usersList')?.addEventListener('click', handleUserActionClick);
+    document.getElementById('inquiriesList')?.addEventListener('click', handleInquiryActionClick);
     document.getElementById('searchUsersInput')?.addEventListener('input', searchUsers);
     document.getElementById('searchUsersInput')?.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
