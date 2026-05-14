@@ -89,6 +89,30 @@ HealthDesk/
 2. The app uses the `docker` Spring profile and connects to MySQL at `healthdesk-db`.
 3. Access the app at: http://localhost:8080
 
+### Railway Backend With Railway MySQL
+
+Use the `railway` Spring profile when the backend service and Railway MySQL service are in the same Railway project.
+
+Set these variables on the backend service:
+
+```bash
+SPRING_PROFILES_ACTIVE=railway
+MYSQLHOST=${{MySQL.MYSQLHOST}}
+MYSQLPORT=${{MySQL.MYSQLPORT}}
+MYSQLDATABASE=${{MySQL.MYSQLDATABASE}}
+MYSQLUSER=${{MySQL.MYSQLUSER}}
+MYSQLPASSWORD=${{MySQL.MYSQLPASSWORD}}
+JWT_SECRET=<long-random-secret>
+ENCRYPTION_SECRET_KEY=<long-random-secret>
+HEALTHDESK_ADMIN_USERNAME=admin
+HEALTHDESK_ADMIN_EMAIL=<admin-email>
+HEALTHDESK_ADMIN_PASSWORD=<strong-admin-password>
+MFA_DELIVERY_MODE=console
+APP_CORS_ALLOWED_ORIGINS=https://temporary.vercel.app
+```
+
+Do not also set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, or `SPRING_DATASOURCE_PASSWORD` when using this profile, because direct datasource variables override the Railway profile.
+
 ### Frontend Access
 - Public pages: http://localhost:8080/guest/
 - Login page: http://localhost:8080/app/login.html
