@@ -30,6 +30,8 @@ services:
         sync: false
       - key: MFA_DELIVERY_MODE
         value: email
+      - key: APP_CORS_ALLOWED_ORIGINS
+        sync: false
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
         value: update
       - key: SPRING_JPA_DATABASE_PLATFORM

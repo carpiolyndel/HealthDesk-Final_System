@@ -19,7 +19,7 @@ A comprehensive healthcare management system built with Spring Boot backend and 
 
 ### Backend (Spring Boot)
 - **Framework**: Spring Boot 3.1.5
-- **Database**: H2 (development) / MySQL (production)
+- **Database**: H2 (local development) / PostgreSQL on Render / MySQL with Docker Compose
 - **Security**: JWT authentication with MFA support
 - **API**: RESTful endpoints with validation
 
@@ -129,6 +129,7 @@ HEALTHDESK_ADMIN_PASSWORD=<strong-admin-password>
 MAIL_USERNAME=<smtp-email-address>
 MAIL_PASSWORD=<smtp-app-password>
 MFA_DELIVERY_MODE=email
+APP_CORS_ALLOWED_ORIGINS=https://<guest-site>.netlify.app,https://<app-site>.netlify.app
 ```
 
 Use `/hello` as the health check path. After deploy, open `/app/login.html`.
@@ -152,6 +153,8 @@ Set backend CORS to allow both Netlify sites:
 ```bash
 APP_CORS_ALLOWED_ORIGINS=https://healthdesk-clinic.netlify.app,https://healthdesk-app.netlify.app
 ```
+
+If the Netlify site names are not final yet, deploy Render first, deploy both Netlify sites, then return to Render and update `APP_CORS_ALLOWED_ORIGINS` with the exact Netlify URLs.
 
 ### Guest Site on Netlify
 
