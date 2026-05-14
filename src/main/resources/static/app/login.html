@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HealthDesk | Login</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
     <style>
         * {
             margin: 0;
@@ -13,63 +15,70 @@
             box-sizing: border-box;
         }
 
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
             background:
-                linear-gradient(90deg, rgba(6, 23, 24, 0.88) 0%, rgba(6, 23, 24, 0.78) 36%, rgba(6, 23, 24, 0.42) 66%, rgba(6, 23, 24, 0.18) 100%),
+                linear-gradient(180deg, rgba(6, 23, 24, 0.72), rgba(6, 23, 24, 0.48)),
                 url('images/clinic-login-bg.png') center / cover no-repeat;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
             padding: 20px;
             position: relative;
+            overflow-x: hidden;
         }
-        
+
         body::before {
             content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
+            position: fixed;
+            inset: 0;
             background: linear-gradient(180deg, rgba(240, 253, 250, 0.08), rgba(15, 118, 110, 0.12));
-            background-repeat: repeat;
             pointer-events: none;
         }
-        
+
         .login-container {
             width: 100%;
             max-width: 460px;
             position: relative;
             z-index: 1;
-            margin-left: clamp(12px, 8vw, 150px);
+            margin: 0 auto;
         }
-        
+
         .login-card {
+            width: 100%;
             background: rgba(255, 255, 255, 0.94);
             border: 1px solid rgba(204, 251, 241, 0.68);
             border-radius: 24px;
-            padding: 48px 40px;
+            padding: clamp(30px, 5vw, 48px) clamp(22px, 5vw, 40px);
             box-shadow: 0 28px 70px -20px rgba(0,0,0,0.45);
             backdrop-filter: blur(10px);
             animation: slideUp 0.5s ease;
         }
-        
+
         @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .login-logo {
             text-align: center;
             margin-bottom: 32px;
         }
-        
+
         .login-logo .logo-icon {
             width: 92px;
             height: 92px;
@@ -83,31 +92,31 @@
             box-shadow: 0 8px 20px rgba(13,148,136,0.3);
             overflow: hidden;
         }
-        
+
         .login-logo .logo-icon img {
             width: 76px;
             height: 76px;
             object-fit: contain;
             display: block;
         }
-        
+
         .login-logo h1 {
-            font-size: 32px;
+            font-size: clamp(28px, 5vw, 32px);
             font-weight: 800;
             color: #0f172a;
             letter-spacing: -0.5px;
         }
-        
+
         .login-logo h1 span {
             color: #0d9488;
         }
-        
+
         .login-logo p {
             font-size: 14px;
             color: #64748b;
             margin-top: 8px;
         }
-        
+
         .secure-badge {
             text-align: center;
             margin-bottom: 28px;
@@ -120,15 +129,15 @@
             color: #0d9488;
             font-weight: 500;
         }
-        
+
         .secure-badge i {
             margin-right: 6px;
         }
-        
+
         .input-field {
             margin-bottom: 24px;
         }
-        
+
         .input-field label {
             display: block;
             margin-bottom: 8px;
@@ -136,11 +145,11 @@
             font-size: 14px;
             color: #1e293b;
         }
-        
+
         .input-wrapper {
             position: relative;
         }
-        
+
         .input-wrapper i {
             position: absolute;
             left: 16px;
@@ -149,7 +158,7 @@
             color: #94a3b8;
             font-size: 18px;
         }
-        
+
         .input-wrapper input {
             width: 100%;
             padding: 16px 16px 16px 48px;
@@ -159,13 +168,13 @@
             font-family: inherit;
             transition: all 0.3s ease;
         }
-        
+
         .input-wrapper input:focus {
             outline: none;
             border-color: #0d9488;
             box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
         }
-        
+
         .btn-login {
             width: 100%;
             padding: 16px;
@@ -183,7 +192,7 @@
             justify-content: center;
             gap: 10px;
         }
-        
+
         .btn-login:hover {
             background: #0f766e;
             transform: translateY(-2px);
@@ -196,7 +205,7 @@
             padding-top: 20px;
             border-top: 1px solid #e2e8f0;
         }
-        
+
         .security-footer .badge {
             display: inline-flex;
             align-items: center;
@@ -207,62 +216,62 @@
             font-size: 12px;
             color: #64748b;
         }
-        
+
         .security-footer .badge i {
             color: #10b981;
         }
-        
+
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background: rgba(0,0,0,0.5);
             backdrop-filter: blur(4px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            padding: 16px;
         }
-        
+
         .modal.active {
             display: flex;
             animation: fadeIn 0.3s ease;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
+
         .modal-content {
             background: white;
             border-radius: 32px;
-            width: 90%;
+            width: 100%;
             max-width: 420px;
             animation: modalPop 0.3s ease;
         }
-        
+
         @keyframes modalPop {
             from {
                 transform: scale(0.9);
                 opacity: 0;
             }
+
             to {
                 transform: scale(1);
                 opacity: 1;
             }
         }
-        
+
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 24px;
             border-bottom: 1px solid #e2e8f0;
+            gap: 12px;
         }
-        
+
         .modal-header h3 {
             font-size: 20px;
             font-weight: 600;
@@ -270,11 +279,11 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .modal-header h3 i {
             color: #0d9488;
         }
-        
+
         .close-btn {
             background: none;
             border: none;
@@ -283,28 +292,28 @@
             color: #94a3b8;
             transition: all 0.3s;
         }
-        
+
         .close-btn:hover {
             color: #ef4444;
         }
-        
+
         .modal-body {
             padding: 24px;
             text-align: center;
         }
-        
+
         .modal-body p {
             color: #64748b;
             margin-bottom: 8px;
         }
-        
+
         .otp-inputs {
             display: flex;
             gap: 12px;
             justify-content: center;
             margin: 24px 0;
         }
-        
+
         .otp-inputs input {
             width: 52px;
             height: 60px;
@@ -316,24 +325,24 @@
             font-family: monospace;
             transition: all 0.3s;
         }
-        
+
         .otp-inputs input:focus {
             outline: none;
             border-color: #0d9488;
             box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
         }
-        
+
         .timer {
             color: #0d9488;
             margin: 16px 0;
             font-size: 14px;
             font-weight: 500;
         }
-        
+
         .timer.expired {
             color: #ef4444;
         }
-        
+
         .btn-verify {
             width: 100%;
             padding: 14px;
@@ -346,11 +355,11 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .btn-verify:hover {
             background: #0f766e;
         }
-        
+
         .btn-resend {
             width: 100%;
             padding: 12px;
@@ -363,54 +372,23 @@
             font-weight: 500;
             transition: all 0.3s;
         }
-        
+
         .btn-resend:hover {
             text-decoration: underline;
         }
-        
+
         .btn-resend:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
-        @media (max-width: 640px) {
-            body {
-                justify-content: center;
-                background:
-                    linear-gradient(180deg, rgba(6, 23, 24, 0.88), rgba(6, 23, 24, 0.64)),
-                    url('images/clinic-login-bg.png') center / cover no-repeat;
-            }
-            .login-container {
-                margin-left: 0;
-            }
-            .login-card {
-                padding: 32px 24px;
-            }
-            .otp-inputs input {
-                width: 45px;
-                height: 55px;
-                font-size: 20px;
-            }
-            .login-logo h1 {
-                font-size: 28px;
-            }
-            .login-logo .logo-icon {
-                width: 74px;
-                height: 74px;
-            }
-            .login-logo .logo-icon img {
-                width: 62px;
-                height: 62px;
-            }
-        }
-        
+
         .toast-container {
             position: fixed;
             bottom: 30px;
             right: 30px;
             z-index: 1100;
         }
-        
+
         .toast {
             background: #1e293b;
             color: white;
@@ -423,29 +401,84 @@
             transition: all 0.3s ease;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-        
+
         .toast.show {
             opacity: 1;
             transform: translateX(0);
         }
-        
+
         .toast.success {
             background: #10b981;
         }
-        
+
         .toast.error {
             background: #ef4444;
         }
-        
+
         .toast.info {
             background: #3b82f6;
         }
-        
+
         .toast.warning {
             background: #f59e0b;
         }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+                align-items: center;
+            }
+
+            .login-container {
+                max-width: 100%;
+            }
+
+            .login-card {
+                border-radius: 20px;
+            }
+
+            .login-logo {
+                margin-bottom: 24px;
+            }
+
+            .login-logo .logo-icon {
+                width: 74px;
+                height: 74px;
+            }
+
+            .login-logo .logo-icon img {
+                width: 62px;
+                height: 62px;
+            }
+
+            .otp-inputs {
+                gap: 8px;
+            }
+
+            .otp-inputs input {
+                width: 42px;
+                height: 52px;
+                font-size: 20px;
+            }
+
+            .toast-container {
+                left: 16px;
+                right: 16px;
+                bottom: 16px;
+            }
+
+            .toast {
+                text-align: center;
+                transform: translateY(100%);
+            }
+
+            .toast.show {
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="login-card">
@@ -456,34 +489,36 @@
                 <h1>Health<span>Desk</span></h1>
                 <p>Clinic Patient Record & Appointment System</p>
             </div>
-            
+
             <div style="text-align: center; margin-bottom: 24px;">
-                <div class="secure-badge" style="display: inline-block;">
+                <div class="secure-badge">
                     <i class="fas fa-shield-alt"></i> Secure access to your dashboard
                 </div>
             </div>
-            
+
             <form id="loginForm">
                 <div class="input-field">
-                    <label>Username</label>
+                    <label for="username">Username</label>
                     <div class="input-wrapper">
                         <i class="fas fa-user"></i>
                         <input type="text" id="username" placeholder="Enter your username" required autofocus />
                     </div>
                 </div>
+
                 <div class="input-field">
-                    <label>Password</label>
+                    <label for="password">Password</label>
                     <div class="input-wrapper">
                         <i class="fas fa-lock"></i>
                         <input type="password" id="password" placeholder="Enter your password" required />
                     </div>
                 </div>
+
                 <button type="submit" class="btn-login">
                     <span>Sign In</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
-            
+
             <div class="security-footer">
                 <div class="badge">
                     <i class="fas fa-shield-alt"></i>
@@ -499,8 +534,10 @@
                 <h3><i class="fas fa-key"></i> Two-Factor Authentication</h3>
                 <button class="close-btn" onclick="closeOtpModal()">&times;</button>
             </div>
+
             <div class="modal-body">
                 <p>Enter verification code sent to <strong id="userEmail">your email</strong></p>
+
                 <div class="otp-inputs">
                     <input type="text" id="otp1" maxlength="1" autofocus />
                     <input type="text" id="otp2" maxlength="1" />
@@ -509,6 +546,7 @@
                     <input type="text" id="otp5" maxlength="1" />
                     <input type="text" id="otp6" maxlength="1" />
                 </div>
+
                 <div id="timerDisplay" class="timer">05:00</div>
                 <button id="verifyBtn" class="btn-verify">Verify Code</button>
                 <button id="resendBtn" class="btn-resend" disabled>Resend Code</button>
@@ -520,6 +558,7 @@
 
     <script src="/app/js/runtime-config.js"></script>
     <script src="/app/js/config.js"></script>
+
     <script>
         let pendingUser = null;
         let otpExpiry = null;
@@ -528,17 +567,27 @@
 
         function showToast(message, type) {
             let container = document.querySelector('.toast-container');
+
             if (!container) {
                 container = document.createElement('div');
                 container.className = 'toast-container';
                 document.body.appendChild(container);
             }
+
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+
+            const icon = type === 'success'
+                ? 'fa-check-circle'
+                : type === 'error'
+                    ? 'fa-exclamation-circle'
+                    : 'fa-info-circle';
+
             toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
             container.appendChild(toast);
+
             setTimeout(() => toast.classList.add('show'), 10);
+
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
@@ -552,6 +601,7 @@
                 NURSE: 'nurse.html',
                 STAFF: 'staff.html'
             };
+
             return dashboards[role] || 'staff.html';
         }
 
@@ -562,10 +612,14 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
+
                 const data = await response.json();
 
                 if (!response.ok) {
-                    return { success: false, message: data.message || 'Invalid username or password' };
+                    return {
+                        success: false,
+                        message: data.message || 'Invalid username or password'
+                    };
                 }
 
                 pendingUser = {
@@ -575,6 +629,7 @@
                     email: data.email || data.username,
                     fullname: data.fullName || data.username
                 };
+
                 pendingPassword = password;
 
                 if (data.accessToken) {
@@ -587,27 +642,50 @@
                         fullName: data.fullName || data.username,
                         email: data.email || ''
                     };
+
                     localStorage.setItem('token', data.accessToken);
                     localStorage.setItem('refreshToken', data.refreshToken || '');
                     localStorage.setItem('currentUser', JSON.stringify(userData));
-                    return { success: true, verified: true, user: userData, dashboard: getDashboardUrl(data.role) };
+
+                    return {
+                        success: true,
+                        verified: true,
+                        user: userData,
+                        dashboard: getDashboardUrl(data.role)
+                    };
                 }
 
                 otpExpiry = Date.now() + 5 * 60 * 1000;
-                return { success: true, user: pendingUser };
+
+                return {
+                    success: true,
+                    user: pendingUser
+                };
             } catch (error) {
-                return { success: false, message: 'Cannot reach the server. Please start Spring Boot first.' };
+                return {
+                    success: false,
+                    message: 'Cannot reach the server. Please start Spring Boot first.'
+                };
             }
         }
 
         async function verifyOtp(enteredOtp) {
             if (!pendingUser || !pendingPassword) {
                 showToast('No pending login session', 'error');
-                return { success: false, message: 'No OTP generated' };
+
+                return {
+                    success: false,
+                    message: 'No OTP generated'
+                };
             }
+
             if (Date.now() > otpExpiry) {
                 showToast('OTP expired', 'error');
-                return { success: false, message: 'OTP expired' };
+
+                return {
+                    success: false,
+                    message: 'OTP expired'
+                };
             }
 
             try {
@@ -620,10 +698,14 @@
                         otpCode: enteredOtp
                     })
                 });
+
                 const data = await response.json();
 
                 if (!response.ok || !data.accessToken) {
-                    return { success: false, message: data.message || 'Invalid verification code' };
+                    return {
+                        success: false,
+                        message: data.message || 'Invalid verification code'
+                    };
                 }
 
                 const userData = {
@@ -635,47 +717,44 @@
                     fullName: data.fullName || data.username,
                     email: data.email || ''
                 };
+
                 localStorage.setItem('token', data.accessToken);
                 localStorage.setItem('refreshToken', data.refreshToken || '');
                 localStorage.setItem('currentUser', JSON.stringify(userData));
 
-                return { success: true, user: userData, dashboard: getDashboardUrl(data.role) };
+                return {
+                    success: true,
+                    user: userData,
+                    dashboard: getDashboardUrl(data.role)
+                };
             } catch (error) {
-                return { success: false, message: 'Cannot verify OTP while the server is unavailable.' };
+                return {
+                    success: false,
+                    message: 'Cannot verify OTP while the server is unavailable.'
+                };
             }
         }
 
         async function resendOtp() {
             if (!pendingUser || !pendingPassword) return false;
+
             const result = await login(pendingUser.username, pendingPassword);
+
             if (result.success) {
                 showToast('New verification code requested.', 'success');
                 return true;
             }
+
             return false;
         }
 
-        async function syncBackendSession(username, password) {
-            try {
-                const response = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await response.json();
-                if (response.ok && data.accessToken) {
-                    localStorage.setItem('token', data.accessToken);
-                    localStorage.setItem('refreshToken', data.refreshToken || '');
-                }
-            } catch (error) {
-                console.warn('Backend session sync failed:', error);
-            }
-        }
-
         function getOtpValue() {
-            return document.getElementById('otp1').value + document.getElementById('otp2').value +
-                   document.getElementById('otp3').value + document.getElementById('otp4').value +
-                   document.getElementById('otp5').value + document.getElementById('otp6').value;
+            return document.getElementById('otp1').value +
+                document.getElementById('otp2').value +
+                document.getElementById('otp3').value +
+                document.getElementById('otp4').value +
+                document.getElementById('otp5').value +
+                document.getElementById('otp6').value;
         }
 
         function clearOtpInputs() {
@@ -683,16 +762,19 @@
                 const input = document.getElementById(`otp${i}`);
                 if (input) input.value = '';
             }
+
             document.getElementById('otp1').focus();
         }
 
         function startTimer() {
             const timerEl = document.getElementById('timerDisplay');
             const resendBtn = document.getElementById('resendBtn');
+
             if (currentOtpTimer) clearInterval(currentOtpTimer);
-            
+
             currentOtpTimer = setInterval(() => {
                 const remaining = otpExpiry - Date.now();
+
                 if (remaining <= 0) {
                     clearInterval(currentOtpTimer);
                     timerEl.innerHTML = 'Code expired';
@@ -720,11 +802,12 @@
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            
+
             const result = await login(username, password);
-            
+
             if (result.success && result.verified) {
                 showToast(`Welcome back, ${result.user.name}!`, 'success');
                 window.location.href = result.dashboard;
@@ -738,14 +821,14 @@
 
         document.getElementById('verifyBtn').addEventListener('click', async () => {
             const enteredOtp = getOtpValue();
-            
+
             if (enteredOtp.length !== 6) {
                 showToast('Please enter 6-digit code', 'error');
                 return;
             }
-            
+
             const result = await verifyOtp(enteredOtp);
-            
+
             if (result.success) {
                 showToast(`Welcome back, ${result.user.name}!`, 'success');
                 closeOtpModal();
@@ -763,14 +846,19 @@
         });
 
         const otpInputs = ['otp1', 'otp2', 'otp3', 'otp4', 'otp5', 'otp6'];
+
         otpInputs.forEach((id, index) => {
             const input = document.getElementById(id);
+
             if (input) {
                 input.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+
                     if (e.target.value.length === 1 && index < 5) {
                         document.getElementById(otpInputs[index + 1])?.focus();
                     }
                 });
+
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
                         document.getElementById(otpInputs[index - 1])?.focus();
