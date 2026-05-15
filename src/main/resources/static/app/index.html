@@ -24,9 +24,9 @@
         body {
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            background:
-                linear-gradient(180deg, rgba(6, 23, 24, 0.72), rgba(6, 23, 24, 0.48)),
-                url('images/clinic-login-bg.png') center / cover no-repeat;
+           background:
+    linear-gradient(180deg, rgba(6, 23, 24, 0.88), rgba(6, 23, 24, 0.78)),
+    url('images/clinic-login-bg.png') center / cover no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -556,8 +556,8 @@
 
     <div class="toast-container"></div>
 
-    <script src="/app/js/runtime-config.js"></script>
-    <script src="/app/js/config.js"></script>
+    <script src="js/runtime-config.js"></script>
+    <script src="js/config.js"></script>
 
     <script>
         let pendingUser = null;
@@ -664,7 +664,7 @@
             } catch (error) {
                 return {
                     success: false,
-                    message: 'Cannot reach the server. Please start Spring Boot first.'
+                    message: 'Cannot reach the Railway API. Please check the backend URL or CORS settings.'
                 };
             }
         }

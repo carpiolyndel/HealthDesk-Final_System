@@ -110,7 +110,7 @@ function mergeInquiries(localInquiries, backendInquiries) {
 
 async function fetchBackendInquiries() {
     try {
-        const response = await fetch('/api/public/customer-inquiries');
+        const response = await fetch(`${API_BASE_URL}/public/customer-inquiries`);
         if (!response.ok) return [];
         const data = await response.json();
         return Array.isArray(data) ? data : [];
@@ -120,7 +120,7 @@ async function fetchBackendInquiries() {
 }
 
 async function sendBackendInquiryReply(inquiryId, replyMessage, repliedBy) {
-    const response = await fetch(`/api/public/customer-inquiries/${encodeURIComponent(inquiryId)}/reply`, {
+    const response = await fetch(`${API_BASE_URL}/public/customer-inquiries/${encodeURIComponent(inquiryId)}/reply`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ replyMessage, repliedBy })
@@ -132,7 +132,7 @@ async function sendBackendInquiryReply(inquiryId, replyMessage, repliedBy) {
 }
 
 async function deleteBackendInquiry(inquiryId) {
-    const response = await fetch(`/api/public/customer-inquiries/${encodeURIComponent(inquiryId)}`, {
+    const response = await fetch(`${API_BASE_URL}/public/customer-inquiries/${encodeURIComponent(inquiryId)}`, {
         method: 'DELETE'
     });
     if (!response.ok) {

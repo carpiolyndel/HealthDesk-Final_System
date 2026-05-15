@@ -556,8 +556,8 @@
 
     <div class="toast-container"></div>
 
-    <script src="/app/js/runtime-config.js"></script>
-    <script src="/app/js/config.js"></script>
+    <script src="js/runtime-config.js"></script>
+    <script src="js/config.js"></script>
 
     <script>
         let pendingUser = null;
@@ -664,7 +664,7 @@
             } catch (error) {
                 return {
                     success: false,
-                    message: 'Cannot reach the server. Please start Spring Boot first.'
+                    message: 'Cannot reach the Railway API. Please check the backend URL or CORS settings.'
                 };
             }
         }
