@@ -199,59 +199,6 @@
             box-shadow: 0 8px 20px rgba(13,148,136,0.3);
         }
 
-        .demo-accounts {
-            margin-top: 18px;
-            padding: 14px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-        }
-
-        .demo-accounts h2 {
-            margin-bottom: 10px;
-            color: #334155;
-            font-size: 13px;
-            font-weight: 700;
-            text-align: center;
-        }
-
-        .demo-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-        }
-
-        .demo-account {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            padding: 10px 12px;
-            border: 1px solid #ccfbf1;
-            border-radius: 12px;
-            background: #ffffff;
-            color: #0f172a;
-            font-family: inherit;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .demo-account:hover {
-            border-color: #0d9488;
-            box-shadow: 0 8px 18px rgba(13,148,136,0.12);
-            transform: translateY(-1px);
-        }
-
-        .demo-account strong {
-            font-size: 13px;
-        }
-
-        .demo-account span {
-            color: #64748b;
-            font-size: 11px;
-            word-break: break-word;
-        }
-
         .security-footer {
             text-align: center;
             margin-top: 28px;
@@ -514,10 +461,6 @@
                 font-size: 20px;
             }
 
-            .demo-grid {
-                grid-template-columns: 1fr;
-            }
-
             .toast-container {
                 left: 16px;
                 right: 16px;
@@ -576,28 +519,6 @@
                 </button>
             </form>
 
-            <div class="demo-accounts" aria-label="Demo accounts">
-                <h2>Use demo account</h2>
-                <div class="demo-grid">
-                    <button type="button" class="demo-account" data-demo-account="admin">
-                        <strong>Admin</strong>
-                        <span>Fill login</span>
-                    </button>
-                    <button type="button" class="demo-account" data-demo-account="staff">
-                        <strong>Staff</strong>
-                        <span>Fill login</span>
-                    </button>
-                    <button type="button" class="demo-account" data-demo-account="nurse">
-                        <strong>Nurse</strong>
-                        <span>Fill login</span>
-                    </button>
-                    <button type="button" class="demo-account" data-demo-account="doctor">
-                        <strong>Doctor</strong>
-                        <span>Fill login</span>
-                    </button>
-                </div>
-            </div>
-
             <div class="security-footer">
                 <div class="badge">
                     <i class="fas fa-shield-alt"></i>
@@ -643,13 +564,6 @@
         let otpExpiry = null;
         let currentOtpTimer = null;
         let pendingPassword = null;
-        const demoAccounts = {
-            admin: { username: 'admin', password: 'Admin12345!' },
-            staff: { username: 'staff', password: 'Demo12345!' },
-            nurse: { username: 'nurse', password: 'Demo12345!' },
-            doctor: { username: 'doctor', password: 'Demo12345!' }
-        };
-
         function showToast(message, type) {
             let container = document.querySelector('.toast-container');
 
@@ -902,18 +816,6 @@
             } else {
                 showToast(result.message, 'error');
             }
-        });
-
-        document.querySelectorAll('[data-demo-account]').forEach((button) => {
-            button.addEventListener('click', () => {
-                const account = demoAccounts[button.dataset.demoAccount];
-
-                if (!account) return;
-
-                document.getElementById('username').value = account.username;
-                document.getElementById('password').value = account.password;
-                showToast(`${button.querySelector('strong').textContent} demo account ready`, 'info');
-            });
         });
 
         document.getElementById('verifyBtn').addEventListener('click', async () => {
