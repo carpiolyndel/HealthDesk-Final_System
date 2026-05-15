@@ -1,0 +1,7 @@
+# Ignore everything except the frontend static assets and deploy config
+*
+!vercel.json
+!src/main/resources/static/guest/**
+!src/main/resources/static/app/**
+!src/main/resources/static/guest/js/runtime-config.js
+!src/main/resources/static/app/js/runtime-config.js

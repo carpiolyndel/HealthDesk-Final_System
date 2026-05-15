@@ -160,6 +160,39 @@ Use `/hello` as the health check path. After deploy, open `/app/login.html`.
 
 For real OTP email, use `MFA_DELIVERY_MODE=email` and set valid SMTP credentials. Render Free may block SMTP ports such as 587; if email OTP fails after deploy, use an email API provider or a hosting plan/network that allows SMTP.
 
+## Vercel Static Frontend
+
+You can deploy the static frontend to Vercel while keeping the Java backend on a separate host such as Render, Railway, or another Java-friendly provider.
+
+- Use `vercel.json` at the repository root to serve the frontend from:
+  - `src/main/resources/static/guest` for the public guest pages
+  - `src/main/resources/static/app` for the dashboard pages
+- Keep the backend API deployed on a separate service.
+- Set `APP_CORS_ALLOWED_ORIGINS` on the backend to allow your Vercel domain, for example:
+
+```bash
+APP_CORS_ALLOWED_ORIGINS=https://<your-vercel-domain>.vercel.app
+```
+
+Before deploying, update the API base URL in both runtime config files:
+
+```javascript
+src/main/resources/static/guest/js/runtime-config.js
+src/main/resources/static/app/js/runtime-config.js
+```
+
+Example:
+
+```javascript
+window.HEALTHDESK_API_BASE_URL = 'https://healthdesk-api.<your-host>.app/api';
+```
+
+Then run the Vercel deploy from the repository root:
+
+```bash
+vercel --prod
+```
+
 ## Separate Netlify Frontends
 
 You can host the public guest pages and the dashboard app as two separate Netlify sites while keeping the Spring Boot API on Render, Railway, Koyeb, or another Java backend host.
