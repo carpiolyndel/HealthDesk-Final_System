@@ -390,6 +390,8 @@ function openUserModal() {
     updateCredentialField();
     document.getElementById('status').value = 'Active';
     document.getElementById('userModal').classList.add('active');
+    // Ensure mobile sidebar overlay/scroll-lock is removed so modal can scroll
+    document.body.classList.remove('sidebar-open');
 }
 
 function closeUserModal() {
