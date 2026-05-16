@@ -8,12 +8,25 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class OtpNotificationService {
     private static final Logger log = LoggerFactory.getLogger(OtpNotificationService.class);
 
     private final JavaMailSender mailSender;
+    private final ObjectMapper objectMapper;
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(5))
+            .build();
 
     @Value("${spring.mail.username:}")
     private String fromAddress;
@@ -21,8 +34,23 @@ public class OtpNotificationService {
     @Value("${mfa.delivery.mode:console}")
     private String deliveryMode;
 
-    public OtpNotificationService(@org.springframework.beans.factory.annotation.Autowired(required = false) JavaMailSender mailSender) {
+    @Value("${emailjs.service-id:}")
+    private String emailJsServiceId;
+
+    @Value("${emailjs.template-id:}")
+    private String emailJsTemplateId;
+
+    @Value("${emailjs.public-key:}")
+    private String emailJsPublicKey;
+
+    @Value("${emailjs.private-key:}")
+    private String emailJsPrivateKey;
+
+    public OtpNotificationService(
+            @org.springframework.beans.factory.annotation.Autowired(required = false) JavaMailSender mailSender,
+            ObjectMapper objectMapper) {
         this.mailSender = mailSender;
+        this.objectMapper = objectMapper;
     }
 
     public void sendOtp(String toEmail, String otp) {
@@ -32,6 +60,11 @@ public class OtpNotificationService {
     public void sendOtp(String toEmail, String otp, String recipientName) {
         if ("console".equalsIgnoreCase(deliveryMode)) {
             log.info("DEV OTP for {} is {}", maskEmail(toEmail), otp);
+            return;
+        }
+
+        if ("emailjs".equalsIgnoreCase(deliveryMode) || isEmailJsConfigured()) {
+            sendOtpWithEmailJs(toEmail, otp, recipientName);
             return;
         }
 
@@ -52,6 +85,59 @@ public class OtpNotificationService {
         } catch (Exception ex) {
             log.warn("OTP email dispatch failed for {}: {}. OTP for this login is {}", maskEmail(toEmail), ex.getMessage(), otp);
         }
+    }
+
+    private void sendOtpWithEmailJs(String toEmail, String otp, String recipientName) {
+        if (!isEmailJsConfigured()) {
+            log.warn("EmailJS delivery is selected but service/template/public key is missing. OTP for {} is {}", maskEmail(toEmail), otp);
+            return;
+        }
+
+        try {
+            Map<String, Object> templateParams = new LinkedHashMap<>();
+            String displayName = resolveDisplayName(recipientName, toEmail);
+            templateParams.put("to_email", toEmail);
+            templateParams.put("user_email", toEmail);
+            templateParams.put("email", toEmail);
+            templateParams.put("recipient_email", toEmail);
+            templateParams.put("name", displayName);
+            templateParams.put("user_name", displayName);
+            templateParams.put("username", displayName);
+            templateParams.put("otp", otp);
+            templateParams.put("otp_code", otp);
+            templateParams.put("code", otp);
+            templateParams.put("app_name", "HealthDesk");
+
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("service_id", emailJsServiceId);
+            payload.put("template_id", emailJsTemplateId);
+            payload.put("user_id", emailJsPublicKey);
+            payload.put("template_params", templateParams);
+            if (hasText(emailJsPrivateKey)) {
+                payload.put("accessToken", emailJsPrivateKey);
+            }
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.emailjs.com/api/v1.0/email/send"))
+                    .timeout(Duration.ofSeconds(10))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload)))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("EmailJS OTP email sent to {}", maskEmail(toEmail));
+            } else {
+                log.warn("EmailJS OTP email failed for {} with status {}: {}. OTP for this login is {}",
+                        maskEmail(toEmail), response.statusCode(), response.body(), otp);
+            }
+        } catch (Exception ex) {
+            log.warn("EmailJS OTP email dispatch failed for {}: {}. OTP for this login is {}", maskEmail(toEmail), ex.getMessage(), otp);
+        }
+    }
+
+    private boolean isEmailJsConfigured() {
+        return hasText(emailJsServiceId) && hasText(emailJsTemplateId) && hasText(emailJsPublicKey);
     }
 
     private String buildOtpEmailHtml(String recipientName, String toEmail, String otp) {
@@ -137,5 +223,9 @@ public class OtpNotificationService {
         String name = parts[0];
         String safe = name.length() <= 2 ? "***" : name.substring(0, 2) + "***";
         return safe + "@" + parts[1];
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }
