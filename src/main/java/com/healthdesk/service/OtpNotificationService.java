@@ -48,6 +48,7 @@ public class OtpNotificationService {
             helper.setSubject("HealthDesk | Your One-Time Password (OTP)");
             helper.setText(buildOtpEmailHtml(recipientName, toEmail, otp), true);
             mailSender.send(message);
+            log.info("OTP email sent to {}", maskEmail(toEmail));
         } catch (Exception ex) {
             log.warn("OTP email dispatch failed for {}: {}. OTP for this login is {}", maskEmail(toEmail), ex.getMessage(), otp);
         }
