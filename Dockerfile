@@ -4,6 +4,9 @@ FROM eclipse-temurin:21-jdk-jammy
 # Set working directory
 WORKDIR /app
 
+# Use Railway profile by default inside the container
+ENV SPRING_PROFILES_ACTIVE=railway
+
 # Copy Maven wrapper and pom.xml
 COPY mvnw .
 COPY .mvn .mvn
