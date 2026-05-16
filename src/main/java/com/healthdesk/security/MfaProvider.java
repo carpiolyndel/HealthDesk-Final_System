@@ -25,8 +25,13 @@ public class MfaProvider {
     private final SecureRandom secureRandom = new SecureRandom();
 
     public String generateOtp(String userId) {
+        OtpData existing = otpStore.get(userId);
+        if (existing != null && existing.expiry.isAfter(LocalDateTime.now())) {
+            return existing.plainOtp;
+        }
+
         String otp = generateRandomOtp();
-        otpStore.put(userId, new OtpData(hashOtp(otp), LocalDateTime.now().plusNanos(otpExpiration * 1_000_000)));
+        otpStore.put(userId, new OtpData(otp, hashOtp(otp), LocalDateTime.now().plusNanos(otpExpiration * 1_000_000)));
         return otp;
     }
 
@@ -76,11 +81,13 @@ public class MfaProvider {
     }
 
     private static class OtpData {
+        String plainOtp;
         String hashedOtp;
         LocalDateTime expiry;
         int attempts;
 
-        OtpData(String hashedOtp, LocalDateTime expiry) {
+        OtpData(String plainOtp, String hashedOtp, LocalDateTime expiry) {
+            this.plainOtp = plainOtp;
             this.hashedOtp = hashedOtp;
             this.expiry = expiry;
             this.attempts = 0;
