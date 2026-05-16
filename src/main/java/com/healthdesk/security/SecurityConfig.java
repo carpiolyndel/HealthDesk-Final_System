@@ -35,6 +35,7 @@ public class SecurityConfig {
                 // GUEST - Public access
                 .requestMatchers(
                     "/guest/**",
+                    "/favicon.ico",
                     "/assets/**",
                     "/test.html",
                     "/app/css/**",
