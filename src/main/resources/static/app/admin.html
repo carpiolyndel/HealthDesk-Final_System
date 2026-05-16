@@ -511,6 +511,8 @@
       #userModal .modal-content {
         max-width: 720px;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
         box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
       }
       .modal-header {
@@ -558,6 +560,8 @@
       #userModal .modal-body {
         max-height: calc(90vh - 82px);
         overflow-y: auto;
+        flex: 1 1 auto;
+        min-height: 0;
         padding: 28px 32px 0;
         scrollbar-width: thin;
         scrollbar-color: var(--primary) #f1f5f9;

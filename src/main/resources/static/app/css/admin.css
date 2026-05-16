@@ -532,6 +532,8 @@ canvas {
     max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
@@ -556,6 +558,8 @@ canvas {
 }
 
 .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 24px;
 }
 
