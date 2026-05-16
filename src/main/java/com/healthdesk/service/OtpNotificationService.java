@@ -36,7 +36,7 @@ public class OtpNotificationService {
         }
 
         if (mailSender == null) {
-            log.info("OTP email sender is not configured. DEV OTP for {} is {}", maskEmail(toEmail), otp);
+            log.info("OTP email sender is not configured. OTP for {} is {}", maskEmail(toEmail), otp);
             return;
         }
 
@@ -49,8 +49,7 @@ public class OtpNotificationService {
             helper.setText(buildOtpEmailHtml(recipientName, toEmail, otp), true);
             mailSender.send(message);
         } catch (Exception ex) {
-            log.warn("OTP email dispatch failed for {}: {}", maskEmail(toEmail), ex.getMessage());
-            throw new IllegalStateException("Unable to send OTP at this time. Please try again.");
+            log.warn("OTP email dispatch failed for {}: {}. OTP for this login is {}", maskEmail(toEmail), ex.getMessage(), otp);
         }
     }
 

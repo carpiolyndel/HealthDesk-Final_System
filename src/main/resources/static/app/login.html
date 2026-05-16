@@ -199,6 +199,13 @@
             box-shadow: 0 8px 20px rgba(13,148,136,0.3);
         }
 
+        .btn-login:disabled {
+            cursor: wait;
+            opacity: 0.78;
+            transform: none;
+            box-shadow: none;
+        }
+
         .security-footer {
             text-align: center;
             margin-top: 28px;
@@ -734,6 +741,17 @@
             }
         }
 
+        const loginButton = document.querySelector('.btn-login');
+        const loginButtonContent = loginButton.innerHTML;
+        let isLoginSubmitting = false;
+
+        function setLoginLoading(isLoading) {
+            loginButton.disabled = isLoading;
+            loginButton.innerHTML = isLoading
+                ? '<span>Signing in</span><i class="fas fa-spinner fa-spin"></i>'
+                : loginButtonContent;
+        }
+
         async function resendOtp() {
             if (!pendingUser || !pendingPassword) return false;
 
@@ -801,20 +819,29 @@
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (isLoginSubmitting) return;
 
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
 
-            const result = await login(username, password);
+            isLoginSubmitting = true;
+            setLoginLoading(true);
 
-            if (result.success && result.verified) {
-                showToast(`Welcome back, ${result.user.name}!`, 'success');
-                window.location.href = result.dashboard;
-            } else if (result.success) {
-                openOtpModal(result.user.email);
-                document.getElementById('resendBtn').disabled = true;
-            } else {
-                showToast(result.message, 'error');
+            try {
+                const result = await login(username, password);
+
+                if (result.success && result.verified) {
+                    showToast(`Welcome back, ${result.user.name}!`, 'success');
+                    window.location.href = result.dashboard;
+                } else if (result.success) {
+                    openOtpModal(result.user.email);
+                    document.getElementById('resendBtn').disabled = true;
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } finally {
+                isLoginSubmitting = false;
+                setLoginLoading(false);
             }
         });
 
