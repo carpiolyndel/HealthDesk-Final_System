@@ -21,16 +21,58 @@ function escapeHtml(value) {
 
 async function loadClinicInfo() {
     const info = await GuestAPI.getClinicInfo();
-    if (info) {
-        if (document.getElementById('clinicAddress')) {
-            document.getElementById('clinicAddress').textContent = info.address || 'Cawayan, Catarman, Northern Samar';
-        }
-        if (document.getElementById('clinicPhone')) {
-            document.getElementById('clinicPhone').textContent = info.phone || '09486729942';
-        }
-        if (document.getElementById('clinicEmail')) {
-            document.getElementById('clinicEmail').textContent = info.email || 'healthdesk.info1@gmail.com';
-        }
+    const defaultAddress = 'Cawayan, Catarman, Northern Samar';
+    const defaultPhone = '09486729942';
+    const defaultEmail = 'healthdesk.info1@gmail.com';
+    const address = info?.address || defaultAddress;
+    const phone = info?.phone || defaultPhone;
+    const email = info?.email || defaultEmail;
+
+    const addressLink = document.getElementById('clinicAddressLink');
+    const phoneLink = document.getElementById('clinicPhoneLink');
+    const emergencyPhoneLink = document.getElementById('clinicPhoneEmergencyLink');
+    const emailLink = document.getElementById('clinicEmailLink');
+    const addressText = document.getElementById('clinicAddress');
+    const phoneText = document.getElementById('clinicPhone');
+    const emergencyPhoneText = document.getElementById('clinicEmergencyPhone');
+    const emailText = document.getElementById('clinicEmail');
+    const mapIframe = document.getElementById('clinicMapIframe');
+    const mapLink = document.getElementById('clinicMapLink');
+
+    const emergencyPhone = info?.emergencyPhone || phone;
+    const mapsQuery = encodeURIComponent(address);
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+    const embedUrl = `https://www.google.com/maps?q=${mapsQuery}&output=embed`;
+
+    if (addressLink) {
+        addressLink.href = mapsUrl;
+    }
+    if (addressText) {
+        addressText.textContent = address;
+    }
+    if (phoneLink) {
+        phoneLink.href = `tel:${phone}`;
+    }
+    if (phoneText) {
+        phoneText.textContent = phone;
+    }
+    if (emergencyPhoneLink) {
+        emergencyPhoneLink.href = `tel:${emergencyPhone}`;
+    }
+    if (emergencyPhoneText) {
+        emergencyPhoneText.textContent = emergencyPhone;
+    }
+    if (emailLink) {
+        emailLink.href = `mailto:${email}`;
+    }
+    if (emailText) {
+        emailText.textContent = email;
+    }
+    if (mapIframe) {
+        mapIframe.src = embedUrl;
+    }
+    if (mapLink) {
+        mapLink.href = mapsUrl;
     }
 }
 

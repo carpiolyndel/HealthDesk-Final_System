@@ -20,6 +20,7 @@ public class PublicController {
         info.put("name", "HealthDesk Clinic");
         info.put("address", "Cawayan, Catarman, Northern Samar");
         info.put("phone", "09486729942");
+        info.put("emergencyPhone", "09486729942");
         info.put("email", "healthdesk.info1@gmail.com");
         return ResponseEntity.ok(info);
     }
