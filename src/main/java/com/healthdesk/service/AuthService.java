@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -47,7 +46,6 @@ public class AuthService {
     @Autowired
     private OtpNotificationService otpNotificationService;
 
-    @Transactional
     public LoginResponseDTO login(LoginRequestDTO loginRequest, String ipAddress) {
         Authentication authentication = authenticate(loginRequest);
 
