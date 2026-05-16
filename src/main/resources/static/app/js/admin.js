@@ -8,6 +8,56 @@ let rowsPerPage = 10;
 let currentFilter = '';
 let currentInquiryFilter = 'all';
 let usingBackend = false;
+let inquiryPollingInterval = null;
+
+const ADMIN_PAGE_STORAGE_KEY = 'adminCurrentPage';
+const ADMIN_PAGE_NAMES = ['dashboard', 'users', 'archive', 'reports', 'contact'];
+
+function getSavedAdminPage() {
+    const hashPage = window.location.hash ? window.location.hash.slice(1) : '';
+    if (ADMIN_PAGE_NAMES.includes(hashPage)) {
+        return hashPage;
+    }
+    const storedPage = localStorage.getItem(ADMIN_PAGE_STORAGE_KEY);
+    if (ADMIN_PAGE_NAMES.includes(storedPage)) {
+        return storedPage;
+    }
+    return 'dashboard';
+}
+
+function setSavedAdminPage(page) {
+    if (!ADMIN_PAGE_NAMES.includes(page)) return;
+    localStorage.setItem(ADMIN_PAGE_STORAGE_KEY, page);
+    window.history.replaceState(null, '', `#${page}`);
+}
+
+function activateAdminPage(page) {
+    if (!ADMIN_PAGE_NAMES.includes(page)) {
+        page = 'dashboard';
+    }
+
+    document.querySelectorAll('.nav-item[data-page]').forEach(nav => nav.classList.toggle('active', nav.dataset.page === page));
+    document.querySelectorAll('.page-content').forEach(content => content.classList.toggle('active', content.id === `${page}Page`));
+
+    const titles = {
+        dashboard: 'Dashboard',
+        users: 'User Management',
+        archive: 'Archive',
+        reports: 'Reports',
+        contact: 'Contact Inquiries'
+    };
+    document.getElementById('pageTitle').innerText = titles[page] || 'Dashboard';
+    setSavedAdminPage(page);
+
+    if (page === 'users') renderUsers();
+    if (page === 'archive') renderArchive();
+    if (page === 'dashboard') renderRecentUsersTable();
+    if (page === 'contact') renderInquiries();
+    if (page === 'reports') {
+        const reportResult = document.getElementById('reportResult');
+        if (reportResult) reportResult.classList.add('empty');
+    }
+}
 
 // ============ UTILITY FUNCTIONS ============
 
@@ -64,8 +114,8 @@ function normalizeUser(user) {
     return {
         id: user.id,
         username: user.username,
-        fullname: user.fullname || user.name || '',
-        name: user.fullname || user.name || '',
+        fullname: user.fullName || user.fullname || user.name || '',
+        name: user.fullName || user.fullname || user.name || '',
         email: user.email || '',
         role: (user.role || 'STAFF').toUpperCase(),
         licenseNumber: user.licenseNumber || '',
@@ -117,6 +167,38 @@ async function fetchBackendInquiries() {
     } catch (error) {
         return [];
     }
+}
+
+function inquiriesChanged(oldList, newList) {
+    if (oldList.length !== newList.length) return true;
+    for (let i = 0; i < newList.length; i += 1) {
+        if (String(oldList[i]?.id) !== String(newList[i]?.id)) return true;
+        if (String(oldList[i]?.status) !== String(newList[i]?.status)) return true;
+    }
+    return false;
+}
+
+async function refreshGuestInquiries() {
+    const storedInquiries = JSON.parse(localStorage.getItem('guestInquiries') || '[]');
+    const backendInquiries = await fetchBackendInquiries();
+    const merged = mergeInquiries(storedInquiries, backendInquiries);
+    const hasChanges = inquiriesChanged(guestInquiries, merged);
+    guestInquiries = merged;
+    localStorage.setItem('guestInquiries', JSON.stringify(guestInquiries));
+
+    if (hasChanges) {
+        renderInquiries();
+    }
+    return guestInquiries;
+}
+
+function startInquiryPolling() {
+    if (inquiryPollingInterval) {
+        clearInterval(inquiryPollingInterval);
+    }
+    inquiryPollingInterval = setInterval(async () => {
+        await refreshGuestInquiries();
+    }, 15000);
 }
 
 async function sendBackendInquiryReply(inquiryId, replyMessage, repliedBy) {
@@ -1071,6 +1153,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     renderRecentUsersTable();
     renderInquiries();
     initCharts();
+    startInquiryPolling();
     
     // Event Listeners
     document.getElementById('addUserBtn')?.addEventListener('click', openUserModal);
@@ -1108,27 +1191,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupResponsiveSidebar();
     
     // Sidebar navigation
-    document.querySelectorAll('.nav-item').forEach(item => {
+    document.querySelectorAll('.nav-item[data-page]').forEach(item => {
         item.addEventListener('click', function() {
             const page = this.dataset.page;
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            this.classList.add('active');
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-            document.getElementById(`${page}Page`).classList.add('active');
-            
-            const titles = { 
-                dashboard: 'Dashboard', 
-                users: 'User Management', 
-                archive: 'Archive', 
-                reports: 'Reports', 
-                contact: 'Contact Inquiries' 
-            };
-            document.getElementById('pageTitle').innerText = titles[page] || 'Dashboard';
-            
-            if (page === 'users') renderUsers();
-            if (page === 'archive') renderArchive();
-            if (page === 'dashboard') renderRecentUsersTable();
-            if (page === 'contact') renderInquiries();
+            if (!page || !ADMIN_PAGE_NAMES.includes(page)) return;
+            activateAdminPage(page);
         });
     });
     

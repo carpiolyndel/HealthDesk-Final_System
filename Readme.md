@@ -14,6 +14,8 @@ A comprehensive healthcare management system built with Spring Boot backend and 
 - **FR-9 / FR-10**: Staff can cancel or reschedule appointments with a reason, at least one day before the appointment, and the system prevents double booking.
 - **FR-12**: Admin and authorized medical users can view reports based on their role.
 - **FR-13 / FR-14**: Frontend screens include confirmation/toast messages and print support for records and summaries.
+- Guest contact inquiries now submit via AJAX so visitors can send messages without a full page refresh.
+- Admin inquiry list automatically refreshes periodically to surface new guest messages without manual reload.
 
 ## 🏗️ Architecture
 
@@ -356,6 +358,7 @@ Run tests with Maven:
 - H2 database for development
 - MySQL recommended for production
 - CORS configured for frontend integration
+- Admin inquiry dashboard polls the backend for new messages so new guest inquiries appear without manual refresh.
 
 ## 🤝 Contributing
 
