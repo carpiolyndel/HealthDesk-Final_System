@@ -3,6 +3,7 @@ package com.healthdesk.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -14,7 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -33,30 +33,26 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 // GUEST - Public access
-                .requestMatchers(new AntPathRequestMatcher("/guest/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/assets/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/test.html")).permitAll()
-                
-                // APP - Static files
-                .requestMatchers(new AntPathRequestMatcher("/app/css/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/app/js/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/app/images/**")).permitAll()
-                
-                // APP pages are static; role access is enforced via API authorization.
-                .requestMatchers(new AntPathRequestMatcher("/app/**")).permitAll()
-                
-                // API Public endpoints
-                .requestMatchers(new AntPathRequestMatcher("/api/public/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/api/h2-console/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/api/hello")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/hello")).permitAll()
+                .requestMatchers(
+                    "/guest/**",
+                    "/assets/**",
+                    "/test.html",
+                    "/app/css/**",
+                    "/app/js/**",
+                    "/app/images/**",
+                    "/app/**",
+                    "/api/public/**",
+                    "/api/auth/**",
+                    "/api/h2-console/**",
+                    "/api/hello",
+                    "/hello"
+                ).permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
                 // API Private endpoints
-                .requestMatchers(new AntPathRequestMatcher("/api/patients/**")).authenticated()
-                .requestMatchers(new AntPathRequestMatcher("/api/appointments/**")).authenticated()
-                .requestMatchers(new AntPathRequestMatcher("/api/users/**")).hasRole("ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/api/reports/**")).hasAnyRole("ADMIN", "DOCTOR")
+                .requestMatchers("/api/patients/**", "/api/appointments/**").authenticated()
+                .requestMatchers("/api/users/**").hasRole("ADMIN")
+                .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "DOCTOR")
                 
                 .anyRequest().authenticated()
             )

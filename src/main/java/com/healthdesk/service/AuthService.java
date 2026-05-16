@@ -53,10 +53,7 @@ public class AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = userRepository.findByUsername(loginRequest.getUsername()).orElse(null);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
+        User user = getUserFromAuthentication(authentication, loginRequest);
 
         if (user.isMfaEnabled() && (loginRequest.getOtpCode() == null || loginRequest.getOtpCode().isEmpty())) {
             String otp = mfaProvider.generateOtp(user.getId());
@@ -88,6 +85,15 @@ public class AuthService {
         return authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
         );
+    }
+
+    private User getUserFromAuthentication(Authentication authentication, LoginRequestDTO loginRequest) {
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof User user) {
+            return user;
+        }
+        return userRepository.findByUsername(loginRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     private String generateRefreshToken(User user) {
