@@ -752,6 +752,10 @@
                 : loginButtonContent;
         }
 
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
         async function resendOtp() {
             if (!pendingUser || !pendingPassword) return false;
 
@@ -826,9 +830,12 @@
 
             isLoginSubmitting = true;
             setLoginLoading(true);
+            const loadingStartedAt = Date.now();
 
             try {
                 const result = await login(username, password);
+                const remainingLoadingTime = Math.max(0, 650 - (Date.now() - loadingStartedAt));
+                if (remainingLoadingTime > 0) await wait(remainingLoadingTime);
 
                 if (result.success && result.verified) {
                     showToast(`Welcome back, ${result.user.name}!`, 'success');
