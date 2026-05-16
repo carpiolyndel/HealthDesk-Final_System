@@ -563,10 +563,22 @@
 
     <div class="toast-container"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="js/runtime-config.js"></script>
     <script src="js/config.js"></script>
 
     <script>
+        const EMAILJS_CONFIG = {
+            PUBLIC_KEY: 'AWKJFPcxzwvpV-xAp',
+            SERVICE_ID: 'service_b3vovaj',
+            TEMPLATE_ID: 'template_4fgq7ho'
+        };
+
+        if (window.emailjs) {
+            emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+            console.log('EmailJS initialized');
+        }
+
         let pendingUser = null;
         let otpExpiry = null;
         let currentOtpTimer = null;
