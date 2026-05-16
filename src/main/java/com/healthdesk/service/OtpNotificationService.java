@@ -31,7 +31,7 @@ public class OtpNotificationService {
     @Value("${spring.mail.username:}")
     private String fromAddress;
 
-    @Value("${mfa.delivery.mode:console}")
+    @Value("${mfa.delivery.mode:email}")
     private String deliveryMode;
 
     @Value("${emailjs.service-id:}")
