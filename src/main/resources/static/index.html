@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HealthDesk Redirect</title>
+  <meta http-equiv="refresh" content="0; url=/guest/" />
+  <style>
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .container {
+      max-width: 500px;
+      padding: 24px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+      text-align: center;
+    }
+    a {
+      color: #0d9488;
+      text-decoration: none;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Redirecting to HealthDesk guest site...</h1>
+    <p>If your browser does not redirect automatically, use one of these links:</p>
+    <p><a href="/guest/">Guest site</a></p>
+    <p><a href="/app/login.html">App login</a></p>
+  </div>
+  <script>
+    window.location.replace('/guest/');
+  </script>
+</body>
+</html>

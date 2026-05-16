@@ -5,11 +5,10 @@
     { "src": "src/main/resources/static/app/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "^/app/?$", "dest": "/src/main/resources/static/app/index.html" },
-    { "src": "^/guest/?$", "dest": "/src/main/resources/static/guest/index.html" },
-    { "src": "^/app/(.*)$", "dest": "/src/main/resources/static/app/$1" },
-    { "src": "^/guest/(.*)$", "dest": "/src/main/resources/static/guest/$1" },
-    { "src": "^/$", "dest": "/src/main/resources/static/guest/index.html" },
-    { "src": "/(.*)", "dest": "/src/main/resources/static/guest/$1" }
+    { "src": "^/$", "dest": "/guest/index.html" },
+    { "src": "^/guest/?$", "dest": "/guest/index.html" },
+    { "src": "^/guest/(.*)$", "dest": "/guest/$1" },
+    { "src": "^/app/?$", "dest": "/app/index.html" },
+    { "src": "^/app/(.*)$", "dest": "/app/$1" }
   ]
 }
