@@ -1015,8 +1015,8 @@ body.sidebar-open::before {
 
 #usersPage .search-bar {
     display: flex !important;
-    width: min(100%, 620px) !important;
-    max-width: 620px !important;
+    width: 100% !important;
+    max-width: none !important;
     align-items: stretch;
     gap: 14px;
     margin-bottom: 24px;
@@ -1024,8 +1024,8 @@ body.sidebar-open::before {
 
 #usersPage .user-search-field {
     position: relative;
-    width: 460px !important;
-    flex: 0 1 460px !important;
+    width: auto !important;
+    flex: 1 1 auto !important;
     min-width: 260px;
 }
 
