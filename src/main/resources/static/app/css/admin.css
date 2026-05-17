@@ -1489,6 +1489,154 @@ body.sidebar-open::before {
         flex: 0 0 auto !important;
     }
 
+    #usersPage .section-card,
+    #archivePage .section-card {
+        padding: 18px 14px;
+        overflow: hidden;
+    }
+
+    #usersPage .section-header,
+    #archivePage .section-header {
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    #usersPage .section-header h3,
+    #archivePage h3 {
+        font-size: 20px;
+        line-height: 1.25;
+    }
+
+    #usersPage .section-header .btn-primary {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    #archivePage .search-bar {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #archivePage .search-bar input,
+    #archivePage .search-bar button {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    #usersPage .data-table-responsive,
+    #archivePage .data-table-responsive {
+        overflow: visible;
+        padding-bottom: 0;
+    }
+
+    #usersPage .data-table,
+    #archivePage .data-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+    }
+
+    #usersPage .data-table thead,
+    #archivePage .data-table thead {
+        display: none;
+    }
+
+    #usersPage .data-table tbody,
+    #archivePage .data-table tbody,
+    #usersPage .data-table tr,
+    #archivePage .data-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    #usersPage .data-table tr,
+    #archivePage .data-table tr {
+        margin-bottom: 12px;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    #usersPage .data-table td,
+    #archivePage .data-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        padding: 10px 4px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: right;
+        font-size: 14px;
+    }
+
+    #usersPage .data-table td:last-child,
+    #archivePage .data-table td:last-child {
+        flex-direction: column;
+        border-bottom: 0;
+        align-items: stretch;
+        text-align: left;
+    }
+
+    #usersPage .data-table td:last-child::before,
+    #archivePage .data-table td:last-child::before {
+        flex: 0 0 auto;
+    }
+
+    #usersPage .data-table td::before,
+    #archivePage .data-table td::before {
+        flex: 0 0 112px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    #usersPage .data-table td:nth-child(1)::before { content: "Username"; }
+    #usersPage .data-table td:nth-child(2)::before { content: "Full Name"; }
+    #usersPage .data-table td:nth-child(3)::before { content: "Role"; }
+    #usersPage .data-table td:nth-child(4)::before { content: "Credential"; }
+    #usersPage .data-table td:nth-child(5)::before { content: "Status"; }
+    #usersPage .data-table td:nth-child(6)::before { content: "Password"; }
+    #usersPage .data-table td:nth-child(7)::before { content: "Actions"; }
+
+    #archivePage .data-table td:nth-child(1)::before { content: "Username"; }
+    #archivePage .data-table td:nth-child(2)::before { content: "Full Name"; }
+    #archivePage .data-table td:nth-child(3)::before { content: "Role"; }
+    #archivePage .data-table td:nth-child(4)::before { content: "Archived"; }
+    #archivePage .data-table td:nth-child(5)::before { content: "Actions"; }
+
+    #usersPage .data-table td[colspan],
+    #archivePage .data-table td[colspan] {
+        display: block;
+        text-align: center;
+    }
+
+    #usersPage .data-table td[colspan]::before,
+    #archivePage .data-table td[colspan]::before {
+        content: none;
+    }
+
+    #usersPage .user-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+        gap: 8px;
+    }
+
+    #usersPage .user-actions button,
+    #archivePage .data-table .btn-danger {
+        width: 100%;
+        justify-content: center;
+        min-height: 38px;
+        margin: 0;
+    }
+
     .info-grid {
         grid-template-columns: 1fr;
     }
