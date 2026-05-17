@@ -1,1 +1,1 @@
-window.HEALTHDESK_API_BASE_URL = 'https://healthdesk-finalsystem-production.up.railway.app/api';
+window.HEALTHDESK_API_BASE_URL = 'https://healthdesk-clinic.up.railway.app/api';
