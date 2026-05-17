@@ -5,6 +5,9 @@ let nurses = [];
 let selectedPatient = null;
 let confirmCallback = null;
 
+const DOCTOR_PAGE_STORAGE_KEY = 'doctorCurrentPage';
+const DOCTOR_PAGE_NAMES = ['dashboard', 'patients', 'appointments', 'medical', 'reports'];
+
 document.addEventListener('DOMContentLoaded', async () => {
     const user = requireDoctor();
     if (!user) return;
@@ -15,7 +18,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     setupModalEventListeners();
     await refreshDoctorData();
+    switchPage(getSavedDoctorPage());
 });
+
+function getSavedDoctorPage() {
+    const hashPage = window.location.hash ? window.location.hash.slice(1) : '';
+    if (DOCTOR_PAGE_NAMES.includes(hashPage)) return hashPage;
+    const storedPage = localStorage.getItem(DOCTOR_PAGE_STORAGE_KEY);
+    return DOCTOR_PAGE_NAMES.includes(storedPage) ? storedPage : 'dashboard';
+}
+
+function setSavedDoctorPage(page) {
+    if (!DOCTOR_PAGE_NAMES.includes(page)) return;
+    localStorage.setItem(DOCTOR_PAGE_STORAGE_KEY, page);
+    window.history.replaceState(null, '', `#${page}`);
+}
 
 function requireDoctor() {
     const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
@@ -98,6 +115,7 @@ function setupEventListeners() {
 }
 
 function switchPage(page) {
+    if (!DOCTOR_PAGE_NAMES.includes(page)) page = 'dashboard';
     document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(`${page}Page`)?.classList.add('active');
@@ -110,6 +128,7 @@ function switchPage(page) {
         reports: 'My Reports'
     };
     document.getElementById('pageTitle').textContent = titles[page] || 'Doctor Dashboard';
+    setSavedDoctorPage(page);
     if (page === 'reports') loadDoctorReports();
     if (page === 'medical') loadMedicalRecords();
 }

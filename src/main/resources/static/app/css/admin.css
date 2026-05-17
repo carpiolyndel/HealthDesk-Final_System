@@ -386,6 +386,11 @@ canvas {
     margin-bottom: 20px;
 }
 
+.search-bar i {
+    position: static;
+    transform: none;
+}
+
 .search-bar input {
     flex: 1;
     padding: 10px 16px;
@@ -1010,8 +1015,8 @@ body.sidebar-open::before {
 
 #usersPage .search-bar {
     display: flex !important;
-    width: 100% !important;
-    max-width: none !important;
+    width: min(100%, 620px) !important;
+    max-width: 620px !important;
     align-items: stretch;
     gap: 14px;
     margin-bottom: 24px;
@@ -1019,8 +1024,8 @@ body.sidebar-open::before {
 
 #usersPage .user-search-field {
     position: relative;
-    width: auto !important;
-    flex: 1 1 auto !important;
+    width: 460px !important;
+    flex: 0 1 460px !important;
     min-width: 260px;
 }
 
@@ -1469,8 +1474,15 @@ body.sidebar-open::before {
     }
 
     #usersPage .search-bar {
-        grid-template-columns: 1fr;
-        max-width: 100%;
+        flex-direction: column;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    #usersPage .user-search-field,
+    #usersPage .search-bar button {
+        width: 100% !important;
+        flex: 0 0 auto !important;
     }
 
     .info-grid {

@@ -3,6 +3,22 @@ let appointments = [];
 let vitalsUpdatedToday = 0;
 let currentPatient = null;
 
+const NURSE_PAGE_STORAGE_KEY = 'nurseCurrentPage';
+const NURSE_PAGE_NAMES = ['dashboard', 'patients', 'reports'];
+
+function getSavedNursePage() {
+    const hashPage = window.location.hash ? window.location.hash.slice(1) : '';
+    if (NURSE_PAGE_NAMES.includes(hashPage)) return hashPage;
+    const storedPage = localStorage.getItem(NURSE_PAGE_STORAGE_KEY);
+    return NURSE_PAGE_NAMES.includes(storedPage) ? storedPage : 'dashboard';
+}
+
+function setSavedNursePage(page) {
+    if (!NURSE_PAGE_NAMES.includes(page)) return;
+    localStorage.setItem(NURSE_PAGE_STORAGE_KEY, page);
+    window.history.replaceState(null, '', `#${page}`);
+}
+
 async function loadNurseData() {
     [nursePatients, appointments] = await Promise.all([
         api.getPatients(0, 500, ''),
@@ -178,6 +194,22 @@ function generatePatientReport() {
     `;
 }
 
+function switchNursePage(page) {
+    if (!NURSE_PAGE_NAMES.includes(page)) page = 'dashboard';
+    document.querySelectorAll('.nav-item[data-page]').forEach(nav => {
+        nav.classList.toggle('active', nav.getAttribute('data-page') === page);
+    });
+    NURSE_PAGE_NAMES.forEach(name => {
+        const node = document.getElementById(`${name}Page`);
+        if (!node) return;
+        node.classList.toggle('active', name === page);
+        node.style.display = name === page ? 'block' : '';
+    });
+    const titles = { dashboard: 'Nurse Dashboard', patients: 'Assigned Patients', reports: 'Patient Reports' };
+    setText('pageTitle', titles[page] || 'Nurse Dashboard');
+    setSavedNursePage(page);
+}
+
 function logout() {
     api.logout().finally(() => window.location.href = '/app/login.html');
 }
@@ -230,17 +262,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
             const page = this.getAttribute('data-page');
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
-            ['dashboardPage', 'patientsPage', 'reportsPage'].forEach(id => {
-                const node = document.getElementById(id);
-                if (node) node.style.display = 'none';
-            });
-            document.getElementById(`${page}Page`).style.display = 'block';
-            const titles = { dashboard: 'Nurse Dashboard', patients: 'Assigned Patients', reports: 'Patient Reports' };
-            setText('pageTitle', titles[page] || 'Nurse Dashboard');
+            switchNursePage(page);
         });
     });
+    switchNursePage(getSavedNursePage());
 });
 
 window.openVitalsModal = openVitalsModal;

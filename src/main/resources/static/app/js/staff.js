@@ -2,6 +2,22 @@ let staffAppointments = [];
 let staffPatients = [];
 let doctors = [];
 
+const STAFF_PAGE_STORAGE_KEY = 'staffCurrentPage';
+const STAFF_PAGE_NAMES = ['dashboard', 'appointments', 'patients', 'reports'];
+
+function getSavedStaffPage() {
+    const hashPage = window.location.hash ? window.location.hash.slice(1) : '';
+    if (STAFF_PAGE_NAMES.includes(hashPage)) return hashPage;
+    const storedPage = localStorage.getItem(STAFF_PAGE_STORAGE_KEY);
+    return STAFF_PAGE_NAMES.includes(storedPage) ? storedPage : 'dashboard';
+}
+
+function setSavedStaffPage(page) {
+    if (!STAFF_PAGE_NAMES.includes(page)) return;
+    localStorage.setItem(STAFF_PAGE_STORAGE_KEY, page);
+    window.history.replaceState(null, '', `#${page}`);
+}
+
 function getToday() {
     return new Date().toISOString().split('T')[0];
 }
@@ -319,6 +335,22 @@ function exportPatientsCSV() {}
 function editPatient() { showToast('Staff cannot edit medical records.', 'error'); }
 function deletePatient() { showToast('Patient records are archived by authorized medical users.', 'error'); }
 
+function switchStaffPage(page) {
+    if (!STAFF_PAGE_NAMES.includes(page)) page = 'dashboard';
+    document.querySelectorAll('.nav-item[data-page]').forEach(nav => {
+        nav.classList.toggle('active', nav.getAttribute('data-page') === page);
+    });
+    STAFF_PAGE_NAMES.forEach(name => {
+        const node = document.getElementById(`${name}Page`);
+        if (!node) return;
+        node.classList.toggle('active', name === page);
+        node.style.display = name === page ? 'block' : '';
+    });
+    const titles = { dashboard: 'Staff Dashboard', appointments: 'Appointments', patients: 'Patient Registration', reports: 'Reports' };
+    document.getElementById('pageTitle').textContent = titles[page] || 'Staff Dashboard';
+    setSavedStaffPage(page);
+}
+
 function escapeHtml(text) {
     if (text === null || text === undefined) return '';
     const div = document.createElement('div');
@@ -354,17 +386,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
             const page = this.getAttribute('data-page');
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
-            ['dashboardPage', 'appointmentsPage', 'patientsPage', 'reportsPage'].forEach(id => {
-                const node = document.getElementById(id);
-                if (node) node.style.display = 'none';
-            });
-            document.getElementById(`${page}Page`).style.display = 'block';
-            const titles = { dashboard: 'Staff Dashboard', appointments: 'Appointments', patients: 'Patient Registration', reports: 'Reports' };
-            document.getElementById('pageTitle').textContent = titles[page] || 'Staff Dashboard';
+            switchStaffPage(page);
         });
     });
+    switchStaffPage(getSavedStaffPage());
 
     document.getElementById('appointmentForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
