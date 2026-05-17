@@ -266,6 +266,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
     switchNursePage(getSavedNursePage());
+    document.body.classList.add('app-ready');
 });
 
 window.openVitalsModal = openVitalsModal;

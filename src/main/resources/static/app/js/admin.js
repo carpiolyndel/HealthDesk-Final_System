@@ -1199,6 +1199,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
     activateAdminPage(getSavedAdminPage());
+    document.body.classList.add('app-ready');
     
     // Inquiry filters
     document.querySelectorAll('.filter-btn').forEach(btn => {

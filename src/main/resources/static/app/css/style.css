@@ -646,6 +646,10 @@ a:hover {
     display: block;
 }
 
+body:not(.app-ready) .page-content {
+    visibility: hidden;
+}
+
 .form-note {
     font-size: var(--font-xs);
     color: var(--text-muted);

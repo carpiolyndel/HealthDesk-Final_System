@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupModalEventListeners();
     await refreshDoctorData();
     switchPage(getSavedDoctorPage());
+    document.body.classList.add('app-ready');
 });
 
 function getSavedDoctorPage() {

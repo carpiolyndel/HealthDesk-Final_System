@@ -704,6 +704,9 @@
       .page-content.active {
         display: block;
       }
+      body:not(.app-ready) .page-content {
+        visibility: hidden;
+      }
 
       .mobile-menu-btn {
         display: none;

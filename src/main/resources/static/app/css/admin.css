@@ -661,6 +661,10 @@ canvas {
     display: block;
 }
 
+body:not(.app-ready) .page-content {
+    visibility: hidden;
+}
+
 .mobile-menu-btn {
     display: none;
     width: 42px;

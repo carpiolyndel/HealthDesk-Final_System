@@ -390,6 +390,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
     switchStaffPage(getSavedStaffPage());
+    document.body.classList.add('app-ready');
 
     document.getElementById('appointmentForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
