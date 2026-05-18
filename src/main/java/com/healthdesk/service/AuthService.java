@@ -21,6 +21,7 @@ import java.util.UUID;
 
 @Service
 public class AuthService {
+    private static final String DEMO_OTP = "123456";
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -54,7 +55,7 @@ public class AuthService {
         User user = getUserFromAuthentication(authentication, loginRequest);
 
         if (user.isMfaEnabled() && (loginRequest.getOtpCode() == null || loginRequest.getOtpCode().isEmpty())) {
-            String otp = mfaProvider.generateOtp(user.getId());
+            String otp = isDemoUser(user) ? mfaProvider.generateOtp(user.getId(), DEMO_OTP) : mfaProvider.generateOtp(user.getId());
             otpNotificationService.sendOtp(user.getEmail(), otp, resolveDisplayName(user));
             auditLogService.logAction(user.getId(), "MFA_CHALLENGE", "OTP challenge created");
             return new LoginResponseDTO(null, null, "Bearer", user.getId(), user.getUsername(),
@@ -99,6 +100,12 @@ public class AuthService {
             return user.getFullName();
         }
         return user.getUsername();
+    }
+
+    private boolean isDemoUser(User user) {
+        return ("doctor".equals(user.getUsername()) && "Demo Doctor".equals(user.getFullName()))
+                || ("nurse".equals(user.getUsername()) && "Demo Nurse".equals(user.getFullName()))
+                || ("staff".equals(user.getUsername()) && "Demo Staff".equals(user.getFullName()));
     }
 
     private String generateRefreshToken(User user) {

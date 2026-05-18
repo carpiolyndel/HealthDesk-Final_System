@@ -111,11 +111,8 @@ HEALTHDESK_ADMIN_EMAIL=<admin-email>
 HEALTHDESK_ADMIN_PASSWORD=<strong-admin-password>
 HEALTHDESK_DEMO_USERS_ENABLED=true
 HEALTHDESK_DEMO_DOCTOR_PASSWORD=<strong-demo-password>
-HEALTHDESK_DEMO_DOCTOR_EMAIL=<real-doctor-otp-email>
 HEALTHDESK_DEMO_NURSE_PASSWORD=<strong-demo-password>
-HEALTHDESK_DEMO_NURSE_EMAIL=<real-nurse-otp-email>
 HEALTHDESK_DEMO_STAFF_PASSWORD=<strong-demo-password>
-HEALTHDESK_DEMO_STAFF_EMAIL=<real-staff-otp-email>
 MFA_DELIVERY_MODE=emailjs
 EMAILJS_SERVICE_ID=<emailjs-service-id>
 EMAILJS_TEMPLATE_ID=<emailjs-template-id>
@@ -155,21 +152,32 @@ HEALTHDESK_ADMIN_PASSWORD=replace-with-a-strong-password
 
 ### OTP and Demo Users
 
-All normal users created through the admin UI have MFA enabled. Seeded demo users also require OTP when `HEALTHDESK_DEMO_USERS_ENABLED=true`.
+All normal users created through the admin UI have MFA enabled and receive a real generated OTP.
 
-Configure demo users with real inboxes so they can receive OTP messages:
+Seeded demo users also require OTP when `HEALTHDESK_DEMO_USERS_ENABLED=true`, but their demo-only OTP is fixed:
+
+```text
+123456
+```
+
+This fixed OTP applies only to the seeded demo identities:
+
+```text
+doctor / Demo Doctor
+nurse  / Demo Nurse
+staff  / Demo Staff
+```
+
+Configure demo users with passwords like this:
 
 ```bash
 HEALTHDESK_DEMO_USERS_ENABLED=true
 HEALTHDESK_DEMO_DOCTOR_PASSWORD=<strong-demo-password>
-HEALTHDESK_DEMO_DOCTOR_EMAIL=doctor@example.com
 HEALTHDESK_DEMO_NURSE_PASSWORD=<strong-demo-password>
-HEALTHDESK_DEMO_NURSE_EMAIL=nurse@example.com
 HEALTHDESK_DEMO_STAFF_PASSWORD=<strong-demo-password>
-HEALTHDESK_DEMO_STAFF_EMAIL=staff@example.com
 ```
 
-If demo emails are left as defaults like `doctor@healthdesk.local`, the login will still ask for OTP, but the user cannot receive it in a real inbox. In console mode or when delivery fails, check the backend logs for the OTP.
+Demo emails can stay as defaults like `doctor@healthdesk.local` because demo users can enter `123456` at the OTP screen. Non-demo users still need a real generated OTP from email or backend logs.
 
 For production OTP delivery, use one of:
 

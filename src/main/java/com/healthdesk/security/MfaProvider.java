@@ -25,12 +25,15 @@ public class MfaProvider {
     private final SecureRandom secureRandom = new SecureRandom();
 
     public String generateOtp(String userId) {
+        return generateOtp(userId, generateRandomOtp());
+    }
+
+    public String generateOtp(String userId, String otp) {
         OtpData existing = otpStore.get(userId);
         if (existing != null && existing.expiry.isAfter(LocalDateTime.now())) {
             return existing.plainOtp;
         }
 
-        String otp = generateRandomOtp();
         otpStore.put(userId, new OtpData(otp, hashOtp(otp), LocalDateTime.now().plusNanos(otpExpiration * 1_000_000)));
         return otp;
     }
