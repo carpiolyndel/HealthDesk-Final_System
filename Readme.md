@@ -91,9 +91,9 @@ HealthDesk/
 2. The app uses the `docker` Spring profile and connects to MySQL at `healthdesk-db`.
 3. Access the app at: http://localhost:8080
 
-### Railway Backend With Railway MySQL
+### Railway Deployment With Railway MySQL
 
-Use the `railway` Spring profile when the backend service and Railway MySQL service are in the same Railway project.
+Use the `railway` Spring profile when the HealthDesk backend service and Railway MySQL service are in the same Railway project. The Spring Boot app serves both the backend API and the static frontend pages from the same deployed Railway service.
 
 Set these variables on the backend service:
 
@@ -121,14 +121,20 @@ EMAILJS_SERVICE_ID=<emailjs-service-id>
 EMAILJS_TEMPLATE_ID=<emailjs-template-id>
 EMAILJS_PUBLIC_KEY=<emailjs-public-key>
 EMAILJS_PRIVATE_KEY=<emailjs-private-key-optional>
-APP_CORS_ALLOWED_ORIGINS=https://<your-frontend-domain>
+APP_CORS_ALLOWED_ORIGINS=https://<your-railway-app-domain>
 ```
 
 Do not also set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, or `SPRING_DATASOURCE_PASSWORD` when using this profile, because direct datasource variables override the Railway profile.
 
 The repository includes `railway.json`, which deploys with the `Dockerfile` and uses `/hello` as the health check path. After changing variables, redeploy or restart the Railway service so seeded users are updated.
 
-### Frontend Access
+After deployment, open:
+
+```text
+https://<your-railway-app-domain>/app/login.html
+```
+
+### Local Frontend Access
 - Public pages: http://localhost:8080/guest/
 - Login page: http://localhost:8080/app/login.html
 - Admin dashboard: http://localhost:8080/app/admin.html
@@ -182,150 +188,6 @@ MFA_DELIVERY_MODE=email
 MAIL_USERNAME=<smtp-email-address>
 MAIL_PASSWORD=<smtp-app-password>
 ```
-
-## Render Deployment
-
-Railway is the recommended deployment target for the current project setup. Render deployment is still possible with the Dockerfile, but you must provide compatible database variables yourself.
-
-Recommended Render PostgreSQL environment variables:
-
-```bash
-SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:<port>/<database>
-SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
-SPRING_DATASOURCE_USERNAME=<database-user>
-SPRING_DATASOURCE_PASSWORD=<database-password>
-SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
-JWT_SECRET=<long-random-secret>
-ENCRYPTION_SECRET_KEY=<long-random-secret>
-HEALTHDESK_ADMIN_EMAIL=<admin-email>
-HEALTHDESK_ADMIN_PASSWORD=<strong-admin-password>
-HEALTHDESK_DEMO_USERS_ENABLED=true
-HEALTHDESK_DEMO_DOCTOR_PASSWORD=<strong-demo-password>
-HEALTHDESK_DEMO_DOCTOR_EMAIL=<real-doctor-otp-email>
-HEALTHDESK_DEMO_NURSE_PASSWORD=<strong-demo-password>
-HEALTHDESK_DEMO_NURSE_EMAIL=<real-nurse-otp-email>
-HEALTHDESK_DEMO_STAFF_PASSWORD=<strong-demo-password>
-HEALTHDESK_DEMO_STAFF_EMAIL=<real-staff-otp-email>
-MAIL_USERNAME=<smtp-email-address>
-MAIL_PASSWORD=<smtp-app-password>
-MFA_DELIVERY_MODE=email
-APP_CORS_ALLOWED_ORIGINS=https://<guest-site>.netlify.app,https://<app-site>.netlify.app
-```
-
-Use `/hello` as the health check path. After deploy, open `/app/login.html`.
-
-For real OTP email, use `MFA_DELIVERY_MODE=email` and set valid SMTP credentials, or use `MFA_DELIVERY_MODE=emailjs` with the EmailJS variables shown in the Railway section. Render Free may block SMTP ports such as 587; if email OTP fails after deploy, use EmailJS or another email API provider.
-
-## Vercel Static Frontend
-
-You can deploy the static frontend to Vercel while keeping the Java backend on a separate host such as Render, Railway, or another Java-friendly provider.
-
-- Use `vercel.json` at the repository root to serve the frontend from:
-  - `src/main/resources/static/guest` for the public guest pages
-  - `src/main/resources/static/app` for the dashboard pages
-- Keep the backend API deployed on a separate service.
-- Set `APP_CORS_ALLOWED_ORIGINS` on the backend to allow your Vercel domain, for example:
-
-```bash
-APP_CORS_ALLOWED_ORIGINS=https://<your-vercel-domain>.vercel.app
-```
-
-Before deploying, update the API base URL in both runtime config files:
-
-```javascript
-src/main/resources/static/guest/js/runtime-config.js
-src/main/resources/static/app/js/runtime-config.js
-```
-
-Example:
-
-```javascript
-window.HEALTHDESK_API_BASE_URL = 'https://healthdesk-api.<your-host>.app/api';
-```
-
-Then run the Vercel deploy from the repository root:
-
-```bash
-vercel --prod
-```
-
-## Separate Netlify Frontends
-
-You can host the public guest pages and the dashboard app as two separate Netlify sites while keeping the Spring Boot API on Render, Railway, Koyeb, or another Java backend host.
-
-### Backend API
-
-Deploy the Spring Boot backend first and keep the `/api` routes available. Example backend URL:
-
-```text
-https://healthdesk-api.onrender.com
-```
-
-Set backend CORS to allow both Netlify sites:
-
-```bash
-APP_CORS_ALLOWED_ORIGINS=https://healthdesk-clinic.netlify.app,https://healthdesk-app.netlify.app
-```
-
-If the Netlify site names are not final yet, deploy Render first, deploy both Netlify sites, then return to Render and update `APP_CORS_ALLOWED_ORIGINS` with the exact Netlify URLs.
-
-### Guest Site on Netlify
-
-Create a Netlify site from the same GitHub repository:
-
-```text
-Base directory: leave blank
-Build command: leave blank
-Publish directory: src/main/resources/static/guest
-```
-
-Before deploying, set the backend API URL in:
-
-```text
-src/main/resources/static/guest/js/runtime-config.js
-```
-
-Example:
-
-```javascript
-window.HEALTHDESK_API_BASE_URL = 'https://healthdesk-api.onrender.com/api';
-```
-
-The guest site opens at:
-
-```text
-https://healthdesk-clinic.netlify.app/
-```
-
-### App Site on Netlify
-
-Create a second Netlify site from the same GitHub repository:
-
-```text
-Base directory: leave blank
-Build command: leave blank
-Publish directory: src/main/resources/static/app
-```
-
-Before deploying, set the backend API URL in:
-
-```text
-src/main/resources/static/app/js/runtime-config.js
-```
-
-Example:
-
-```javascript
-window.HEALTHDESK_API_BASE_URL = 'https://healthdesk-api.onrender.com/api';
-```
-
-The app opens at:
-
-```text
-https://healthdesk-app.netlify.app/
-```
-
-The included `_redirects` files keep existing `/guest/...` and `/app/...` links working even when each folder is hosted separately.
 
 ## 🔐 Security Features
 
