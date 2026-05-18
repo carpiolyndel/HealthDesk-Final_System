@@ -103,6 +103,10 @@ public class OtpNotificationService {
             templateParams.put("name", displayName);
             templateParams.put("user_name", displayName);
             templateParams.put("username", displayName);
+            templateParams.put("full_name", displayName);
+            templateParams.put("to_name", displayName);
+            templateParams.put("recipient_name", displayName);
+            templateParams.put("display_name", displayName);
             templateParams.put("otp", otp);
             templateParams.put("otp_code", otp);
             templateParams.put("code", otp);

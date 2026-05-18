@@ -55,7 +55,7 @@ public class AuthService {
 
         if (user.isMfaEnabled() && (loginRequest.getOtpCode() == null || loginRequest.getOtpCode().isEmpty())) {
             String otp = mfaProvider.generateOtp(user.getId());
-            otpNotificationService.sendOtp(user.getEmail(), otp, user.getUsername());
+            otpNotificationService.sendOtp(user.getEmail(), otp, resolveDisplayName(user));
             auditLogService.logAction(user.getId(), "MFA_CHALLENGE", "OTP challenge created");
             return new LoginResponseDTO(null, null, "Bearer", user.getId(), user.getUsername(),
                     user.getEmail(), user.getFullName(), user.getRole().toString(), true);
@@ -92,6 +92,13 @@ public class AuthService {
         }
         return userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private String resolveDisplayName(User user) {
+        if (user.getFullName() != null && !user.getFullName().isBlank()) {
+            return user.getFullName();
+        }
+        return user.getUsername();
     }
 
     private String generateRefreshToken(User user) {
