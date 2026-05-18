@@ -86,7 +86,7 @@ a:hover {
 
 .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: none;
 }
 
 .btn-success {
@@ -105,7 +105,7 @@ a:hover {
 
 .btn-success:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: none;
 }
 
 .btn-secondary {
@@ -177,7 +177,7 @@ a:hover {
 .form-group textarea:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    box-shadow: none;
 }
 
 .form-group input:hover,
@@ -214,7 +214,7 @@ a:hover {
     max-width: 750px;
     position: relative;
     animation: modalFadeIn 0.3s ease;
-    box-shadow: var(--shadow-lg);
+    box-shadow: none;
 }
 
 @keyframes modalFadeIn {
@@ -256,7 +256,7 @@ a:hover {
     transition: opacity var(--transition);
     z-index: 1080;
     white-space: nowrap;
-    box-shadow: var(--shadow-lg);
+    box-shadow: none;
 }
 
 .toast.show {
@@ -369,13 +369,13 @@ a:hover {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
     transition: all var(--transition);
 }
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    box-shadow: none;
 }
 
 .stat-icon {
@@ -410,7 +410,7 @@ a:hover {
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
 }
 
 .dashboard-section h3 {
@@ -561,7 +561,7 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: var(--shadow-md);
+    box-shadow: none;
     border: 2px solid rgba(255,255,255,0.3);
 }
 
@@ -621,7 +621,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
 }
 
 .top-header h1 {
@@ -924,7 +924,7 @@ body:not(.app-ready) .page-content {
 
 .btn-info:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: none;
 }
 
 .btn-warning {
@@ -943,7 +943,7 @@ body:not(.app-ready) .page-content {
 
 .btn-warning:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: none;
 }
 
 .status-arrived {
@@ -966,14 +966,14 @@ body:not(.app-ready) .page-content {
     background: var(--bg-primary);
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
     border: 1px solid var(--border);
     transition: all var(--transition);
 }
 
 .report-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+    box-shadow: none;
 }
 
 .report-card h3 {

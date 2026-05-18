@@ -10,9 +10,7 @@
 }
 
 .sidebar .sidebar-header .role-badge {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: #2563eb;
 }
 
 .medical-record-card {
@@ -70,7 +68,6 @@
 
 .consultation-btn:hover {
     background: var(--primary-dark);
-    transform: translateY(-1px);
 }
 
 .doctor-schedule {
@@ -150,14 +147,13 @@
     background: var(--bg-primary);
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
     border: 1px solid var(--border);
     transition: all var(--transition);
 }
 
 .report-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
 }
 
 .report-card h3 {
@@ -184,7 +180,7 @@
 }
 
 .btn-warning {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
+    background: #f59e0b;
     color: white;
     border: none;
     padding: var(--spacing-sm) var(--spacing-lg);
@@ -193,7 +189,7 @@
 }
 
 .btn-success {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: #10b981;
     color: white;
     border: none;
     padding: var(--spacing-sm) var(--spacing-lg);
@@ -248,7 +244,7 @@
 .clinic-list-item {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    box-shadow: none;
 }
 
 .doctor-patient-card,

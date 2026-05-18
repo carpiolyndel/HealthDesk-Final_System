@@ -45,7 +45,7 @@
 .nurse-search-field input:focus {
     outline: none;
     border-color: #0d9488;
-    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.12);
+    box-shadow: none;
 }
 
 .nurse-search-bar button {
@@ -75,7 +75,7 @@
     border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 18px;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+    box-shadow: none;
 }
 
 .nurse-patient-header {

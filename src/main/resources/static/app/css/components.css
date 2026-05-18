@@ -98,8 +98,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.45);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -107,12 +106,6 @@
 
 .modal.active {
     display: flex;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
 }
 
 .modal-content {
@@ -122,18 +115,7 @@
     max-width: 520px;
     max-height: 90vh;
     overflow-y: auto;
-    animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(30px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+    border: 1px solid var(--gray-300);
 }
 
 .modal-header {
@@ -198,7 +180,7 @@
 .form-group textarea:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
+    background: #f8fafc;
 }
 
 .form-row {
