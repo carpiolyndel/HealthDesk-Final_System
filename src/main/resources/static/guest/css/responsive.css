@@ -1,16 +1,52 @@
 @media (max-width: 1024px) {
+    .page-hero {
+        padding: 130px 0 64px;
+    }
+
+    .page-hero h1 {
+        font-size: 40px;
+    }
+
+    .about-main,
+    .doctors-section,
+    .services-section,
+    .contact-section,
+    .hours-container,
+    .values {
+        padding: 58px 0;
+    }
+
     .features-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
     .doctors-grid,
-    .values-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .services-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .values-grid,
+    .services-grid,
     .info-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .about-grid,
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-main .about-image {
+        min-height: 260px;
+    }
+
+    .values h2 {
+        font-size: 32px;
+    }
+
+    /* contact / team section: 2-up on tablet */
+    .team-grid {
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr 1fr;
     }
 }
 
@@ -76,6 +112,7 @@
     
     .info-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
     
     .about-content {
@@ -87,10 +124,6 @@
         padding: 125px 0 64px;
     }
 
-    .page-hero h1 {
-        letter-spacing: -0.035em;
-    }
-
     .about-main,
     .doctors-section,
     .services-section,
@@ -98,6 +131,11 @@
     .hours-container,
     .values {
         padding: 58px 0;
+    }
+
+    .page-hero h1 {
+        font-size: 36px;
+        letter-spacing: -0.035em;
     }
 
     .about-grid,
@@ -118,20 +156,26 @@
         text-align: center;
     }
     
-    .contact-grid {
-        grid-template-columns: 1fr;
-    }
-    
+    /* Services / values / doctors must come AFTER contact-grid to maintain cascade order */
+    .services-grid,
+    .values-grid,
     .doctors-grid {
         grid-template-columns: 1fr;
     }
     
-    .services-grid {
+    /* Contact page team section — mobile */
+    .team-grid {
         grid-template-columns: 1fr;
+        gap: 24px;
     }
     
-    .values-grid {
-        grid-template-columns: 1fr;
+    .team-card {
+        padding: 24px;
+    }
+    
+    .team-avatar {
+        width: 100px;
+        height: 100px;
     }
     
     .hours-card {

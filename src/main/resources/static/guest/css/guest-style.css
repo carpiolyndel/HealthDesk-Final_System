@@ -953,122 +953,23 @@ body {
 }
 
 .emergency-note {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    background: #dbeafe;
+    border-radius: 16px;
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
-.emergency-note:hover {
-    transform: scale(1.02);
-    background: linear-gradient(135deg, #dbeafe, #ffffff);
-}
-
-.emergency-note i {
-    animation: pulse 2s infinite;
-}
-
-/* ========== FOOTER EFFECTS ========== */
-.footer-brand,
-.footer-links,
-.footer-info,
-.footer-bottom {
-    animation: fadeInUp 0.6s ease;
-}
-
-.footer-brand { animation-delay: 0s; }
-.footer-links { animation-delay: 0.1s; }
-.footer-info { animation-delay: 0.2s; }
-.footer-bottom { animation-delay: 0.3s; }
-
-.footer-logo-img {
-    transition: all 0.3s ease;
-}
-
-.footer-logo-img:hover {
-    transform: scale(1.05);
-}
-
-.footer-links ul li a {
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.footer-links ul li a::before {
-    content: '→';
-    position: absolute;
-    left: -15px;
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.footer-links ul li a:hover {
-    color: #2563eb;
-    padding-left: 15px;
-}
-
-.footer-links ul li a:hover::before {
-    opacity: 1;
-    left: 0;
-}
-
-.footer-info p {
-    transition: all 0.3s ease;
-}
-
-.footer-info p:hover {
-    transform: translateX(5px);
-    color: white;
-}
-
-.footer-info i {
-    transition: all 0.3s ease;
-}
-
-.footer-info p:hover i {
-    transform: scale(1.1);
-}
-
-/* ========== ADDITIONAL UTILITIES ========== */
-.btn-primary,
-.btn-secondary {
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover,
-.btn-secondary:hover {
-    transform: translateY(-2px);
-}
-
-.btn-primary:active,
-.btn-secondary:active {
-    transform: translateY(0);
-}
-
-/* Scroll to top button effect */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Image zoom effect on hover */
-img:not(.logo-img):not(.footer-logo-img) {
-    transition: transform 0.3s ease;
-}
-
-img:not(.logo-img):not(.footer-logo-img):hover {
-    transform: scale(1.02);
-}
-
-/* Glass morphism effect for cards on hover */
-.feature-card:hover,
-.doctor-card:hover,
-.service-card:hover,
-.value-card:hover,
-.team-card:hover {
-    background: rgba(255, 255, 255, 0.98);
-}
-
-/* Loading animation placeholder */
-.loading-skeleton {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+/* ============================================
+   FOOTER EFFECTS
+   ============================================ */
+.page-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+    justify-content: center;
 }

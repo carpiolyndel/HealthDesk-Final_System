@@ -1979,7 +1979,7 @@ body.sidebar-open::before {
 
     #usersPage .data-table td::before,
     #archivePage .data-table td::before {
-        flex: 0 0 112px;
+        flex: 0 0 min(130px, 28%);
         color: #64748b;
         font-size: 12px;
         font-weight: 800;

@@ -37,7 +37,6 @@ async function loadClinicInfo() {
     const emergencyPhoneText = document.getElementById('clinicEmergencyPhone');
     const emailText = document.getElementById('clinicEmail');
     const mapIframe = document.getElementById('clinicMapIframe');
-    const mapLink = document.getElementById('clinicMapLink');
 
     const emergencyPhone = info?.emergencyPhone || phone;
     const mapsQuery = encodeURIComponent(address);
@@ -70,9 +69,6 @@ async function loadClinicInfo() {
     }
     if (mapIframe) {
         mapIframe.src = embedUrl;
-    }
-    if (mapLink) {
-        mapLink.href = mapsUrl;
     }
 }
 
