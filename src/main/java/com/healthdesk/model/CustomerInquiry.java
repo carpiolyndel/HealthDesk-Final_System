@@ -2,6 +2,7 @@ package com.healthdesk.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Entity
 @Table(name = "customer_inquiries")
@@ -38,7 +39,7 @@ public class CustomerInquiry {
     @PrePersist
     protected void onCreate() {
         if (receivedAt == null) {
-            receivedAt = LocalDateTime.now();
+            receivedAt = LocalDateTime.now(ZoneOffset.UTC);
         }
         if (status == null || status.isBlank()) {
             status = "pending";

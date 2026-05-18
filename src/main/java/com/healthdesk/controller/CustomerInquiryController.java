@@ -5,6 +5,8 @@ import com.healthdesk.repository.CustomerInquiryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -13,13 +15,15 @@ import java.util.*;
 public class CustomerInquiryController {
 
     private static final DateTimeFormatter DISPLAY_DATE = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+    private static final ZoneId APP_ZONE = ZoneId.of("Asia/Manila");
+    private static final ZoneOffset STORAGE_ZONE = ZoneOffset.UTC;
 
     @Autowired
     private CustomerInquiryRepository customerInquiryRepository;
 
     @PostMapping("/customer-inquiries")
     public Map<String, String> saveInquiry(@RequestBody Map<String, Object> inquiry) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(STORAGE_ZONE);
         CustomerInquiry savedInquiry = new CustomerInquiry();
         savedInquiry.setName(stringValue(inquiry.get("name"), "Guest Visitor"));
         savedInquiry.setEmail(stringValue(inquiry.get("email"), ""));
@@ -51,7 +55,7 @@ public class CustomerInquiryController {
                 .orElseThrow(() -> new RuntimeException("Inquiry not found"));
         inquiry.setReplyMessage(stringValue(payload.get("replyMessage"), ""));
         inquiry.setRepliedBy(stringValue(payload.get("repliedBy"), "HealthDesk Admin"));
-        inquiry.setRepliedAt(LocalDateTime.now());
+        inquiry.setRepliedAt(LocalDateTime.now(STORAGE_ZONE));
         inquiry.setStatus("replied");
         return toResponse(customerInquiryRepository.save(inquiry));
     }
@@ -89,9 +93,17 @@ public class CustomerInquiryController {
         response.put("status", inquiry.getStatus());
         response.put("replyMessage", inquiry.getReplyMessage());
         response.put("repliedBy", inquiry.getRepliedBy());
-        response.put("repliedAt", inquiry.getRepliedAt() == null ? "" : inquiry.getRepliedAt().toString());
-        response.put("date", receivedAt == null ? "" : receivedAt.format(DISPLAY_DATE));
-        response.put("receivedAt", receivedAt == null ? "" : receivedAt.toString());
+        response.put("repliedAt", inquiry.getRepliedAt() == null ? "" : toUtcIso(inquiry.getRepliedAt()));
+        response.put("date", receivedAt == null ? "" : formatForDisplay(receivedAt));
+        response.put("receivedAt", receivedAt == null ? "" : toUtcIso(receivedAt));
         return response;
+    }
+
+    private String formatForDisplay(LocalDateTime dateTime) {
+        return dateTime.atZone(STORAGE_ZONE).withZoneSameInstant(APP_ZONE).format(DISPLAY_DATE);
+    }
+
+    private String toUtcIso(LocalDateTime dateTime) {
+        return dateTime.atZone(STORAGE_ZONE).toInstant().toString();
     }
 }

@@ -26,6 +26,9 @@ public class DataInitializer implements CommandLineRunner {
     @Value("${healthdesk.initial-admin.password:}")
     private String adminPassword;
 
+    @Value("${healthdesk.initial-admin.mfa-enabled:true}")
+    private boolean adminMfaEnabled;
+
     @Value("${healthdesk.demo-users.enabled:false}")
     private boolean demoUsersEnabled;
 
@@ -56,7 +59,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (hasText(adminPassword)) {
             String email = hasText(adminEmail) ? adminEmail : adminUsername + "@healthdesk.local";
-            upsertUser(adminUsername, email, adminFullName, Role.ADMIN, adminPassword, false);
+            upsertUser(adminUsername, email, adminFullName, Role.ADMIN, adminPassword, adminMfaEnabled);
         }
 
         if (demoUsersEnabled) {

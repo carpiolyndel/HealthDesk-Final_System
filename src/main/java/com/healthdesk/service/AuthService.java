@@ -3,6 +3,7 @@ package com.healthdesk.service;
 import com.healthdesk.dto.LoginRequestDTO;
 import com.healthdesk.dto.LoginResponseDTO;
 import com.healthdesk.model.RefreshToken;
+import com.healthdesk.model.Role;
 import com.healthdesk.model.User;
 import com.healthdesk.repository.RefreshTokenRepository;
 import com.healthdesk.repository.UserRepository;
@@ -103,7 +104,8 @@ public class AuthService {
     }
 
     private boolean isDemoUser(User user) {
-        return ("doctor".equals(user.getUsername()) && "Demo Doctor".equals(user.getFullName()))
+        return ("admin".equals(user.getUsername()) && user.getRole() == Role.ADMIN)
+                || ("doctor".equals(user.getUsername()) && "Demo Doctor".equals(user.getFullName()))
                 || ("nurse".equals(user.getUsername()) && "Demo Nurse".equals(user.getFullName()))
                 || ("staff".equals(user.getUsername()) && "Demo Staff".equals(user.getFullName()));
     }

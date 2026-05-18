@@ -1,4 +1,18 @@
 const API_BASE_URL = window.HEALTHDESK_API_BASE_URL || '/api';
+const GUEST_TIME_ZONE = 'Asia/Manila';
+const GUEST_DATE_TIME_FORMAT = {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: GUEST_TIME_ZONE
+};
+
+function getGuestDisplayDate() {
+    return new Date().toLocaleString('en-US', GUEST_DATE_TIME_FORMAT);
+}
 
 const GuestAPI = {
     async getClinicInfo() {
@@ -73,7 +87,7 @@ const GuestAPI = {
         inquiries.unshift({
             id: Date.now(),
             ...payload,
-            date: new Date().toLocaleString()
+            date: getGuestDisplayDate()
         });
         localStorage.setItem('guestInquiries', JSON.stringify(inquiries));
         return { success: true, source: 'local' };

@@ -109,6 +109,7 @@ ENCRYPTION_SECRET_KEY=<long-random-secret>
 HEALTHDESK_ADMIN_USERNAME=admin
 HEALTHDESK_ADMIN_EMAIL=<admin-email>
 HEALTHDESK_ADMIN_PASSWORD=<strong-admin-password>
+HEALTHDESK_ADMIN_MFA_ENABLED=true
 HEALTHDESK_DEMO_USERS_ENABLED=true
 HEALTHDESK_DEMO_DOCTOR_PASSWORD=<strong-demo-password>
 HEALTHDESK_DEMO_NURSE_PASSWORD=<strong-demo-password>
@@ -148,6 +149,7 @@ ENCRYPTION_SECRET_KEY=replace-with-a-long-random-encryption-key
 HEALTHDESK_ADMIN_USERNAME=admin
 HEALTHDESK_ADMIN_EMAIL=admin@example.com
 HEALTHDESK_ADMIN_PASSWORD=replace-with-a-strong-password
+HEALTHDESK_ADMIN_MFA_ENABLED=true
 ```
 
 ### OTP and Demo Users
@@ -163,6 +165,7 @@ Seeded demo users also require OTP when `HEALTHDESK_DEMO_USERS_ENABLED=true`, bu
 This fixed OTP applies only to the seeded demo identities:
 
 ```text
+admin  / Admin account
 doctor / Demo Doctor
 nurse  / Demo Nurse
 staff  / Demo Staff

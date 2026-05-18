@@ -12,6 +12,24 @@ let inquiryPollingInterval = null;
 
 const ADMIN_PAGE_STORAGE_KEY = 'adminCurrentPage';
 const ADMIN_PAGE_NAMES = ['dashboard', 'users', 'archive', 'reports', 'contact'];
+const APP_TIME_ZONE = 'Asia/Manila';
+const APP_DATE_TIME_FORMAT = {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: APP_TIME_ZONE
+};
+
+function formatAppDateTime(value) {
+    const date = value ? new Date(value) : new Date();
+    if (Number.isNaN(date.getTime())) {
+        return value || new Date().toLocaleString('en-US', APP_DATE_TIME_FORMAT);
+    }
+    return date.toLocaleString('en-US', APP_DATE_TIME_FORMAT);
+}
 
 function getSavedAdminPage() {
     const hashPage = window.location.hash ? window.location.hash.slice(1) : '';
@@ -138,7 +156,7 @@ function normalizeInquiry(inquiry) {
         message: inquiry.message || '',
         source: inquiry.source || 'guest',
         status: inquiry.status || 'pending',
-        date: inquiry.date || (receivedAt ? new Date(receivedAt).toLocaleString() : new Date().toLocaleString()),
+        date: receivedAt ? formatAppDateTime(receivedAt) : formatAppDateTime(),
         receivedAt: receivedAt || new Date().toISOString(),
         replyMessage: inquiry.replyMessage || '',
         repliedAt: inquiry.repliedAt || '',
