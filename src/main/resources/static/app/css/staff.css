@@ -196,6 +196,35 @@
 }
 
 @media (max-width: 768px) {
+    #dashboardPage .data-table td:nth-child(1)::before { content: "Time"; }
+    #dashboardPage .data-table td:nth-child(2)::before { content: "Patient ID"; }
+    #dashboardPage .data-table td:nth-child(3)::before { content: "Patient Name"; }
+    #dashboardPage .data-table td:nth-child(4)::before { content: "Doctor"; }
+    #dashboardPage .data-table td:nth-child(5)::before { content: "Status"; }
+    #dashboardPage .data-table td:nth-child(6)::before { content: "Actions"; }
+
+    #appointmentsPage .data-table td:nth-child(1)::before { content: "Date"; }
+    #appointmentsPage .data-table td:nth-child(2)::before { content: "Time"; }
+    #appointmentsPage .data-table td:nth-child(3)::before { content: "Patient"; }
+    #appointmentsPage .data-table td:nth-child(4)::before { content: "Doctor"; }
+    #appointmentsPage .data-table td:nth-child(5)::before { content: "Status"; }
+    #appointmentsPage .data-table td:nth-child(6)::before { content: "Actions"; }
+
+    #patientsPage .data-table td:nth-child(1)::before { content: "Patient ID"; }
+    #patientsPage .data-table td:nth-child(2)::before { content: "Name"; }
+    #patientsPage .data-table td:nth-child(3)::before { content: "Age"; }
+    #patientsPage .data-table td:nth-child(4)::before { content: "Contact"; }
+    #patientsPage .data-table td:nth-child(5)::before { content: "Access"; }
+
+    .status-badge,
+    .status-scheduled,
+    .status-cancelled,
+    .status-rescheduled,
+    .status-completed {
+        width: max-content;
+        max-width: 100%;
+    }
+
     .data-card {
         flex-direction: column;
         text-align: center;
