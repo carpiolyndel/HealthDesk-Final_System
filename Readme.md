@@ -20,8 +20,8 @@ A comprehensive healthcare management system built with Spring Boot backend and 
 ## 🏗️ Architecture
 
 ### Backend (Spring Boot)
-- **Framework**: Spring Boot 3.1.5
-- **Database**: H2 (local development) / PostgreSQL on Render / MySQL with Docker Compose
+- **Framework**: Spring Boot with Gradle
+- **Database**: H2 (local development) / Railway MySQL / MySQL with Docker Compose
 - **Security**: JWT authentication with MFA support
 - **API**: RESTful endpoints with validation
 
@@ -57,23 +57,23 @@ HealthDesk/
 │   ├── 📄 schema.sql      # Database schema
 │   └── 📄 seed-data.sql   # Initial data
 │
-└── 📄 pom.xml            # Maven configuration
+└── 📄 build.gradle       # Gradle configuration
 ```
 
 ## 🔧 Setup & Installation
 
 ### Prerequisites
 - Java 21+
-- Maven 3.6+
+- Gradle wrapper included (`gradlew` / `gradlew.bat`)
 - Node.js (optional, for frontend development)
 
 ### Backend Setup
 1. Clone the repository
 2. Navigate to project directory
-3. Run with Maven for local development (H2):
+3. Run with Gradle for local development (H2):
    ```powershell
    $env:SPRING_PROFILES_ACTIVE="local"
-   .\mvnw.cmd spring-boot:run
+   .\gradlew.bat bootRun
    ```
 4. Access H2 console at: http://localhost:8080/api/h2-console
 5. Access API at: http://localhost:8080
@@ -109,11 +109,24 @@ ENCRYPTION_SECRET_KEY=<long-random-secret>
 HEALTHDESK_ADMIN_USERNAME=admin
 HEALTHDESK_ADMIN_EMAIL=<admin-email>
 HEALTHDESK_ADMIN_PASSWORD=<strong-admin-password>
-MFA_DELIVERY_MODE=console
-APP_CORS_ALLOWED_ORIGINS=https://temporary.vercel.app
+HEALTHDESK_DEMO_USERS_ENABLED=true
+HEALTHDESK_DEMO_DOCTOR_PASSWORD=<strong-demo-password>
+HEALTHDESK_DEMO_DOCTOR_EMAIL=<real-doctor-otp-email>
+HEALTHDESK_DEMO_NURSE_PASSWORD=<strong-demo-password>
+HEALTHDESK_DEMO_NURSE_EMAIL=<real-nurse-otp-email>
+HEALTHDESK_DEMO_STAFF_PASSWORD=<strong-demo-password>
+HEALTHDESK_DEMO_STAFF_EMAIL=<real-staff-otp-email>
+MFA_DELIVERY_MODE=emailjs
+EMAILJS_SERVICE_ID=<emailjs-service-id>
+EMAILJS_TEMPLATE_ID=<emailjs-template-id>
+EMAILJS_PUBLIC_KEY=<emailjs-public-key>
+EMAILJS_PRIVATE_KEY=<emailjs-private-key-optional>
+APP_CORS_ALLOWED_ORIGINS=https://<your-frontend-domain>
 ```
 
 Do not also set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, or `SPRING_DATASOURCE_PASSWORD` when using this profile, because direct datasource variables override the Railway profile.
+
+The repository includes `railway.json`, which deploys with the `Dockerfile` and uses `/hello` as the health check path. After changing variables, redeploy or restart the Railway service so seeded users are updated.
 
 ### Frontend Access
 - Public pages: http://localhost:8080/guest/
@@ -134,11 +147,45 @@ HEALTHDESK_ADMIN_EMAIL=admin@example.com
 HEALTHDESK_ADMIN_PASSWORD=replace-with-a-strong-password
 ```
 
-Optional demo role accounts can be seeded only when `HEALTHDESK_DEMO_USERS_ENABLED=true` and the matching demo passwords are supplied.
+### OTP and Demo Users
+
+All normal users created through the admin UI have MFA enabled. Seeded demo users also require OTP when `HEALTHDESK_DEMO_USERS_ENABLED=true`.
+
+Configure demo users with real inboxes so they can receive OTP messages:
+
+```bash
+HEALTHDESK_DEMO_USERS_ENABLED=true
+HEALTHDESK_DEMO_DOCTOR_PASSWORD=<strong-demo-password>
+HEALTHDESK_DEMO_DOCTOR_EMAIL=doctor@example.com
+HEALTHDESK_DEMO_NURSE_PASSWORD=<strong-demo-password>
+HEALTHDESK_DEMO_NURSE_EMAIL=nurse@example.com
+HEALTHDESK_DEMO_STAFF_PASSWORD=<strong-demo-password>
+HEALTHDESK_DEMO_STAFF_EMAIL=staff@example.com
+```
+
+If demo emails are left as defaults like `doctor@healthdesk.local`, the login will still ask for OTP, but the user cannot receive it in a real inbox. In console mode or when delivery fails, check the backend logs for the OTP.
+
+For production OTP delivery, use one of:
+
+```bash
+MFA_DELIVERY_MODE=emailjs
+EMAILJS_SERVICE_ID=<emailjs-service-id>
+EMAILJS_TEMPLATE_ID=<emailjs-template-id>
+EMAILJS_PUBLIC_KEY=<emailjs-public-key>
+EMAILJS_PRIVATE_KEY=<emailjs-private-key-optional>
+```
+
+or SMTP:
+
+```bash
+MFA_DELIVERY_MODE=email
+MAIL_USERNAME=<smtp-email-address>
+MAIL_PASSWORD=<smtp-app-password>
+```
 
 ## Render Deployment
 
-This repository includes `render.yaml` and a Dockerfile for Render.
+Railway is the recommended deployment target for the current project setup. Render deployment is still possible with the Dockerfile, but you must provide compatible database variables yourself.
 
 Recommended Render PostgreSQL environment variables:
 
@@ -152,6 +199,13 @@ JWT_SECRET=<long-random-secret>
 ENCRYPTION_SECRET_KEY=<long-random-secret>
 HEALTHDESK_ADMIN_EMAIL=<admin-email>
 HEALTHDESK_ADMIN_PASSWORD=<strong-admin-password>
+HEALTHDESK_DEMO_USERS_ENABLED=true
+HEALTHDESK_DEMO_DOCTOR_PASSWORD=<strong-demo-password>
+HEALTHDESK_DEMO_DOCTOR_EMAIL=<real-doctor-otp-email>
+HEALTHDESK_DEMO_NURSE_PASSWORD=<strong-demo-password>
+HEALTHDESK_DEMO_NURSE_EMAIL=<real-nurse-otp-email>
+HEALTHDESK_DEMO_STAFF_PASSWORD=<strong-demo-password>
+HEALTHDESK_DEMO_STAFF_EMAIL=<real-staff-otp-email>
 MAIL_USERNAME=<smtp-email-address>
 MAIL_PASSWORD=<smtp-app-password>
 MFA_DELIVERY_MODE=email
@@ -160,7 +214,7 @@ APP_CORS_ALLOWED_ORIGINS=https://<guest-site>.netlify.app,https://<app-site>.net
 
 Use `/hello` as the health check path. After deploy, open `/app/login.html`.
 
-For real OTP email, use `MFA_DELIVERY_MODE=email` and set valid SMTP credentials. Render Free may block SMTP ports such as 587; if email OTP fails after deploy, use an email API provider or a hosting plan/network that allows SMTP.
+For real OTP email, use `MFA_DELIVERY_MODE=email` and set valid SMTP credentials, or use `MFA_DELIVERY_MODE=emailjs` with the EmailJS variables shown in the Railway section. Render Free may block SMTP ports such as 587; if email OTP fails after deploy, use EmailJS or another email API provider.
 
 ## Vercel Static Frontend
 
@@ -346,9 +400,9 @@ The included `_redirects` files keep existing `/guest/...` and `/app/...` links 
 
 ## 🧪 Testing
 
-Run tests with Maven:
+Run tests with Gradle:
 ```bash
-./mvnw test
+./gradlew test
 ```
 
 ## 📝 Development Notes

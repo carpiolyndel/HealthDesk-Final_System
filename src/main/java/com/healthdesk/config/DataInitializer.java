@@ -32,11 +32,20 @@ public class DataInitializer implements CommandLineRunner {
     @Value("${healthdesk.demo.doctor.password:}")
     private String doctorPassword;
 
+    @Value("${healthdesk.demo.doctor.email:doctor@healthdesk.local}")
+    private String doctorEmail;
+
     @Value("${healthdesk.demo.nurse.password:}")
     private String nursePassword;
 
+    @Value("${healthdesk.demo.nurse.email:nurse@healthdesk.local}")
+    private String nurseEmail;
+
     @Value("${healthdesk.demo.staff.password:}")
     private String staffPassword;
+
+    @Value("${healthdesk.demo.staff.email:staff@healthdesk.local}")
+    private String staffEmail;
 
     public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -47,17 +56,17 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (hasText(adminPassword)) {
             String email = hasText(adminEmail) ? adminEmail : adminUsername + "@healthdesk.local";
-            upsertUser(adminUsername, email, adminFullName, Role.ADMIN, adminPassword);
+            upsertUser(adminUsername, email, adminFullName, Role.ADMIN, adminPassword, false);
         }
 
         if (demoUsersEnabled) {
-            upsertDemoUser("doctor", "doctor@healthdesk.local", "Demo Doctor", Role.DOCTOR, doctorPassword);
-            upsertDemoUser("nurse", "nurse@healthdesk.local", "Demo Nurse", Role.NURSE, nursePassword);
-            upsertDemoUser("staff", "staff@healthdesk.local", "Demo Staff", Role.STAFF, staffPassword);
+            upsertDemoUser("doctor", doctorEmail, "Demo Doctor", Role.DOCTOR, doctorPassword);
+            upsertDemoUser("nurse", nurseEmail, "Demo Nurse", Role.NURSE, nursePassword);
+            upsertDemoUser("staff", staffEmail, "Demo Staff", Role.STAFF, staffPassword);
         }
     }
 
-    private void upsertUser(String username, String email, String fullName, Role role, String password) {
+    private void upsertUser(String username, String email, String fullName, Role role, String password, boolean mfaEnabled) {
         User user = userRepository.findByUsername(username).orElseGet(User::new);
         user.setUsername(username);
         user.setEmail(email);
@@ -65,13 +74,13 @@ public class DataInitializer implements CommandLineRunner {
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(password));
         user.setActive(true);
-        user.setMfaEnabled(false);
+        user.setMfaEnabled(mfaEnabled);
         userRepository.save(user);
     }
 
     private void upsertDemoUser(String username, String email, String fullName, Role role, String password) {
         if (hasText(password)) {
-            upsertUser(username, email, fullName, role, password);
+            upsertUser(username, email, fullName, role, password, true);
         }
     }
 

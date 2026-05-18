@@ -603,23 +603,121 @@
     .section-subtitle {
         width: 100%;
         margin-left: 0;
+        font-size: 12px;
     }
 
     .doctor-patient-grid,
     .medical-record-grid,
     .record-detail-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 14px;
+    }
+
+    .doctor-toolbar,
+    .search-bar {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .doctor-toolbar select,
+    .doctor-toolbar .btn-primary,
+    .search-bar input,
+    .search-bar button {
+        width: 100%;
+        min-height: 40px;
+    }
+
+    .doctor-patient-card,
+    .medical-summary-card {
+        border-radius: 14px;
+        padding: 14px;
+    }
+
+    .patient-card-header,
+    .medical-summary-header,
+    .schedule-title-row {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .patient-card-header h4,
+    .medical-summary-header h4,
+    .schedule-title-row h4 {
+        font-size: 15px;
+        line-height: 1.25;
+    }
+
+    .patient-meta-grid,
+    .medical-summary-body,
+    .record-detail-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin: 12px 0;
+    }
+
+    .patient-meta-grid div,
+    .medical-summary-body div,
+    .record-detail-item {
+        padding: 9px;
+        border-radius: 10px;
+    }
+
+    .patient-note,
+    .record-patient-banner {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .patient-card-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .patient-card-actions button,
+    .medical-summary-card button,
+    .btn-secondary {
+        width: 100%;
+        min-height: 36px;
+        padding: 8px 10px;
+        font-size: 12px;
     }
 
     .schedule-card,
     .clinic-list-item {
         align-items: flex-start;
         flex-direction: column;
+        gap: 10px;
+        padding: 12px;
     }
 
     .schedule-date-box {
         width: 100%;
         min-width: 0;
-        min-height: 70px;
+        min-height: 58px;
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .schedule-meta {
+        gap: 8px;
+        font-size: 12px;
+    }
+
+    .clinic-status {
+        min-height: 24px;
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 380px) {
+    .patient-meta-grid,
+    .medical-summary-body,
+    .record-detail-grid,
+    .patient-card-actions {
+        grid-template-columns: 1fr;
     }
 }
