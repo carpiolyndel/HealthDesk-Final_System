@@ -25,7 +25,7 @@ function showNotification(message, type) {
         <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">${type === 'success' ? 'Success!' : 'Error!'}</h3>
         <p style="color: #64748b;">${message}</p>
         <button onclick="this.closest('.notification-overlay').remove()" style="
-            margin-top: 20px; padding: 10px 28px; background: #2563eb; color: white;
+            margin-top: 20px; padding: 10px 28px; background: #0f766e; color: white;
             border: none; border-radius: 10px; cursor: pointer; font-weight: 500;
         ">OK</button>
     `;
