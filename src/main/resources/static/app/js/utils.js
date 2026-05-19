@@ -663,21 +663,8 @@ function setupResponsiveSidebar() {
         }
     });
 
-    let desktopButton = sidebar.querySelector('.sidebar-collapse-btn');
-    if (!desktopButton) {
-        desktopButton = document.createElement('button');
-        desktopButton.type = 'button';
-        desktopButton.className = 'sidebar-collapse-btn';
-        desktopButton.setAttribute('aria-label', 'Collapse sidebar');
-        desktopButton.dataset.label = 'Collapse';
-        desktopButton.innerHTML = '<i class="fas fa-angle-left"></i><span>Collapse</span>';
-        const footer = sidebar.querySelector('.sidebar-footer');
-        if (footer) {
-            footer.prepend(desktopButton);
-        } else {
-            sidebar.appendChild(desktopButton);
-        }
-    }
+    sidebar.querySelectorAll('.sidebar-collapse-btn').forEach(button => button.remove());
+    document.body.classList.remove('sidebar-collapsed');
 
     const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
     const closeMobileSidebar = () => {
@@ -692,15 +679,6 @@ function setupResponsiveSidebar() {
         document.body.classList.add('sidebar-open');
         menuButton.setAttribute('aria-expanded', 'true');
     };
-    const toggleDesktopSidebar = () => {
-        const collapsed = document.body.classList.toggle('sidebar-collapsed');
-        desktopButton.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
-        desktopButton.dataset.label = collapsed ? 'Expand' : 'Collapse';
-        desktopButton.innerHTML = collapsed
-            ? '<i class="fas fa-angle-right"></i><span>Expand</span>'
-            : '<i class="fas fa-angle-left"></i><span>Collapse</span>';
-    };
-
     menuButton.addEventListener('click', (event) => {
         event.stopPropagation();
         if (sidebar.classList.contains('active')) {
@@ -708,11 +686,6 @@ function setupResponsiveSidebar() {
         } else {
             openMobileSidebar();
         }
-    });
-
-    desktopButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        if (!isMobile()) toggleDesktopSidebar();
     });
 
     document.querySelectorAll('.nav-item[data-page]').forEach(item => {

@@ -695,9 +695,9 @@ body:not(.app-ready) .page-content {
 }
 
 .sidebar-collapse-btn {
+    display: none !important;
     width: 100%;
     min-height: 42px;
-    display: inline-flex;
     align-items: center;
     justify-content: flex-start;
     gap: 12px;
