@@ -53,6 +53,7 @@ public class UserService {
         user.setPhoneNumber(dto.getPhoneNumber());
         Role role = parseRole(dto.getRole());
         applyCredentials(user, dto, role);
+        applyPublicProfile(user, dto, role);
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setActive(true);
@@ -80,6 +81,7 @@ public class UserService {
         existing.setPhoneNumber(dto.getPhoneNumber());
         Role role = parseRole(dto.getRole());
         applyCredentials(existing, dto, role);
+        applyPublicProfile(existing, dto, role);
         existing.setRole(role);
 
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
@@ -188,11 +190,27 @@ public class UserService {
         user.setEmployeeId(employeeId);
     }
 
+    private void applyPublicProfile(User user, UserDTO dto, Role role) {
+        if (role == Role.DOCTOR) {
+            user.setSpecialty(defaultText(dto.getSpecialty(), "General Medicine"));
+            user.setSchedule(defaultText(dto.getSchedule(), "Mon-Fri 9AM-5PM"));
+            return;
+        }
+
+        user.setSpecialty(null);
+        user.setSchedule(null);
+    }
+
     private String normalizeBlank(String value) {
         if (value == null || value.isBlank()) {
             return null;
         }
         return value.trim();
+    }
+
+    private String defaultText(String value, String fallback) {
+        String normalized = normalizeBlank(value);
+        return normalized == null ? fallback : normalized;
     }
 
     private UserDTO toDTO(User user) {
@@ -204,6 +222,8 @@ public class UserService {
         dto.setPhoneNumber(user.getPhoneNumber());
         dto.setLicenseNumber(user.getLicenseNumber());
         dto.setEmployeeId(user.getEmployeeId());
+        dto.setSpecialty(user.getSpecialty());
+        dto.setSchedule(user.getSchedule());
         dto.setRole(user.getRole() != null ? user.getRole().name() : Role.STAFF.name());
         return dto;
     }

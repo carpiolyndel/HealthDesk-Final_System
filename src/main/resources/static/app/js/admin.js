@@ -9,9 +9,10 @@ let currentFilter = '';
 let currentInquiryFilter = 'all';
 let usingBackend = false;
 let inquiryPollingInterval = null;
+let guestContent = {};
 
 const ADMIN_PAGE_STORAGE_KEY = 'adminCurrentPage';
-const ADMIN_PAGE_NAMES = ['dashboard', 'users', 'archive', 'reports', 'contact'];
+const ADMIN_PAGE_NAMES = ['dashboard', 'users', 'archive', 'guest', 'reports', 'contact'];
 const APP_TIME_ZONE = 'Asia/Manila';
 const APP_DATE_TIME_FORMAT = {
     month: 'short',
@@ -61,6 +62,7 @@ function activateAdminPage(page) {
         dashboard: 'Dashboard',
         users: 'User Management',
         archive: 'Archive',
+        guest: 'Guest Site',
         reports: 'Reports',
         contact: 'Contact Inquiries'
     };
@@ -70,6 +72,7 @@ function activateAdminPage(page) {
     if (page === 'users') renderUsers();
     if (page === 'archive') renderArchive();
     if (page === 'dashboard') renderRecentUsersTable();
+    if (page === 'guest') renderGuestContent();
     if (page === 'contact') renderInquiries();
     if (page === 'reports') {
         const reportResult = document.getElementById('reportResult');
@@ -138,6 +141,8 @@ function normalizeUser(user) {
         role: (user.role || 'STAFF').toUpperCase(),
         licenseNumber: user.licenseNumber || '',
         employeeId: user.employeeId || '',
+        specialty: user.specialty || '',
+        schedule: user.schedule || '',
         status: user.status || 'Active',
         password: user.password || '',
         lastLogin: user.lastLogin || 'Never',
@@ -273,12 +278,24 @@ async function loadData() {
     const backendInquiries = await fetchBackendInquiries();
     guestInquiries = mergeInquiries(localInquiries, backendInquiries);
     localStorage.setItem('guestInquiries', JSON.stringify(guestInquiries));
+
+    if (typeof api !== 'undefined' && api.getToken()) {
+        try {
+            guestContent = await api.getGuestContent();
+            localStorage.setItem('guestContent', JSON.stringify(guestContent));
+        } catch (error) {
+            guestContent = JSON.parse(localStorage.getItem('guestContent') || '{}');
+        }
+    } else {
+        guestContent = JSON.parse(localStorage.getItem('guestContent') || '{}');
+    }
 }
 
 function saveToStorage() {
     localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
     localStorage.setItem('archivedUsers', JSON.stringify(archivedUsers));
     localStorage.setItem('guestInquiries', JSON.stringify(guestInquiries));
+    localStorage.setItem('guestContent', JSON.stringify(guestContent));
 }
 
 // ============ DASHBOARD FUNCTIONS ============
@@ -376,6 +393,13 @@ function safeActionId(id) {
     return JSON.stringify(String(id));
 }
 
+function cssString(value) {
+    if (window.CSS && typeof CSS.escape === 'function') {
+        return CSS.escape(String(value));
+    }
+    return String(value).replace(/["\\]/g, '\\$&');
+}
+
 function userMatchesQuery(user, query) {
     const haystack = [
         user.username,
@@ -399,7 +423,12 @@ function updateCredentialField() {
     const label = document.getElementById('credentialLabel');
     const input = document.getElementById('credentialNumber');
     const hint = document.getElementById('credentialHint');
+    const doctorPublicFields = document.getElementById('doctorPublicFields');
     if (!label || !input || !hint) return;
+
+    if (doctorPublicFields) {
+        doctorPublicFields.style.display = role === 'DOCTOR' ? 'grid' : 'none';
+    }
 
     if (role === 'DOCTOR' || role === 'NURSE') {
         label.textContent = 'Professional License No. *';
@@ -487,6 +516,8 @@ function openUserModal() {
     document.getElementById('modalTitle').innerText = 'Add New User';
     document.getElementById('role').value = 'STAFF';
     document.getElementById('credentialNumber').value = '';
+    document.getElementById('doctorSpecialty').value = 'General Medicine';
+    document.getElementById('doctorSchedule').value = 'Mon-Fri 9AM-5PM';
     updateCredentialField();
     document.getElementById('status').value = 'Active';
     document.getElementById('userModal').classList.add('active');
@@ -510,6 +541,8 @@ function editUser(id) {
         document.getElementById('modalTitle').innerText = 'Edit User';
         document.getElementById('role').value = u.role;
         document.getElementById('credentialNumber').value = credentialValue(u);
+        document.getElementById('doctorSpecialty').value = u.specialty || 'General Medicine';
+        document.getElementById('doctorSchedule').value = u.schedule || 'Mon-Fri 9AM-5PM';
         updateCredentialField();
         document.getElementById('status').value = u.status;
         document.getElementById('userModal').classList.add('active');
@@ -528,6 +561,8 @@ function backendUserToLocal(user, status = 'Active') {
         role: user.role,
         licenseNumber: user.licenseNumber,
         employeeId: user.employeeId,
+        specialty: user.specialty,
+        schedule: user.schedule,
         status,
         lastLogin: 'Never',
         createdAt: new Date().toISOString()
@@ -543,6 +578,8 @@ async function saveUser() {
     const role = document.getElementById('role').value;
     const normalizedRole = role.toUpperCase();
     const credentialNumber = document.getElementById('credentialNumber').value.trim();
+    const doctorSpecialty = document.getElementById('doctorSpecialty')?.value.trim() || '';
+    const doctorSchedule = document.getElementById('doctorSchedule')?.value.trim() || '';
     const status = document.getElementById('status').value;
     
     if (!username || !fullname) {
@@ -567,7 +604,9 @@ async function saveUser() {
 
     const credentialPayload = {
         licenseNumber: ['DOCTOR', 'NURSE'].includes(normalizedRole) ? credentialNumber : '',
-        employeeId: ['STAFF', 'ADMIN'].includes(normalizedRole) ? credentialNumber : ''
+        employeeId: ['STAFF', 'ADMIN'].includes(normalizedRole) ? credentialNumber : '',
+        specialty: normalizedRole === 'DOCTOR' ? (doctorSpecialty || 'General Medicine') : '',
+        schedule: normalizedRole === 'DOCTOR' ? (doctorSchedule || 'Mon-Fri 9AM-5PM') : ''
     };
     
     if (id) {
@@ -603,6 +642,8 @@ async function saveUser() {
                 role, 
                 licenseNumber: credentialPayload.licenseNumber,
                 employeeId: credentialPayload.employeeId,
+                specialty: credentialPayload.specialty,
+                schedule: credentialPayload.schedule,
                 status
             };
             showToast('User updated successfully', 'success');
@@ -877,6 +918,114 @@ function changeEntries() {
     rowsPerPage = parseInt(document.getElementById('entriesSelect').value);
     currentPage = 1;
     renderRecentUsersTable();
+}
+
+// ============ GUEST SITE CONTENT ============
+
+const GUEST_CONTENT_DEFAULTS = {
+    'clinic.name': 'HealthDesk Clinic',
+    'clinic.address': 'Cawayan, Catarman, Northern Samar',
+    'clinic.phone': '09486729942',
+    'clinic.emergencyPhone': '09486729942',
+    'clinic.email': 'healthdesk.info1@gmail.com',
+    'hours.monday_friday': '8:00 AM - 8:00 PM',
+    'hours.saturday': '9:00 AM - 5:00 PM',
+    'hours.sunday': 'Closed',
+    'services.list': 'General Consultation\nVaccination\nLaboratory Tests\nDental Checkup\nAnnual Physical Exam'
+};
+
+function guestContentValue(key) {
+    return guestContent[key] ?? GUEST_CONTENT_DEFAULTS[key] ?? '';
+}
+
+function renderGuestContent() {
+    Object.keys(GUEST_CONTENT_DEFAULTS).forEach(key => {
+        const input = document.querySelector(`[data-guest-content="${key}"]`);
+        if (input) input.value = guestContentValue(key);
+    });
+
+    const doctorList = document.getElementById('guestDoctorList');
+    if (!doctorList) return;
+    const doctors = systemUsers.filter(user => user.role === 'DOCTOR');
+    if (!doctors.length) {
+        doctorList.innerHTML = '<p class="guest-settings-empty">No doctor accounts yet. Add a Doctor user first.</p>';
+        return;
+    }
+
+    doctorList.innerHTML = doctors.map(doctor => `
+        <div class="guest-doctor-row">
+            <div>
+                <strong>${escapeHtml(doctor.fullname || doctor.name || doctor.username)}</strong>
+                <small>${escapeHtml(doctor.email || '')}</small>
+            </div>
+            <div>
+                <label>Specialty</label>
+                <input type="text" data-doctor-specialty="${escapeHtml(String(doctor.id))}" value="${escapeHtml(doctor.specialty || 'General Medicine')}" />
+            </div>
+            <div>
+                <label>Schedule</label>
+                <input type="text" data-doctor-schedule="${escapeHtml(String(doctor.id))}" value="${escapeHtml(doctor.schedule || 'Mon-Fri 9AM-5PM')}" />
+            </div>
+            <button type="button" class="btn-primary-sm" data-save-doctor-public="${escapeHtml(String(doctor.id))}">
+                <i class="fas fa-save"></i> Save
+            </button>
+        </div>
+    `).join('');
+}
+
+async function saveGuestContentSettings(event) {
+    event?.preventDefault();
+    const payload = {};
+    Object.keys(GUEST_CONTENT_DEFAULTS).forEach(key => {
+        const input = document.querySelector(`[data-guest-content="${key}"]`);
+        if (input) payload[key] = input.value.trim();
+    });
+
+    try {
+        guestContent = await api.updateGuestContent(payload);
+        saveToStorage();
+        showToast('Guest site content updated', 'success');
+    } catch (error) {
+        showToast(error.message || 'Unable to update guest site content', 'error');
+    }
+}
+
+async function saveDoctorPublicProfile(id) {
+    const doctor = systemUsers.find(user => sameId(user.id, id));
+    if (!doctor) {
+        showToast('Doctor record was not found.', 'error');
+        return;
+    }
+
+    const specialty = document.querySelector(`[data-doctor-specialty="${cssString(id)}"]`)?.value.trim() || 'General Medicine';
+    const schedule = document.querySelector(`[data-doctor-schedule="${cssString(id)}"]`)?.value.trim() || 'Mon-Fri 9AM-5PM';
+
+    try {
+        const saved = await api.updateUser(id, {
+            username: doctor.username,
+            fullName: doctor.fullname || doctor.name,
+            email: doctor.email,
+            role: doctor.role,
+            licenseNumber: doctor.licenseNumber,
+            specialty,
+            schedule
+        });
+        const index = systemUsers.findIndex(user => sameId(user.id, id));
+        if (index !== -1) {
+            systemUsers[index] = { ...systemUsers[index], ...backendUserToLocal(saved, systemUsers[index].status) };
+        }
+        saveToStorage();
+        renderGuestContent();
+        showToast('Doctor guest profile updated', 'success');
+    } catch (error) {
+        showToast(error.message || 'Unable to update doctor profile', 'error');
+    }
+}
+
+function handleGuestDoctorClick(event) {
+    const button = event.target.closest('[data-save-doctor-public]');
+    if (!button) return;
+    saveDoctorPublicProfile(button.dataset.saveDoctorPublic);
 }
 
 // ============ CONTACT INQUIRIES ============
@@ -1173,6 +1322,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('searchArchiveBtn')?.addEventListener('click', searchArchive);
     document.getElementById('userReportBtn')?.addEventListener('click', generateUserReport);
     document.getElementById('activityReportBtn')?.addEventListener('click', generateActivityReport);
+    document.getElementById('guestContentForm')?.addEventListener('submit', saveGuestContentSettings);
+    document.getElementById('saveGuestContentBtn')?.addEventListener('click', saveGuestContentSettings);
+    document.getElementById('guestDoctorList')?.addEventListener('click', handleGuestDoctorClick);
     document.getElementById('logoutBtn')?.addEventListener('click', logout);
     document.getElementById('userForm')?.addEventListener('submit', (e) => { e.preventDefault(); saveUser(); });
     document.getElementById('role')?.addEventListener('change', updateCredentialField);

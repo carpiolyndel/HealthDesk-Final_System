@@ -35,6 +35,8 @@ public class User implements UserDetails {
     private String phoneNumber;
     private String licenseNumber;
     private String employeeId;
+    private String specialty;
+    private String schedule;
     private boolean isActive = true;
     private boolean mfaEnabled = true;
     private String mfaSecret;
@@ -63,6 +65,8 @@ public class User implements UserDetails {
     public String getPhoneNumber() { return phoneNumber; }
     public String getLicenseNumber() { return licenseNumber; }
     public String getEmployeeId() { return employeeId; }
+    public String getSpecialty() { return specialty; }
+    public String getSchedule() { return schedule; }
     public boolean isActive() { return isActive; }
     public boolean isMfaEnabled() { return mfaEnabled; }
     public String getMfaSecret() { return mfaSecret; }
@@ -80,6 +84,8 @@ public class User implements UserDetails {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
     public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+    public void setSpecialty(String specialty) { this.specialty = specialty; }
+    public void setSchedule(String schedule) { this.schedule = schedule; }
     public void setActive(boolean active) { isActive = active; }
     public void setMfaEnabled(boolean mfaEnabled) { this.mfaEnabled = mfaEnabled; }
     public void setMfaSecret(String mfaSecret) { this.mfaSecret = mfaSecret; }

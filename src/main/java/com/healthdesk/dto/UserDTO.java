@@ -9,6 +9,8 @@ public class UserDTO {
     private String phoneNumber;
     private String licenseNumber;
     private String employeeId;
+    private String specialty;
+    private String schedule;
     private String role;
 
     // Getters
@@ -20,6 +22,8 @@ public class UserDTO {
     public String getPhoneNumber() { return phoneNumber; }
     public String getLicenseNumber() { return licenseNumber; }
     public String getEmployeeId() { return employeeId; }
+    public String getSpecialty() { return specialty; }
+    public String getSchedule() { return schedule; }
     public String getRole() { return role; }
 
     // Setters
@@ -31,5 +35,7 @@ public class UserDTO {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
     public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+    public void setSpecialty(String specialty) { this.specialty = specialty; }
+    public void setSchedule(String schedule) { this.schedule = schedule; }
     public void setRole(String role) { this.role = role; }
 }

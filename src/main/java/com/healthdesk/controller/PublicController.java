@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.*;
 import com.healthdesk.model.Role;
 import com.healthdesk.repository.UserRepository;
+import com.healthdesk.service.GuestContentService;
 
 @RestController
 @RequestMapping("/api/public")
@@ -14,26 +15,23 @@ public class PublicController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private GuestContentService guestContentService;
+
     @GetMapping("/clinic-info")
     public ResponseEntity<Map<String, String>> getClinicInfo() {
-        Map<String, String> info = new HashMap<>();
-        info.put("name", "HealthDesk Clinic");
-        info.put("address", "Cawayan, Catarman, Northern Samar");
-        info.put("phone", "09486729942");
-        info.put("emergencyPhone", "09486729942");
-        info.put("email", "healthdesk.info1@gmail.com");
-        return ResponseEntity.ok(info);
+        return ResponseEntity.ok(guestContentService.getClinicInfo());
     }
 
     @GetMapping("/doctors")
     public ResponseEntity<List<Map<String, String>>> getDoctors() {
         List<Map<String, String>> doctors = new ArrayList<>();
-        userRepository.findByRole(Role.DOCTOR).forEach(user -> {
+        userRepository.findByRole(Role.DOCTOR).stream().filter(user -> user.isActive()).forEach(user -> {
             Map<String, String> doctor = new HashMap<>();
             doctor.put("id", user.getId());
             doctor.put("name", user.getFullName());
-            doctor.put("specialty", "General Medicine");
-            doctor.put("schedule", "Mon-Fri 9AM-5PM");
+            doctor.put("specialty", hasText(user.getSpecialty()) ? user.getSpecialty() : "General Medicine");
+            doctor.put("schedule", hasText(user.getSchedule()) ? user.getSchedule() : "Mon-Fri 9AM-5PM");
             doctors.add(doctor);
         });
 
@@ -58,22 +56,15 @@ public class PublicController {
 
     @GetMapping("/hours")
     public ResponseEntity<Map<String, String>> getClinicHours() {
-        Map<String, String> hours = new HashMap<>();
-        hours.put("monday_friday", "8:00 AM - 8:00 PM");
-        hours.put("saturday", "9:00 AM - 5:00 PM");
-        hours.put("sunday", "Closed");
-        return ResponseEntity.ok(hours);
+        return ResponseEntity.ok(guestContentService.getHours());
     }
 
     @GetMapping("/services")
     public ResponseEntity<List<String>> getServices() {
-        List<String> services = Arrays.asList(
-                "General Consultation",
-                "Vaccination",
-                "Laboratory Tests",
-                "Dental Checkup",
-                "Annual Physical Exam"
-        );
-        return ResponseEntity.ok(services);
+        return ResponseEntity.ok(guestContentService.getServices());
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

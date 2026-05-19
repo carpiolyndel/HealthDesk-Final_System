@@ -258,6 +258,14 @@ class ApiService {
         return this.put(`/users/${id}`, userData);
     }
 
+    async getGuestContent() {
+        return this.get('/guest-content');
+    }
+
+    async updateGuestContent(content) {
+        return this.put('/guest-content', content);
+    }
+
     async resetUserPassword(id, newPassword) {
         return this.put(`/users/${id}/reset-password`, { password: newPassword });
     }

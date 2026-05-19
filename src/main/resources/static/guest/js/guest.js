@@ -70,6 +70,24 @@ async function loadClinicInfo() {
     if (mapIframe) {
         mapIframe.src = embedUrl;
     }
+
+    document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+        link.href = `tel:${phone}`;
+    });
+    document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
+        link.href = `mailto:${email}`;
+    });
+    document.querySelectorAll('.footer-info p').forEach(item => {
+        if (item.querySelector('.fa-map-marker-alt')) {
+            item.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${escapeHtml(address)}`;
+        }
+        if (item.querySelector('.fa-phone')) {
+            item.innerHTML = `<i class="fas fa-phone"></i> ${escapeHtml(phone)}`;
+        }
+        if (item.querySelector('.fa-envelope')) {
+            item.innerHTML = `<i class="fas fa-envelope"></i> ${escapeHtml(email)}`;
+        }
+    });
 }
 
 async function loadClinicHours() {
