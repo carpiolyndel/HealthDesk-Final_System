@@ -179,11 +179,22 @@ function setupInquiryForm() {
     if (!inquiryForm || inquiryForm.dataset.ready === 'true') return;
 
     inquiryForm.dataset.ready = 'true';
+    const phoneInput = document.getElementById('inqPhone');
+    const sanitizePhone = (value) => String(value || '').replace(/\D/g, '');
+
+    phoneInput?.addEventListener('input', () => {
+        const sanitized = sanitizePhone(phoneInput.value);
+        if (phoneInput.value !== sanitized) {
+            phoneInput.value = sanitized;
+        }
+    });
+
     inquiryForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const name = document.getElementById('inqName')?.value.trim();
         const email = document.getElementById('inqEmail')?.value.trim();
+        const phone = sanitizePhone(phoneInput?.value);
         const message = document.getElementById('inqMessage')?.value.trim();
 
         if (!name || !email || !message) {
@@ -191,10 +202,14 @@ function setupInquiryForm() {
             return;
         }
 
+        if (phoneInput?.value && phoneInput.value !== phone) {
+            phoneInput.value = phone;
+        }
+
         const result = await GuestAPI.submitInquiry({
             name,
             email,
-            phone: document.getElementById('inqPhone')?.value.trim() || '',
+            phone,
             subject: document.getElementById('inqSubject')?.value || 'General Inquiry',
             message,
             source: 'contact_form'

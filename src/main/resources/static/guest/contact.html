@@ -67,7 +67,14 @@
               <form id="inquiryForm">
                 <input type="text" id="inqName" placeholder="Full Name" required />
                 <input type="email" id="inqEmail" placeholder="Email Address" required />
-                <input type="tel" id="inqPhone" placeholder="Phone Number" />
+                <input
+                  type="tel"
+                  id="inqPhone"
+                  placeholder="Phone Number"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  autocomplete="tel"
+                />
                 <select id="inqSubject">
                   <option value="">Select Subject</option>
                   <option>General Inquiry</option>

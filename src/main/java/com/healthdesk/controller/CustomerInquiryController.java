@@ -2,6 +2,7 @@ package com.healthdesk.controller;
 
 import com.healthdesk.model.CustomerInquiry;
 import com.healthdesk.repository.CustomerInquiryRepository;
+import com.healthdesk.service.CustomerInquiryEmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
@@ -20,6 +21,9 @@ public class CustomerInquiryController {
 
     @Autowired
     private CustomerInquiryRepository customerInquiryRepository;
+
+    @Autowired
+    private CustomerInquiryEmailService customerInquiryEmailService;
 
     @PostMapping("/customer-inquiries")
     public Map<String, String> saveInquiry(@RequestBody Map<String, Object> inquiry) {
@@ -57,7 +61,14 @@ public class CustomerInquiryController {
         inquiry.setRepliedBy(stringValue(payload.get("repliedBy"), "HealthDesk Admin"));
         inquiry.setRepliedAt(LocalDateTime.now(STORAGE_ZONE));
         inquiry.setStatus("replied");
-        return toResponse(customerInquiryRepository.save(inquiry));
+        CustomerInquiry savedInquiry = customerInquiryRepository.save(inquiry);
+        boolean emailSent = customerInquiryEmailService.sendReply(savedInquiry);
+        Map<String, Object> response = toResponse(savedInquiry);
+        response.put("emailSent", emailSent);
+        response.put("emailMessage", emailSent
+                ? "Reply email sent to " + savedInquiry.getEmail()
+                : "Reply saved, but email was not sent. Check recipient email or SMTP configuration.");
+        return response;
     }
 
     @DeleteMapping("/customer-inquiries/{id}")

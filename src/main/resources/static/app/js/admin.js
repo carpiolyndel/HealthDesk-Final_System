@@ -996,29 +996,12 @@ async function sendReply() {
     const adminUser = getCurrentUser();
     const adminName = adminUser ? (adminUser.name || adminUser.fullname || 'Admin') : 'HealthDesk Admin';
     
-    console.log('========================================');
-    console.log('📧 SENDING REPLY EMAIL (DEMO MODE)');
-    console.log('To:', guestEmail);
-    console.log('Subject: Re: HealthDesk Inquiry');
-    console.log(`Message: 
-Dear ${guestName},
-
-Thank you for contacting HealthDesk Clinic.
-
-${replyMessage}
-
-Best regards,
-${adminName}
-HealthDesk Clinic
-Cawayan, Catarman, Northern Samar
-Phone: 09486729942
-Email: healthdesk.info1@gmail.com`);
-    console.log('========================================');
-    
     const index = guestInquiries.findIndex(i => sameId(i.id, inquiryId));
     if (index !== -1) {
+        let replyResult = null;
         try {
             const savedReply = await sendBackendInquiryReply(inquiryId, replyMessage, adminName);
+            replyResult = savedReply;
             guestInquiries[index] = normalizeInquiry(savedReply);
         } catch (error) {
             guestInquiries[index].status = 'replied';
@@ -1029,7 +1012,13 @@ Email: healthdesk.info1@gmail.com`);
         }
         saveToStorage();
         renderInquiries();
-        showToast(`Reply saved for ${guestEmail || guestName}`, 'success');
+        if (replyResult?.emailSent) {
+            showToast(`Reply sent to ${guestEmail || guestName}`, 'success');
+        } else if (replyResult) {
+            showToast(replyResult.emailMessage || `Reply saved for ${guestEmail || guestName}, but email was not sent.`, 'error');
+        } else {
+            showToast(`Reply saved locally for ${guestEmail || guestName}`, 'success');
+        }
     }
     
     closeReplyModal();
