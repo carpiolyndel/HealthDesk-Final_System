@@ -198,6 +198,7 @@ function setupInquiryForm() {
 
     inquiryForm.dataset.ready = 'true';
     const phoneInput = document.getElementById('inqPhone');
+    const countryCodeInput = document.getElementById('inqCountryCode');
     const sanitizePhone = (value) => String(value || '').replace(/\D/g, '');
 
     phoneInput?.addEventListener('input', () => {
@@ -212,7 +213,9 @@ function setupInquiryForm() {
 
         const name = document.getElementById('inqName')?.value.trim();
         const email = document.getElementById('inqEmail')?.value.trim();
-        const phone = sanitizePhone(phoneInput?.value);
+        const nationalPhone = sanitizePhone(phoneInput?.value);
+        const countryCode = countryCodeInput?.value || '+63';
+        const phone = nationalPhone ? `${countryCode} ${nationalPhone}` : '';
         const message = document.getElementById('inqMessage')?.value.trim();
 
         if (!name || !email || !message) {
@@ -220,8 +223,8 @@ function setupInquiryForm() {
             return;
         }
 
-        if (phoneInput?.value && phoneInput.value !== phone) {
-            phoneInput.value = phone;
+        if (phoneInput?.value && phoneInput.value !== nationalPhone) {
+            phoneInput.value = nationalPhone;
         }
 
         const result = await GuestAPI.submitInquiry({

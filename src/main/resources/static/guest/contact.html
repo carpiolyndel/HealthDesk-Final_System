@@ -67,14 +67,25 @@
               <form id="inquiryForm">
                 <input type="text" id="inqName" placeholder="Full Name" required />
                 <input type="email" id="inqEmail" placeholder="Email Address" required />
-                <input
-                  type="tel"
-                  id="inqPhone"
-                  placeholder="Phone Number"
-                  inputmode="numeric"
-                  pattern="[0-9]*"
-                  autocomplete="tel"
-                />
+                <div class="phone-field">
+                  <select id="inqCountryCode" aria-label="Country code" autocomplete="tel-country-code">
+                    <option value="+63" selected>PH +63</option>
+                    <option value="+1">US/CA +1</option>
+                    <option value="+44">UK +44</option>
+                    <option value="+61">AU +61</option>
+                    <option value="+65">SG +65</option>
+                    <option value="+81">JP +81</option>
+                    <option value="+82">KR +82</option>
+                  </select>
+                  <input
+                    type="tel"
+                    id="inqPhone"
+                    placeholder="Phone Number"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    autocomplete="tel-national"
+                  />
+                </div>
                 <select id="inqSubject">
                   <option value="">Select Subject</option>
                   <option>General Inquiry</option>
@@ -94,7 +105,7 @@
           <h2>Meet Our Team</h2>
           <div class="team-grid">
             <div class="team-card">
-              <div class="team-avatar"><img src="/guest/images/lyndel-carpio.jpg" alt="Lyndel Carpio" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Lyndel+Carpio&background=0f766e&color=ffffff&size=120&rounded=true';" /></div>
+              <div class="team-avatar"><img src="/guest/images/download.jpg" alt="Lyndel Carpio" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Lyndel+Carpio&background=0f766e&color=ffffff&size=120&rounded=true';" /></div>
               <h3 class="team-name">Carpio, Lyndel J.</h3>
               <p class="team-role">Team Leader, Full-Stack Developer & Database Lead</p>
               <p class="team-bio">Led the project from frontend to backend, handled deployment, and managed the database structure.</p>

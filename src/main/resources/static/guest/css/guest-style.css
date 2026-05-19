@@ -748,6 +748,17 @@ main {
     padding: 0 14px;
 }
 
+.phone-field {
+    display: grid;
+    grid-template-columns: minmax(118px, 0.34fr) minmax(0, 1fr);
+    gap: 10px;
+}
+
+.phone-field select,
+.phone-field input {
+    min-width: 0;
+}
+
 .contact-form textarea {
     min-height: 132px;
     padding: 14px;
