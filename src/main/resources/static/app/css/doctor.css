@@ -609,6 +609,29 @@
 }
 
 @media (max-width: 700px) {
+    .doctor-patient-grid,
+    .medical-record-grid,
+    .reports-container,
+    .schedule-list,
+    .patient-meta-grid,
+    .medical-summary-body,
+    .record-detail-grid {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .doctor-patient-card,
+    .medical-summary-card,
+    .schedule-card,
+    .clinic-list-item,
+    .report-card,
+    .record-detail-item {
+        min-width: 0;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
     #dashboardPage #currentDateTime {
         margin: 0 0 12px !important;
         font-size: 13px !important;

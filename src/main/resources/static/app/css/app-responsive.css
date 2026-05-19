@@ -1,5 +1,8 @@
 @media (max-width: 1024px) {
+    html,
     body {
+        width: 100% !important;
+        max-width: 100vw !important;
         overflow-x: hidden !important;
         background: #f6f9fc !important;
     }
@@ -14,7 +17,10 @@
 
     .dashboard {
         display: block !important;
+        width: 100% !important;
+        max-width: 100vw !important;
         min-height: 100vh !important;
+        overflow-x: hidden !important;
     }
 
     .sidebar,
@@ -25,6 +31,7 @@
         left: 10px !important;
         right: 10px !important;
         bottom: 10px !important;
+        max-width: calc(100vw - 20px) !important;
         width: auto !important;
         height: 64px !important;
         transform: none !important;
@@ -53,8 +60,17 @@
         align-items: center !important;
         justify-content: space-between !important;
         gap: 4px !important;
-        flex: 1 1 auto !important;
+        flex: 1 1 0 !important;
+        width: auto !important;
+        max-width: calc(100% - 46px) !important;
         min-width: 0 !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        scrollbar-width: none !important;
+    }
+
+    .sidebar > div:first-child::-webkit-scrollbar {
+        display: none !important;
     }
 
     .sidebar-header,
@@ -152,9 +168,21 @@
 
     .main-content {
         width: 100% !important;
+        max-width: 100vw !important;
         min-height: 100vh !important;
         margin-left: 0 !important;
         padding: 12px 12px 88px !important;
+        overflow-x: hidden !important;
+    }
+
+    .content,
+    .page-content,
+    .section-card,
+    .stats-grid,
+    .data-table-responsive {
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
     }
 
     .topbar {
@@ -313,7 +341,7 @@
     .sidebar.open {
         max-width: calc(100vw - 16px) !important;
         justify-content: flex-start !important;
-        overflow-x: auto !important;
+        overflow-x: hidden !important;
         overflow-y: hidden !important;
     }
 
@@ -386,7 +414,7 @@
         height: 62px !important;
         padding: 6px !important;
         justify-content: flex-start !important;
-        overflow-x: auto !important;
+        overflow-x: hidden !important;
         overflow-y: hidden !important;
     }
 
