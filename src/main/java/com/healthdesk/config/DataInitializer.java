@@ -57,15 +57,19 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (hasText(adminPassword)) {
-            String email = hasText(adminEmail) ? adminEmail : adminUsername + "@healthdesk.local";
-            upsertUser(adminUsername, email, adminFullName, Role.ADMIN, adminPassword, adminMfaEnabled);
-        }
+        try {
+            if (hasText(adminPassword)) {
+                String email = hasText(adminEmail) ? adminEmail : adminUsername + "@healthdesk.local";
+                upsertUser(adminUsername, email, adminFullName, Role.ADMIN, adminPassword, adminMfaEnabled);
+            }
 
-        if (demoUsersEnabled) {
-            upsertDemoUser("doctor", doctorEmail, "Demo Doctor", Role.DOCTOR, doctorPassword);
-            upsertDemoUser("nurse", nurseEmail, "Demo Nurse", Role.NURSE, nursePassword);
-            upsertDemoUser("staff", staffEmail, "Demo Staff", Role.STAFF, staffPassword);
+            if (demoUsersEnabled) {
+                upsertDemoUser("doctor", doctorEmail, "Demo Doctor", Role.DOCTOR, doctorPassword);
+                upsertDemoUser("nurse", nurseEmail, "Demo Nurse", Role.NURSE, nursePassword);
+                upsertDemoUser("staff", staffEmail, "Demo Staff", Role.STAFF, staffPassword);
+            }
+        } catch (RuntimeException ex) {
+            System.err.println("Skipping initial user provisioning because the database is not reachable: " + ex.getMessage());
         }
     }
 

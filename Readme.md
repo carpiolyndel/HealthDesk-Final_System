@@ -132,6 +132,18 @@ After deployment, open:
 https://<your-railway-app-domain>/app/login.html
 ```
 
+### Render + Vercel + Neon Deployment
+
+Use this split deployment when you want the backend, frontend, and database hosted separately:
+
+```text
+Render = Spring Boot backend API
+Vercel = static frontend pages
+Neon = PostgreSQL database
+```
+
+See `docs/render-vercel-neon-deployment.md` for the required Render and Vercel environment variables.
+
 ### Local Frontend Access
 - Public pages: http://localhost:8080/guest/
 - Login page: http://localhost:8080/app/login.html
