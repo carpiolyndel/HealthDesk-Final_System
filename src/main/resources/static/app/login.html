@@ -576,7 +576,7 @@
         };
 
         if (window.emailjs) {
-            emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+            emailjs.init({ publicKey: EMAILJS_CONFIG.PUBLIC_KEY });
             console.log('EmailJS initialized');
         }
 
@@ -624,6 +624,24 @@
             return dashboards[role] || 'staff.html';
         }
 
+        async function readApiResponse(response) {
+            const text = await response.text();
+
+            if (!text) {
+                return {};
+            }
+
+            try {
+                return JSON.parse(text);
+            } catch (error) {
+                return { message: text };
+            }
+        }
+
+        function getApiErrorMessage(data, fallback) {
+            return data?.message || data?.error || fallback;
+        }
+
         async function login(username, password) {
             try {
                 const response = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
@@ -632,12 +650,12 @@
                     body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json();
+                const data = await readApiResponse(response);
 
                 if (!response.ok) {
                     return {
                         success: false,
-                        message: data.message || 'Invalid username or password'
+                        message: getApiErrorMessage(data, 'Invalid username or password')
                     };
                 }
 
@@ -718,12 +736,12 @@
                     })
                 });
 
-                const data = await response.json();
+                const data = await readApiResponse(response);
 
                 if (!response.ok || !data.accessToken) {
                     return {
                         success: false,
-                        message: data.message || 'Invalid verification code'
+                        message: getApiErrorMessage(data, 'Invalid verification code')
                     };
                 }
 
