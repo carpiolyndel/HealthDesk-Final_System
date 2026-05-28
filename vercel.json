@@ -1,19 +1,9 @@
 {
-  "buildCommand": "node scripts/write-vercel-runtime-config.mjs",
-  "outputDirectory": "src/main/resources/static",
   "cleanUrls": true,
   "rewrites": [
     {
       "source": "/",
-      "destination": "/guest/index.html"
-    },
-    {
-      "source": "/guest",
-      "destination": "/guest/index.html"
-    },
-    {
-      "source": "/app",
-      "destination": "/app/login.html"
+      "destination": "/index.html"
     }
   ]
 }
