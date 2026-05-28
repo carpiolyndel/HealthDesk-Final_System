@@ -29,6 +29,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsers(search));
     }
 
+    @GetMapping("/archived")
+    public ResponseEntity<List<UserDTO>> getArchivedUsers(@RequestParam(required = false) String search) {
+        return ResponseEntity.ok(userService.getArchivedUsers(search));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUser(@PathVariable String id) {
         UserDTO user = userService.getUser(id);

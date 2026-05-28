@@ -132,6 +132,7 @@ function logout() {
 }
 
 function normalizeUser(user) {
+    const isActive = user.active !== false && user.isActive !== false && user.status !== 'Inactive';
     return {
         id: user.id,
         username: user.username,
@@ -143,10 +144,11 @@ function normalizeUser(user) {
         employeeId: user.employeeId || '',
         specialty: user.specialty || '',
         schedule: user.schedule || '',
-        status: user.status || 'Active',
+        status: user.status || (isActive ? 'Active' : 'Inactive'),
         password: user.password || '',
         lastLogin: user.lastLogin || 'Never',
-        createdAt: user.createdAt || new Date().toISOString()
+        createdAt: user.createdAt || new Date().toISOString(),
+        archivedDate: user.archivedDate ? formatAppDateTime(user.archivedDate) : user.archivedDate
     };
 }
 
@@ -255,22 +257,21 @@ async function loadData() {
     if (typeof api !== 'undefined' && api.getToken()) {
         try {
             systemUsers = (await api.getUsers(0, 500, '')).map(normalizeUser);
+            archivedUsers = (await api.getArchivedUsers('')).map(normalizeUser);
             localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
+            localStorage.setItem('archivedUsers', JSON.stringify(archivedUsers));
         } catch (error) {
             showToast(error.message, 'error');
             systemUsers = storedUsers ? JSON.parse(storedUsers).map(normalizeUser) : [];
+            archivedUsers = storedArchived ? JSON.parse(storedArchived).map(normalizeUser) : [];
         }
     } else if (storedUsers) {
         systemUsers = JSON.parse(storedUsers).map(normalizeUser);
+        archivedUsers = storedArchived ? JSON.parse(storedArchived).map(normalizeUser) : [];
     } else {
         systemUsers = [];
-        localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
-    }
-    
-    if (storedArchived) {
-        archivedUsers = JSON.parse(storedArchived);
-    } else {
         archivedUsers = [];
+        localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
         localStorage.setItem('archivedUsers', JSON.stringify(archivedUsers));
     }
     
@@ -486,24 +487,26 @@ function renderUsers() {
     tbody.innerHTML = renderUserRows(systemUsers);
 }
 
-function renderArchive() {
-    const tbody = document.getElementById('archiveList');
-    if (!tbody) return;
-    
-    if (archivedUsers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No archived users</td></tr>';
-        return;
+function renderArchiveRows(users) {
+    if (!users.length) {
+        return '<tr><td colspan="5" style="text-align:center;">No archived users</td></tr>';
     }
-    
-    tbody.innerHTML = archivedUsers.map(u => `
+
+    return users.map(u => `
         <tr>
             <td>${escapeHtml(u.username)}</td>
             <td>${escapeHtml(u.fullname)}</td>
             <td><span class="role-badge role-${u.role.toLowerCase()}">${u.role}</span></td>
-            <td>${u.archivedDate || 'Unknown'}</td>
+            <td>${escapeHtml(u.archivedDate || 'Unknown')}</td>
             <td><button class="btn-danger" onclick="permanentDelete(${safeActionId(u.id)})"><i class="fas fa-trash"></i> Delete</button></td>
         </tr>
     `).join('');
+}
+
+function renderArchive() {
+    const tbody = document.getElementById('archiveList');
+    if (!tbody) return;
+    tbody.innerHTML = renderArchiveRows(archivedUsers);
 }
 
 function openUserModal() {
@@ -564,6 +567,8 @@ function backendUserToLocal(user, status = 'Active') {
         specialty: user.specialty,
         schedule: user.schedule,
         status,
+        active: user.active,
+        archivedDate: user.archivedDate,
         lastLogin: 'Never',
         createdAt: new Date().toISOString()
     });
@@ -840,9 +845,22 @@ async function permanentDelete(id) {
         danger: true
     });
     if (confirmed) {
-        archivedUsers = archivedUsers.filter(u => !sameId(u.id, id));
+        if (typeof api !== 'undefined' && api.getToken()) {
+            try {
+                await api.deleteUser(id);
+                await loadData();
+            } catch (error) {
+                showToast(error.message, 'error');
+                return;
+            }
+        } else {
+            archivedUsers = archivedUsers.filter(u => !sameId(u.id, id));
+        }
         saveToStorage();
+        updateStats();
+        renderUsers();
         renderArchive();
+        renderRecentUsersTable();
         showToast(`User "${u.username}" removed from archive`, 'success');
     }
 }
@@ -892,20 +910,9 @@ function searchArchive() {
         (u.role && u.role.toLowerCase().includes(query))
     );
     
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No archived users found</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = filtered.map(u => `
-        <tr>
-            <td>${escapeHtml(u.username)}</td>
-            <td>${escapeHtml(u.fullname)}</td>
-            <td><span class="role-badge role-${u.role.toLowerCase()}">${u.role}</span></td>
-            <td>${u.archivedDate || 'Unknown'}</td>
-            <td><button class="btn-danger" onclick="permanentDelete(${safeActionId(u.id)})">Delete</button></td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = filtered.length
+        ? renderArchiveRows(filtered)
+        : '<tr><td colspan="5" style="text-align:center;">No archived users found</td></tr>';
 }
 
 function searchRecentUsers() {

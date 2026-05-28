@@ -21,6 +21,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, String
     List<Appointment> findByDoctor(User doctor);
     List<Appointment> findByStatus(AppointmentStatus status);
     List<Appointment> findByAppointmentDateTimeBetween(LocalDateTime start, LocalDateTime end);
+    void deleteByDoctorOrScheduledBy(User doctor, User scheduledBy);
 
     @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId AND a.appointmentDateTime = :dateTime AND a.status != 'CANCELLED'")
     Optional<Appointment> findConflictingAppointment(@Param("doctorId") String doctorId, @Param("dateTime") LocalDateTime dateTime);

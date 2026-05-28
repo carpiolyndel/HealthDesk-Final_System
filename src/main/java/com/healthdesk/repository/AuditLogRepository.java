@@ -10,4 +10,5 @@ import java.util.List;
 public interface AuditLogRepository extends JpaRepository<AuditLog, String> {
     List<AuditLog> findByUserIdOrderByTimestampDesc(String userId);
     List<AuditLog> findByTimestampBetween(LocalDateTime start, LocalDateTime end);
+    void deleteByUserId(String userId);
 }

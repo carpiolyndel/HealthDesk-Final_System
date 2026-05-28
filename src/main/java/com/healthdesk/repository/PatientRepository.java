@@ -3,6 +3,7 @@ package com.healthdesk.repository;
 import com.healthdesk.model.Patient;
 import com.healthdesk.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -24,4 +25,12 @@ public interface PatientRepository extends JpaRepository<Patient, String> {
     List<Patient> findByAssignedNurse(User nurse);
     List<Patient> findByIsArchivedFalse();
     List<Patient> findByIsArchivedTrue();
+
+    @Modifying
+    @Query("UPDATE Patient p SET p.assignedDoctor = null WHERE p.assignedDoctor = :user")
+    void clearAssignedDoctor(@Param("user") User user);
+
+    @Modifying
+    @Query("UPDATE Patient p SET p.assignedNurse = null WHERE p.assignedNurse = :user")
+    void clearAssignedNurse(@Param("user") User user);
 }

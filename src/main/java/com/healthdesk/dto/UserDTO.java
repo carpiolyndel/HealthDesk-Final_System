@@ -12,6 +12,8 @@ public class UserDTO {
     private String specialty;
     private String schedule;
     private String role;
+    private Boolean active;
+    private String archivedDate;
 
     // Getters
     public String getId() { return id; }
@@ -25,6 +27,8 @@ public class UserDTO {
     public String getSpecialty() { return specialty; }
     public String getSchedule() { return schedule; }
     public String getRole() { return role; }
+    public Boolean getActive() { return active; }
+    public String getArchivedDate() { return archivedDate; }
 
     // Setters
     public void setId(String id) { this.id = id; }
@@ -38,4 +42,6 @@ public class UserDTO {
     public void setSpecialty(String specialty) { this.specialty = specialty; }
     public void setSchedule(String schedule) { this.schedule = schedule; }
     public void setRole(String role) { this.role = role; }
+    public void setActive(Boolean active) { this.active = active; }
+    public void setArchivedDate(String archivedDate) { this.archivedDate = archivedDate; }
 }

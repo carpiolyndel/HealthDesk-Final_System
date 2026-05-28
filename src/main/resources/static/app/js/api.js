@@ -246,6 +246,10 @@ class ApiService {
         return this.get(`/users?page=${page}&size=${size}&search=${encodeURIComponent(search)}`);
     }
 
+    async getArchivedUsers(search = '') {
+        return this.get(`/users/archived?search=${encodeURIComponent(search)}`);
+    }
+
     async getUserById(id) {
         return this.get(`/users/${id}`);
     }

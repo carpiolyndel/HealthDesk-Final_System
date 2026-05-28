@@ -3,10 +3,15 @@ package com.healthdesk.service;
 import com.healthdesk.dto.UserDTO;
 import com.healthdesk.model.Role;
 import com.healthdesk.model.User;
+import com.healthdesk.repository.AppointmentRepository;
+import com.healthdesk.repository.AuditLogRepository;
+import com.healthdesk.repository.PatientRepository;
+import com.healthdesk.repository.RefreshTokenRepository;
 import com.healthdesk.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -24,9 +29,28 @@ public class UserService {
     @Autowired
     private AuditLogService auditLogService;
 
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private AuditLogRepository auditLogRepository;
+
     public List<UserDTO> getUsers(String search) {
         return userRepository.findAll().stream()
                 .filter(User::isActive)
+                .filter(user -> search == null || search.isBlank() || matchesSearch(user, search))
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDTO> getArchivedUsers(String search) {
+        return userRepository.findByIsActiveFalse().stream()
                 .filter(user -> search == null || search.isBlank() || matchesSearch(user, search))
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -93,11 +117,20 @@ public class UserService {
         return toDTO(saved);
     }
 
+    @Transactional
     public void deleteUser(String id, User actor) {
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        boolean deletingSelf = actor != null && id.equals(actor.getId());
+        refreshTokenRepository.deleteByUser(existing);
+        appointmentRepository.deleteByDoctorOrScheduledBy(existing, existing);
+        patientRepository.clearAssignedDoctor(existing);
+        patientRepository.clearAssignedNurse(existing);
+        auditLogRepository.deleteByUserId(existing.getId());
         userRepository.delete(existing);
-        auditLogService.logAction(actor.getId(), "DELETE_USER", "Deleted user: " + existing.getUsername());
+        if (!deletingSelf && actor != null) {
+            auditLogService.logAction(actor.getId(), "DELETE_USER", "Deleted user: " + existing.getUsername());
+        }
     }
 
     public UserDTO resetPassword(String id, String newPassword, User actor) {
@@ -116,11 +149,13 @@ public class UserService {
         return toDTO(saved);
     }
 
+    @Transactional
     public UserDTO archiveUser(String id, User actor) {
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
         existing.setActive(false);
         User saved = userRepository.save(existing);
+        refreshTokenRepository.deleteByUser(saved);
         auditLogService.logAction(actor.getId(), "ARCHIVE_USER", "Archived user: " + saved.getUsername());
         return toDTO(saved);
     }
@@ -225,6 +260,8 @@ public class UserService {
         dto.setSpecialty(user.getSpecialty());
         dto.setSchedule(user.getSchedule());
         dto.setRole(user.getRole() != null ? user.getRole().name() : Role.STAFF.name());
+        dto.setActive(user.isActive());
+        dto.setArchivedDate(!user.isActive() && user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null);
         return dto;
     }
 }
