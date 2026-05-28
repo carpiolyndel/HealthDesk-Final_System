@@ -152,7 +152,7 @@ async function loadDoctors() {
             <p class="doctor-specialty">${escapeHtml(doctor.specialty || 'General Medicine')}</p>
             <p>Licensed HealthDesk physician available for patient consultations.</p>
             <p class="doctor-schedule"><i class="fas fa-calendar"></i> ${escapeHtml(doctor.schedule || 'By appointment')}</p>
-            <a class="card-action" href="/guest/contact.html"><i class="fas fa-calendar-plus"></i> Request appointment</a>
+            <a class="card-action" href="contact.html"><i class="fas fa-calendar-plus"></i> Request appointment</a>
         </div>
     `).join('');
 }
@@ -186,7 +186,7 @@ async function loadServices() {
                 <i class="fas ${icon} service-icon"></i>
                 <h3>${escapeHtml(name || 'Clinic Service')}</h3>
                 <p>${escapeHtml(description)}</p>
-                <a class="card-action" href="/guest/contact.html"><i class="fas fa-paper-plane"></i> Inquire now</a>
+                <a class="card-action" href="contact.html"><i class="fas fa-paper-plane"></i> Inquire now</a>
             </div>
         `;
     }).join('');
@@ -286,16 +286,16 @@ function setupFloatingSupport() {
     const getReply = (message) => {
         const text = message.toLowerCase();
         if (text.includes('appointment')) {
-            return 'To request an appointment, open /guest/contact.html and choose Appointment Request, or call 09486729942.';
+            return 'To request an appointment, open contact.html and choose Appointment Request, or call 09486729942.';
         }
         if (text.includes('record') || text.includes('medical')) {
             return 'Medical records are confidential and can only be accessed by authorized clinic personnel.';
         }
         if (text.includes('hour')) {
-            return 'Clinic hours are shown on /guest/hours.html. You can also call 09486729942 before visiting.';
+            return 'Clinic hours are shown on hours.html. You can also call 09486729942 before visiting.';
         }
         if (text.includes('doctor')) {
-            return 'Doctor availability is listed on /guest/doctors.html. For consultation requests, send a message through /guest/contact.html.';
+            return 'Doctor availability is listed on doctors.html. For consultation requests, send a message through contact.html.';
         }
         return 'Thank you for your message. Our clinic staff will get back to you as soon as possible.';
     };
