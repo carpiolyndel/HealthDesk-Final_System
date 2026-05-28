@@ -30,17 +30,17 @@ public class PatientService {
 
     public PatientDTO createPatient(PatientDTO patientDTO, User actor) {
         Patient patient = new Patient();
-        patient.setFirstName(patientDTO.getFirstName());
-        patient.setLastName(patientDTO.getLastName());
-        patient.setMiddleName(patientDTO.getMiddleName());
+        patient.setFirstName(encryptNullable(patientDTO.getFirstName()));
+        patient.setLastName(encryptNullable(patientDTO.getLastName()));
+        patient.setMiddleName(encryptNullable(patientDTO.getMiddleName()));
         patient.setAge(patientDTO.getAge());
-        patient.setGender(patientDTO.getGender());
-        patient.setEmail(patientDTO.getEmail());
-        patient.setPhoneNumber(patientDTO.getPhoneNumber());
-        patient.setAddress(patientDTO.getAddress());
+        patient.setGender(encryptNullable(patientDTO.getGender()));
+        patient.setEmail(encryptNullable(patientDTO.getEmail()));
+        patient.setPhoneNumber(encryptNullable(patientDTO.getPhoneNumber()));
+        patient.setAddress(encryptNullable(patientDTO.getAddress()));
         patient.setMedicalHistory(encryptNullable(patientDTO.getMedicalHistory()));
         patient.setPreviousDiagnoses(encryptNullable(patientDTO.getPreviousDiagnoses()));
-        patient.setBloodType(patientDTO.getBloodType());
+        patient.setBloodType(encryptNullable(patientDTO.getBloodType()));
         patient.setAllergies(encryptNullable(patientDTO.getAllergies()));
         patient.setCurrentMedications(encryptNullable(patientDTO.getCurrentMedications()));
 
@@ -74,8 +74,9 @@ public class PatientService {
     }
 
     public List<PatientDTO> searchPatients(String searchTerm, User actor) {
-        return patientRepository.searchByNameOrId(searchTerm).stream()
+        return patientRepository.findAll().stream()
                 .filter(patient -> canViewPatient(patient, actor))
+                .filter(patient -> matchesPatientSearch(patient, searchTerm))
                 .map(patient -> convertToDTO(patient, actor))
                 .collect(Collectors.toList());
     }
@@ -95,14 +96,15 @@ public class PatientService {
             throw new IllegalStateException("You can only update assigned patient records.");
         }
 
-        patient.setFirstName(patientDTO.getFirstName());
-        patient.setLastName(patientDTO.getLastName());
-        patient.setMiddleName(patientDTO.getMiddleName());
+        patient.setFirstName(encryptNullable(patientDTO.getFirstName()));
+        patient.setLastName(encryptNullable(patientDTO.getLastName()));
+        patient.setMiddleName(encryptNullable(patientDTO.getMiddleName()));
         patient.setAge(patientDTO.getAge());
-        patient.setGender(patientDTO.getGender());
-        patient.setEmail(patientDTO.getEmail());
-        patient.setPhoneNumber(patientDTO.getPhoneNumber());
-        patient.setAddress(patientDTO.getAddress());
+        patient.setGender(encryptNullable(patientDTO.getGender()));
+        patient.setEmail(encryptNullable(patientDTO.getEmail()));
+        patient.setPhoneNumber(encryptNullable(patientDTO.getPhoneNumber()));
+        patient.setAddress(encryptNullable(patientDTO.getAddress()));
+        patient.setBloodType(encryptNullable(patientDTO.getBloodType()));
 
         if (actor.getRole() != Role.STAFF) {
             patient.setMedicalHistory(encryptNullable(patientDTO.getMedicalHistory()));
@@ -175,15 +177,15 @@ public class PatientService {
     private PatientDTO convertToDTO(Patient patient, User actor) {
         PatientDTO dto = new PatientDTO();
         dto.setId(patient.getId());
-        dto.setFirstName(patient.getFirstName());
-        dto.setLastName(patient.getLastName());
-        dto.setMiddleName(patient.getMiddleName());
+        dto.setFirstName(decryptNullable(patient.getFirstName()));
+        dto.setLastName(decryptNullable(patient.getLastName()));
+        dto.setMiddleName(decryptNullable(patient.getMiddleName()));
         dto.setAge(patient.getAge());
-        dto.setGender(patient.getGender());
-        dto.setEmail(patient.getEmail());
-        dto.setPhoneNumber(patient.getPhoneNumber());
-        dto.setAddress(patient.getAddress());
-        dto.setBloodType(patient.getBloodType());
+        dto.setGender(decryptNullable(patient.getGender()));
+        dto.setEmail(decryptNullable(patient.getEmail()));
+        dto.setPhoneNumber(decryptNullable(patient.getPhoneNumber()));
+        dto.setAddress(decryptNullable(patient.getAddress()));
+        dto.setBloodType(decryptNullable(patient.getBloodType()));
         boolean canSeeMedical = actor == null || actor.getRole() == Role.DOCTOR || actor.getRole() == Role.NURSE;
         if (canSeeMedical) {
             dto.setMedicalHistory(decryptNullable(patient.getMedicalHistory()));
@@ -200,6 +202,24 @@ public class PatientService {
             dto.setAssignedNurseName(patient.getAssignedNurse().getFullName());
         }
         return dto;
+    }
+
+    private boolean matchesPatientSearch(Patient patient, String searchTerm) {
+        if (searchTerm == null || searchTerm.isBlank()) return true;
+        String lowerSearch = searchTerm.toLowerCase();
+        String searchable = String.join(" ",
+                nullToEmpty(patient.getId()),
+                nullToEmpty(decryptNullable(patient.getFirstName())),
+                nullToEmpty(decryptNullable(patient.getLastName())),
+                nullToEmpty(decryptNullable(patient.getMiddleName())),
+                nullToEmpty(decryptNullable(patient.getEmail())),
+                nullToEmpty(decryptNullable(patient.getPhoneNumber()))
+        ).toLowerCase();
+        return searchable.contains(lowerSearch);
+    }
+
+    private String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 
     private String encryptNullable(String value) {

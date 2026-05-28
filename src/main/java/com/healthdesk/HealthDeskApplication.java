@@ -41,7 +41,7 @@ public class HealthDeskApplication {
         String query = uri.getRawQuery();
         String jdbcUrl = "jdbc:mysql://" + uri.getHost() + ":" + uri.getPort() + uri.getPath()
                 + (query == null || query.isBlank()
-                ? "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+                ? "?useSSL=true&sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC"
                 : "?" + query);
         System.setProperty("spring.datasource.url", jdbcUrl);
 

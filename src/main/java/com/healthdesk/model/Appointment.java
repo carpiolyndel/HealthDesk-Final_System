@@ -29,8 +29,13 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status = AppointmentStatus.SCHEDULED;
 
+    @Column(columnDefinition = "TEXT")
     private String reason;
+
+    @Column(columnDefinition = "TEXT")
     private String cancellationReason;
+
+    @Column(columnDefinition = "TEXT")
     private String notes;
     private boolean isArchived = false;
     private LocalDateTime createdAt;

@@ -13,24 +13,28 @@ public class Patient {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String firstName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String lastName;
 
+    @Column(columnDefinition = "TEXT")
     private String middleName;
 
     @Column(nullable = false)
     private Integer age;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String gender;
 
     @Column(unique = true)
     private String email;
 
+    @Column(columnDefinition = "TEXT")
     private String phoneNumber;
+
+    @Column(columnDefinition = "TEXT")
     private String address;
 
     @Column(columnDefinition = "TEXT")
@@ -39,8 +43,13 @@ public class Patient {
     @Column(columnDefinition = "TEXT")
     private String previousDiagnoses;
 
+    @Column(columnDefinition = "TEXT")
     private String bloodType;
+
+    @Column(columnDefinition = "TEXT")
     private String allergies;
+
+    @Column(columnDefinition = "TEXT")
     private String currentMedications;
 
     @ManyToOne

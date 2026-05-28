@@ -5,7 +5,7 @@ A comprehensive healthcare management system built with Spring Boot backend and 
 ## 🚀 Features
 
 ### Functional Requirements (FR)
-- **FR-1 / FR-15**: Patient medical fields are encrypted at rest, and the app is designed to run over HTTPS/TLS in deployment for encryption in transit.
+- **FR-1 / FR-15**: Patient profile/medical fields and appointment notes/reasons are encrypted at rest, and deployed profiles enforce HTTPS/TLS for encryption in transit.
 - **FR-2 / FR-11**: JWT login with OTP-based MFA and role-based access control for Admin, Doctor, Nurse, and Staff.
 - **FR-3**: Patient records store medical history, previous diagnoses, allergies, medications, and basic profile data.
 - **FR-4 / FR-5**: Doctors and nurses can search, view, and update assigned patient records only.

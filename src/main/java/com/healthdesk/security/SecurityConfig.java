@@ -1,6 +1,7 @@
 package com.healthdesk.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,6 +27,9 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
+
+    @Value("${app.security.require-https:false}")
+    private boolean requireHttps;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -61,6 +65,16 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        if (requireHttps) {
+            http
+                .requiresChannel(channel -> channel.anyRequest().requiresSecure())
+                .headers(headers -> headers
+                    .httpStrictTransportSecurity(hsts -> hsts
+                        .includeSubDomains(true)
+                        .preload(true)
+                        .maxAgeInSeconds(31536000)));
+        }
 
         return http.build();
     }

@@ -9,6 +9,7 @@ import com.healthdesk.model.User;
 import com.healthdesk.repository.AppointmentRepository;
 import com.healthdesk.repository.PatientRepository;
 import com.healthdesk.repository.UserRepository;
+import com.healthdesk.security.EncryptionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,9 @@ public class AppointmentService {
 
     @Autowired
     private AuditLogService auditLogService;
+
+    @Autowired
+    private EncryptionUtil encryptionUtil;
 
     public List<AppointmentDTO> getAll(User actor) {
         return appointmentRepository.findAll().stream()
@@ -85,8 +89,8 @@ public class AppointmentService {
         appointment.setDoctor(doctor);
         appointment.setScheduledBy(scheduledBy);
         appointment.setAppointmentDateTime(dto.getAppointmentDateTime());
-        appointment.setReason(dto.getReason());
-        appointment.setNotes(dto.getNotes());
+        appointment.setReason(encryptNullable(dto.getReason()));
+        appointment.setNotes(encryptNullable(dto.getNotes()));
         appointment.setStatus(AppointmentStatus.SCHEDULED);
 
         Appointment saved = appointmentRepository.save(appointment);
@@ -107,7 +111,7 @@ public class AppointmentService {
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
-        appointment.setCancellationReason(reason);
+        appointment.setCancellationReason(encryptNullable(reason));
         Appointment saved = appointmentRepository.save(appointment);
         auditLogService.logAction(actor.getId(), "CANCEL_APPOINTMENT", "Cancelled appointment: " + id);
         return toDTO(saved);
@@ -130,7 +134,7 @@ public class AppointmentService {
 
         appointment.setAppointmentDateTime(newDateTime);
         appointment.setStatus(AppointmentStatus.RESCHEDULED);
-        appointment.setNotes(reason);
+        appointment.setNotes(encryptNullable(reason));
         Appointment saved = appointmentRepository.save(appointment);
         auditLogService.logAction(actor.getId(), "RESCHEDULE_APPOINTMENT", "Rescheduled appointment: " + id);
         return toDTO(saved);
@@ -175,11 +179,38 @@ public class AppointmentService {
         dto.setPatientId(appointment.getPatient().getId());
         dto.setDoctorId(appointment.getDoctor().getId());
         dto.setAppointmentDateTime(appointment.getAppointmentDateTime());
-        dto.setReason(appointment.getReason());
-        dto.setNotes(appointment.getNotes());
+        dto.setReason(decryptNullable(appointment.getReason()));
+        dto.setNotes(decryptNullable(appointment.getNotes()));
         dto.setStatus(appointment.getStatus().name());
-        dto.setPatientName(appointment.getPatient().getFirstName() + " " + appointment.getPatient().getLastName());
+        dto.setPatientName(patientName(appointment.getPatient()));
         dto.setDoctorName(appointment.getDoctor().getFullName());
         return dto;
+    }
+
+    private String patientName(Patient patient) {
+        return (nullToEmpty(decryptNullable(patient.getFirstName())) + " "
+                + nullToEmpty(decryptNullable(patient.getLastName()))).trim();
+    }
+
+    private String encryptNullable(String value) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            return encryptionUtil.encrypt(value);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to encrypt appointment field", e);
+        }
+    }
+
+    private String decryptNullable(String value) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            return encryptionUtil.decrypt(value);
+        } catch (Exception e) {
+            return value;
+        }
+    }
+
+    private String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 }
