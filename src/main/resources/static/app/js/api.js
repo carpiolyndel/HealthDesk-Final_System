@@ -33,7 +33,7 @@ class ApiService {
         if (response.status === 401) {
             this.removeToken();
             localStorage.removeItem('currentUser');
-            window.location.href = '/app/login.html';
+            window.location.href = 'login.html';
             throw new Error('Session expired. Please login again.');
         }
         const text = await response.text();

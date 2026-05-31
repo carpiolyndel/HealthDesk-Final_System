@@ -8,6 +8,10 @@ Vercel = static frontend pages from src/main/resources/static
 Neon = PostgreSQL database
 ```
 
+Railway deployment files are separate. Do not change `railway.json` or
+`src/main/resources/application-railway.properties` when deploying this
+Render + Vercel + Neon setup.
+
 ## 1. Neon
 
 Create a Neon PostgreSQL project and copy:
@@ -54,17 +58,29 @@ EMAILJS_PRIVATE_KEY=<emailjs-private-key-optional>
 APP_CORS_ALLOWED_ORIGINS=https://<your-vercel-domain>
 ```
 
+For the current split Vercel projects, use:
+
+```bash
+APP_CORS_ALLOWED_ORIGINS=https://healthdesk-guest.vercel.app,https://healthdesk-app-mu.vercel.app
+```
+
 After Render deploys, test:
 
 ```text
 https://<your-render-backend-domain>/hello
 ```
 
+For the current Render service:
+
+```text
+https://healthdesk-final-system.onrender.com/hello
+```
+
 ## 3. Vercel Frontend
 
 Create a Vercel project from the same repository.
 
-Use these settings:
+Use these settings if deploying both guest and app under one Vercel project:
 
 ```text
 Framework Preset: Other
@@ -78,11 +94,48 @@ Set this Vercel environment variable:
 HEALTHDESK_API_BASE_URL=https://<your-render-backend-domain>/api
 ```
 
+For the current Render backend:
+
+```bash
+HEALTHDESK_API_BASE_URL=https://healthdesk-final-system.onrender.com/api
+```
+
 After Vercel deploys, open:
 
 ```text
 https://<your-vercel-domain>/guest/
 https://<your-vercel-domain>/app/login.html
+```
+
+### Separate Vercel Projects
+
+If deploying the guest site and app site as separate Vercel projects, use the
+same build command and environment variable, but different output directories.
+
+Guest project:
+
+```text
+Build Command: node scripts/write-vercel-runtime-config.mjs
+Output Directory: src/main/resources/static/guest
+HEALTHDESK_API_BASE_URL=https://healthdesk-final-system.onrender.com/api
+Open: https://healthdesk-guest.vercel.app/
+Runtime config check: https://healthdesk-guest.vercel.app/js/runtime-config.js
+```
+
+App project:
+
+```text
+Build Command: node scripts/write-vercel-runtime-config.mjs
+Output Directory: src/main/resources/static/app
+HEALTHDESK_API_BASE_URL=https://healthdesk-final-system.onrender.com/api
+Open: https://healthdesk-app-mu.vercel.app/login.html
+Runtime config check: https://healthdesk-app-mu.vercel.app/js/runtime-config.js
+```
+
+The runtime config check should show:
+
+```js
+window.HEALTHDESK_API_BASE_URL = 'https://healthdesk-final-system.onrender.com/api';
 ```
 
 ## 4. Final CORS Update

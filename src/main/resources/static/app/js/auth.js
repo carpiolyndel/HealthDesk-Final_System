@@ -45,12 +45,12 @@ function checkAuth(allowedRoles) {
 
     if (!user || !getAuthToken()) {
         clearAuthSession();
-        window.location.href = '/app/login.html';
+        window.location.href = 'login.html';
         return null;
     }
 
     if (allowed.length && !allowed.includes(role)) {
-        window.location.href = `/app/${getDashboardUrl(role)}`;
+        window.location.href = getDashboardUrl(role);
         return null;
     }
 
@@ -61,7 +61,7 @@ function checkAuth(allowedRoles) {
 function logout() {
     const finish = () => {
         clearAuthSession();
-        window.location.href = '/app/login.html';
+        window.location.href = 'login.html';
     };
 
     if (typeof api !== 'undefined' && typeof api.logout === 'function') {

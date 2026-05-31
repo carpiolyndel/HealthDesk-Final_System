@@ -32,7 +32,7 @@ function requireNurse() {
     const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
     const role = (user?.role || '').toUpperCase().replace('ROLE_', '');
     if (!user || role !== 'NURSE' || !api.getToken()) {
-        window.location.href = '/app/login.html';
+        window.location.href = 'login.html';
         return null;
     }
     return user;
@@ -211,7 +211,7 @@ function switchNursePage(page) {
 }
 
 function logout() {
-    api.logout().finally(() => window.location.href = '/app/login.html');
+    api.logout().finally(() => window.location.href = 'login.html');
 }
 
 function escapeHtml(text) {

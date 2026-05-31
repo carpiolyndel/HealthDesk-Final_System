@@ -29,7 +29,7 @@ function normalizeRole(user) {
 function requireStaff() {
     const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
     if (!user || normalizeRole(user) !== 'STAFF' || !api.getToken()) {
-        window.location.href = '/app/login.html';
+        window.location.href = 'login.html';
         return null;
     }
     return user;
@@ -359,7 +359,7 @@ function escapeHtml(text) {
 }
 
 function logout() {
-    api.logout().finally(() => window.location.href = '/app/login.html');
+    api.logout().finally(() => window.location.href = 'login.html');
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
